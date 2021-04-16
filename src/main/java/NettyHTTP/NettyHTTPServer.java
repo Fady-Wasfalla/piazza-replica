@@ -10,8 +10,7 @@ import io.netty.handler.logging.LoggingHandler;
 
 
 public class NettyHTTPServer {
-
-
+    
     public static void start(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
