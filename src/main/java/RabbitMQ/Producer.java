@@ -11,6 +11,7 @@ import java.util.concurrent.TimeoutException;
 public class Producer {
     private String queue;
     private Channel channel;
+    private Connection connection;
 
     public Producer(String queue) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
@@ -22,10 +23,13 @@ public class Producer {
 
         this.channel = channel;
         this.queue = queue;
+        this.connection = connection;
     }
 
-    public void send(String message) throws IOException {
+    public void send(String message) throws IOException, TimeoutException {
         this.channel.basicPublish("", this.queue, null, message.getBytes("UTF-8"));
+        this.channel.close();
+        this.connection.close();
     }
 
 
