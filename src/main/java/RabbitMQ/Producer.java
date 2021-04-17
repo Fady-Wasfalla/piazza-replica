@@ -23,6 +23,7 @@ public class Producer {
 
         this.channel = channel;
         this.queue = queue;
+        this.connection = connection;
     }
 
     public void send(String message) throws IOException, TimeoutException {
