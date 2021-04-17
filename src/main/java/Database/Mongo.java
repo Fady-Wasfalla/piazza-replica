@@ -24,14 +24,14 @@ public class Mongo {
 
 
         MongoClient mongoClient = MongoClients.create(
-                "mongodb+srv://Scalable:Scalable@cluster0.ahsrm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+                "mongodb+srv://Scalable:Scalable@scalable.rjotz.mongodb.net/Piazza?retryWrites=true&w=majority");
         MongoDatabase database = mongoClient.getDatabase("Piazza");
         
         MongoCollection<Document> Courses = database.getCollection("Courses");
 
         //Create Object
-//        Document course = new Document("name", "Scalable");
-//        ObjectId id = Courses.insertOne(course).getInsertedId().asObjectId().getValue();
+        Document course = new Document("name", "Scalable");
+        ObjectId id = Courses.insertOne(course).getInsertedId().asObjectId().getValue();
 
         //Retrieve Object
         Document courseScalable = Courses.find(new Document("name", "Scalable")).first();
