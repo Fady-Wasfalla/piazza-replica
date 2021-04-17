@@ -22,7 +22,6 @@ public class HTTPServerInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast("decoder", new HttpRequestDecoder());
         p.addLast("encoder", new HttpResponseEncoder());
         p.addLast(new CorsHandler(corsConfig));
-        p.addLast(new HTTPHandler());
-        p.addLast(new JSONHandler());
+        p.addLast(new NettyServerHandler());
     }
 }
