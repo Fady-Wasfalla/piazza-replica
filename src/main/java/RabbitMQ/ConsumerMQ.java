@@ -41,8 +41,8 @@ public class ConsumerMQ {
                 String serviceDAL = requestJson.getString("service");
 
                 try {
-                    Class service = Class.forName("core.commands."+serviceDAL+"Commands."+function);
-                    Command command = (Command) service.newInstance();
+                    Command command = (Command) CommandsMap.queryClass(function).newInstance();
+                    Class service = command.getClass();
 
                     // Several Instances of DAL
 //                    Class dalClass = Class.forName("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL");
@@ -58,8 +58,7 @@ public class ConsumerMQ {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                 
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {

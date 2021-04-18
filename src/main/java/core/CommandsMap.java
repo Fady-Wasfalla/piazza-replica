@@ -11,7 +11,7 @@ public class CommandsMap {
 
     public static void instantiate() {
         cmdMap = new ConcurrentHashMap<>();
-        cmdMap.put("signUp",SignupCommand.class);
+        cmdMap.put("SignupCommand",SignupCommand.class);
     }
 
         public static Class<?> queryClass(String cmd) {
