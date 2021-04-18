@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import core.commands.UserCommads.*;
+import core.commands.UserCommands.*;
 
 public class CommandsMap {
     private static ConcurrentMap<String, Class<?>> cmdMap;
