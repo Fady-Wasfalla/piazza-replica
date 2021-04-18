@@ -29,12 +29,12 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
     volatile String responseBody;
     String[] queueNames = {
             "chatRequestQueue" ,"chatResponseQueue" ,
-            "courseRequestQueue" ,"courseResponseQueue" ,
+                "courseRequestQueue" ,"courseResponseQueue" ,
             "mediaRequestQueue" ,"mediaResponseQueue" ,
             "notificationRequestQueue" ,"notificationResponseQueue" ,
             "pollRequestQueue" ,"pollResponseQueue" ,
             "questionRequestQueue" ,"questionResponseQueue" ,
-            "userRequestQueue" ,"userResponseQueue"
+            "userRequestQueue" ,"userResponseQueue", "queue_name"
     };
 
 
@@ -68,7 +68,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         requestJson.put("httpRoute",httpRoute);
         String queueName = requestJson.getString("queue");
         if(validateQueueName(queueName)) {
-            sendMessageToActiveMQ(getRequestBody(), queueName);
+            sendMessageToActiveMQ(requestJson.toString(), queueName);
             System.out.println("Queue : " + queueName);
             System.out.println("Request Body : " + requestJson.toString() );
         }

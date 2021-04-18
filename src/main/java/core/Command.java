@@ -1,6 +1,9 @@
 package core;
 
 
-public interface Command {
-    public void execute();
+import org.json.JSONObject;
+
+public abstract class Command {
+    public JSONObject data;
+    public abstract void execute();
 }
