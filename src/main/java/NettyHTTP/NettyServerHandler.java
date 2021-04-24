@@ -26,7 +26,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
     volatile String responseBody;
     String[] queueNames = {
             "chatRequestQueue" ,"chatResponseQueue" ,
-                "courseRequestQueue" ,"courseResponseQueue" ,
+            "courseRequestQueue" ,"courseResponseQueue" ,
             "mediaRequestQueue" ,"mediaResponseQueue" ,
             "notificationRequestQueue" ,"notificationResponseQueue" ,
             "pollRequestQueue" ,"pollResponseQueue" ,
