@@ -11,9 +11,9 @@ public class UserDAL {
         connectPostgreSQL();
     }
     public void connectPostgreSQL(){
-        String url = "jdbc:postgresql://ec2-54-74-14-109.eu-west-1.compute.amazonaws.com:5432/d6461e8nfjon20?user=tubgbcanmobdya&password=6504bc63cc929664bd5ebbbdba04310949db9925ccc7a4d24cae3e41c58c8269";
-        String user = "tubgbcanmobdya";
-        String password = "6504bc63cc929664bd5ebbbdba04310949db9925ccc7a4d24cae3e41c58c8269";
+        String url = "jdbc:postgresql://ec2-54-220-35-19.eu-west-1.compute.amazonaws.com:5432/d2spprpmp8ult?user=fbqvcficlrhimr&password=f989e5d9f18291eddb927bfbbbcf76121d597dddc5a3350f136b233e7c4af518";
+        String user = "fbqvcficlrhimr";
+        String password = "f989e5d9f18291eddb927bfbbbcf76121d597dddc5a3350f136b233e7c4af518";
 
         try{
             con = DriverManager.getConnection(url, user, password);
