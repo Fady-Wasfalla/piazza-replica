@@ -1,10 +1,10 @@
 package core;
 
+import core.commands.UserCommands.SignupCommand;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import core.commands.UserCommands.*;
 
 public class CommandsMap {
     private static ConcurrentMap<String, Class<?>> cmdMap;

@@ -1,10 +1,10 @@
 package core.commands.UserCommands;
-import core.Command;
+import core.CommandDP;
 import org.json.JSONObject;
 
 import java.sql.SQLException;
 
-public class SignupCommand extends Command {
+public class SignupCommand extends CommandDP {
 
 
     @Override
@@ -22,6 +22,7 @@ public class SignupCommand extends Command {
         else {
             System.out.println("else");
         }
+        System.out.println("Finish");
     }
 
     @Override
