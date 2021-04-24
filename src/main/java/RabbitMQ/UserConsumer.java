@@ -1,5 +1,7 @@
 package RabbitMQ;
+
 import com.rabbitmq.client.*;
+
 import java.io.IOException;
 
 public class UserConsumer {

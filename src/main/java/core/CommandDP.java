@@ -3,7 +3,7 @@ package core;
 
 import org.json.JSONObject;
 
-public abstract class Command {
+public abstract class CommandDP {
     public JSONObject data;
     public Object dal;
     public abstract void execute();

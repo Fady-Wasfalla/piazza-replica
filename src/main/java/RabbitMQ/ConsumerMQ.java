@@ -1,14 +1,12 @@
 package RabbitMQ;
 
 import com.rabbitmq.client.*;
-
-import java.io.IOException;
-
-import core.commands.UserCommands.UserDAL;
-import core.Command;
+import core.CommandDP;
 import core.CommandsMap;
+import core.commands.UserCommands.UserDAL;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,7 +39,7 @@ public class ConsumerMQ {
                 String serviceDAL = requestJson.getString("service");
 
                 try {
-                    Command command = (Command) CommandsMap.queryClass(function).newInstance();
+                    CommandDP command = (CommandDP) CommandsMap.queryClass(function).newInstance();
                     Class service = command.getClass();
 
                     // Several Instances of DAL
