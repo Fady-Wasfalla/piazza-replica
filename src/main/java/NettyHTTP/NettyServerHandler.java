@@ -19,58 +19,67 @@ import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 
-public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
+public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private HttpRequest request;
-    private  int counter = 0;
+    private int counter = 0;
     private String requestBody;
     private String httpRoute;
     private long correlationId;
     volatile String responseBody;
     String[] queueNames = {
-            "chatRequestQueue" ,"chatResponseQueue" ,
-                "courseRequestQueue" ,"courseResponseQueue" ,
-            "mediaRequestQueue" ,"mediaResponseQueue" ,
-            "notificationRequestQueue" ,"notificationResponseQueue" ,
-            "pollRequestQueue" ,"pollResponseQueue" ,
-            "questionRequestQueue" ,"questionResponseQueue" ,
-            "userRequestQueue" ,"userResponseQueue", "queue_name"
+            "chatRequestQueue", "chatResponseQueue",
+            "courseRequestQueue", "courseResponseQueue",
+            "mediaRequestQueue", "mediaResponseQueue",
+            "notificationRequestQueue", "notificationResponseQueue",
+            "pollRequestQueue", "pollResponseQueue",
+            "questionRequestQueue", "questionResponseQueue",
+            "userRequestQueue", "userResponseQueue", "queue_name"
     };
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         //HTTP HANDLER
-        if (msg instanceof HttpRequest) {
-            requestBody="";
-            httpRoute="";
-            HttpRequest request = this.request = (HttpRequest) msg;
-            if (HttpUtil.is100ContinueExpected(request)) {
-                send100Continue(ctx);
+        if ("/chat".equalsIgnoreCase(msg.getUri())) {
+            System.out.println(1);
+            ctx.fireChannelRead(msg.retain());
+        } else {
+
+            if (msg instanceof HttpRequest) {
+                System.out.println(2);
+                requestBody = "";
+                httpRoute = "";
+                HttpRequest request = this.request = (HttpRequest) msg;
+                if (HttpUtil.is100ContinueExpected(request)) {
+                    send100Continue(ctx);
+                }
+                httpRoute = request.uri();
             }
-            httpRoute=request.uri();
-        }
-        if (msg instanceof HttpContent) {
-            HttpContent httpContent = (HttpContent) msg;
-            ByteBuf content = httpContent.content();
-            requestBody = requestBody + content.toString(CharsetUtil.UTF_8);
-            ctx.fireChannelRead(content.copy());
-        }
-        if (msg instanceof LastHttpContent) {
-            LastHttpContent trailer = (LastHttpContent) msg;
-            writeResponse(trailer, ctx);
+            if (msg instanceof HttpContent) {
+                System.out.println(3);
+                HttpContent httpContent = (HttpContent) msg;
+                ByteBuf content = httpContent.content();
+                requestBody = requestBody + content.toString(CharsetUtil.UTF_8);
+                //ctx.fireChannelRead(content.copy());
+            }
+            if (msg instanceof LastHttpContent) {
+                System.out.println(4);
+                LastHttpContent trailer = (LastHttpContent) msg;
+                writeResponse(trailer, ctx);
+            }
         }
 
     }
 
-    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{
+    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception {
         JSONObject requestJson = new JSONObject(getRequestBody());
-        requestJson.put("httpRoute",httpRoute);
+        requestJson.put("httpRoute", httpRoute);
         String queueName = requestJson.getString("queue");
-        if(validateQueueName(queueName)) {
+        if (validateQueueName(queueName)) {
             sendMessageToActiveMQ(requestJson.toString(), queueName);
             System.out.println("Queue : " + queueName);
-            System.out.println("Request Body : " + requestJson.toString() );
+            System.out.println("Request Body : " + requestJson.toString());
         }
     }
 
@@ -79,7 +88,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         P.send(jsonBody);
     }
 
-    public boolean validateQueueName(String queue){
+    public boolean validateQueueName(String queue) {
         return Arrays.asList(this.queueNames).contains(queue);
     }
 
@@ -103,6 +112,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         cause.printStackTrace();
         ctx.close();
     }
+
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.close();
