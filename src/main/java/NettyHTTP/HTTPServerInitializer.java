@@ -35,8 +35,8 @@ public class HTTPServerInitializer extends ChannelInitializer<SocketChannel> {
 //        p.addLast(new WebSocketServerProtocolHandler("/chat"));
 //        p.addLast(new TextWebSocketFrameHandler(group));
         ChannelPipeline pipeline = arg0.pipeline();
-//        pipeline.addLast("decoder", new HttpRequestDecoder());
 //        pipeline.addLast("encoder", new HttpResponseEncoder());
+//        pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast(new CorsHandler(corsConfig));
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new ChunkedWriteHandler());

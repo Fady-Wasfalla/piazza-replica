@@ -10,6 +10,9 @@ import io.netty.util.CharsetUtil;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,9 +44,45 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         //HTTP HANDLER
-        if ("/chat".equalsIgnoreCase(msg.getUri())) {
+        String[] url = msg.getUri().split("/");
+        if ("chat".equalsIgnoreCase(url[1])) {
+
+            URL ChatUrl = new URL ("http://localhost:8081/chat");
+            HttpURLConnection con = (HttpURLConnection)ChatUrl.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Connection", "Upgrade");
+            con.setRequestProperty("Upgrade", "websocket");
+            con.setRequestProperty("Origin", "localhost");
+            con.setRequestProperty("Content-Type", "application/json");
+
+            con.setDoOutput(true);
+
+            HttpContent httpContent = (HttpContent) msg;
+            ByteBuf content = httpContent.content();
+            requestBody = content.toString(CharsetUtil.UTF_8);
+
+            try(OutputStream os = con.getOutputStream()) {
+                byte[] input = requestBody.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            
+
             System.out.println(1);
-            ctx.fireChannelRead(msg.retain());
+            System.out.println(msg);
+//            try {
+//                HttpContent httpContent = (HttpContent) msg;
+//                ByteBuf content = httpContent.content();
+//                requestBody = content.toString(CharsetUtil.UTF_8);
+//                System.out.println(requestBody);
+//                JSONObject requestJson = new JSONObject(getRequestBody());
+//                requestJson.put("httpRoute", httpRoute);
+//                String queueName = requestJson.getString("queue");
+//                System.out.println(queueName);
+//                ctx.writeAndFlush(requestJson);
+//            } catch (Exception e) {
+//            }
+//            ctx.fireChannelRead(msg.retain());
         } else {
 
             if (msg instanceof HttpRequest) {
