@@ -7,30 +7,26 @@ import core.commands.UserCommands.UserDAL;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import io.github.cdimascio.dotenv.Dotenv;
+
 
 public class ConsumerMQ {
     //private final static String QUEUE_NAME = "queue_name";
     private static ExecutorService threadPool = Executors.newFixedThreadPool(10);
-    static String[] queueNames = {
-            "chatRequestQueue" ,"chatResponseQueue" ,
-            "courseRequestQueue" ,"courseResponseQueue" ,
-            "mediaRequestQueue" ,"mediaResponseQueue" ,
-            "notificationRequestQueue" ,"notificationResponseQueue" ,
-            "pollRequestQueue" ,"pollResponseQueue" ,
-            "questionRequestQueue" ,"questionResponseQueue" ,
-            "userRequestQueue" ,"userResponseQueue", "queue_name"
-    };
 
     public static void main(String[] argv) throws Exception {
+        Dotenv dotenv = Dotenv.load();
+        String strlist = dotenv.get("queues");
+        List<String> queueNames = Arrays.asList(strlist.split(","));
         CommandsMap.instantiate();
-
         // One Instance of DAL
         ConcurrentMap<String, Object> dalMap = new ConcurrentHashMap<>();
         dalMap.put("core.commands.UserCommands.UserDAL", UserDAL.class.newInstance());
@@ -45,7 +41,7 @@ public class ConsumerMQ {
         for (String QUEUE_NAME:queueNames) {
 
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+        System.out.println("[*] "+QUEUE_NAME + " [*] Waiting for messages. To exit press CTRL+C");
 
         consumer = new DefaultConsumer(channel) {
             @Override
@@ -53,8 +49,6 @@ public class ConsumerMQ {
                     throws IOException {
                 Runnable task = new Runnable() {
                     public void run() {
-
-
                         try {
                             String message = new String(body, "UTF-8");
                             JSONObject requestJson = new JSONObject(message);
@@ -62,18 +56,10 @@ public class ConsumerMQ {
                             String serviceDAL = requestJson.getString("service");
                             CommandDP command = (CommandDP) CommandsMap.queryClass(function).newInstance();
                             Class service = command.getClass();
-
-                            // Several Instances of DAL
-//                    Class dalClass = Class.forName("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL");
-//                    Object dal = dalClass.newInstance();
-
                             Method setData = service.getMethod("setData",JSONObject.class, Object.class);
-
                             setData.invoke(command, requestJson, dalMap.get("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL"));
                             command.execute();
                             channel.basicAck(envelope.getDeliveryTag(), false);
-
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
