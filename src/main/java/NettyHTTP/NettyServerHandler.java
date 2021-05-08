@@ -1,5 +1,23 @@
 package NettyHTTP;
 
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+
 import RabbitMQ.Producer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -9,10 +27,11 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,48 +64,37 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         //HTTP HANDLER
         String[] url = msg.getUri().split("/");
-        if ("chat".equalsIgnoreCase(url[1])) {
+        String chat = "";
+        try{chat= url[1];}catch (Exception e){}
+        if ("chat".equalsIgnoreCase(chat)) {
 
-            URL ChatUrl = new URL ("http://localhost:8081/chat");
-            HttpURLConnection con = (HttpURLConnection)ChatUrl.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("Connection", "Upgrade");
-            con.setRequestProperty("Upgrade", "websocket");
-            con.setRequestProperty("Origin", "localhost");
-            con.setRequestProperty("Content-Type", "application/json");
+            //Keep Chat in same server
+            ctx.fireChannelRead(msg.retain());
 
-            con.setDoOutput(true);
-
-            HttpContent httpContent = (HttpContent) msg;
-            ByteBuf content = httpContent.content();
-            requestBody = content.toString(CharsetUtil.UTF_8);
-
-            try(OutputStream os = con.getOutputStream()) {
-                byte[] input = requestBody.getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
-
-            
-
-            System.out.println(1);
-            System.out.println(msg);
-//            try {
-//                HttpContent httpContent = (HttpContent) msg;
-//                ByteBuf content = httpContent.content();
-//                requestBody = content.toString(CharsetUtil.UTF_8);
-//                System.out.println(requestBody);
-//                JSONObject requestJson = new JSONObject(getRequestBody());
-//                requestJson.put("httpRoute", httpRoute);
-//                String queueName = requestJson.getString("queue");
-//                System.out.println(queueName);
-//                ctx.writeAndFlush(requestJson);
-//            } catch (Exception e) {
+            //Redirect Chat to an external server
+//            {
+//            CloseableHttpClient httpClient = HttpClients.createDefault();
+//
+//            HttpGet request = new HttpGet("http://localhost:8081/chat");
+//
+//            // add request headers
+//            request.addHeader("Content-Type", "application/json");
+//            request.addHeader("Connection", "Upgrade");
+//            request.addHeader("Upgrade", "websocket");
+//            request.addHeader("Origin", "localhost:8080");
+//
+//            try  {
+//                CloseableHttpResponse response = httpClient.execute(request);
+//                // Get HttpResponse Status
+//            }catch (Exception e){}
 //            }
-//            ctx.fireChannelRead(msg.retain());
+
+            //Read JSON
+
+
         } else {
 
             if (msg instanceof HttpRequest) {
-                System.out.println(2);
                 requestBody = "";
                 httpRoute = "";
                 HttpRequest request = this.request = (HttpRequest) msg;
