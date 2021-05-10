@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class mongoDB {
 
-    final static String databaseName ="";
+    final static String databaseName ="piazza";
     public static MongoCollection<Document> getCollection(MongoClient mongoClient,String collectionName) {
         MongoDatabase database = mongoClient.getDatabase(databaseName);
         return database.getCollection(collectionName);
@@ -95,7 +95,7 @@ public class mongoDB {
              deleteMany(mongoClient, "grades",
                  new Document("student_id", new Document("$gte",10001)));
 
-            ViewAllQuestionsCommand.viewQuestions("1");
+//            ViewAllQuestionsCommand.viewQuestions("1");
         }
     }
 }

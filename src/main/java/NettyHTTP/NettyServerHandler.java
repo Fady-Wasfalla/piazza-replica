@@ -69,7 +69,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         String queueName = requestJson.getString("queue");
         String responseQueue = queueName.split("Req",0)[0]+"Res";
 
-        if(validateQueueName(queueName)) {
+//        if(validateQueueName(queueName)) {
             final String corrId = UUID.randomUUID().toString();
             sendMessageToActiveMQ(requestJson.toString(), queueName,corrId);
             System.out.println("Request Body : " + requestJson.toString());
@@ -78,7 +78,8 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
             if(NettyHTTPServer.channel==null)
                 NettyHTTPServer.instantiateChannel();
-            String ctag = NettyHTTPServer.channel.basicConsume(responseQueue, true, (consumerTag, delivery) -> {
+            NettyHTTPServer.channel.queueDeclare(responseQueue, false, false, false, null);
+        String ctag = NettyHTTPServer.channel.basicConsume(responseQueue, true, (consumerTag, delivery) -> {
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
                     response.offer(new String(delivery.getBody(), "UTF-8"));
                 }
@@ -98,7 +99,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
             System.out.println(response1.toString());
-        }
+//        }
     }
 
     private void sendMessageToActiveMQ(String jsonBody, String queue, String UUID) throws IOException, TimeoutException {
