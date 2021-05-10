@@ -1,7 +1,13 @@
 package NettyHTTP;
 
 import RabbitMQ.Producer;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import io.github.cdimascio.dotenv.Dotenv;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
@@ -10,6 +16,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeoutException;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
@@ -18,23 +27,17 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
+
     private HttpRequest request;
     private  int counter = 0;
     private String requestBody;
     private String httpRoute;
-    private long correlationId;
     volatile String responseBody;
-    String[] queueNames = {
-            "chatRequestQueue" ,"chatResponseQueue" ,
-            "courseRequestQueue" ,"courseResponseQueue" ,
-            "mediaRequestQueue" ,"mediaResponseQueue" ,
-            "notificationRequestQueue" ,"notificationResponseQueue" ,
-            "pollRequestQueue" ,"pollResponseQueue" ,
-            "questionRequestQueue" ,"questionResponseQueue" ,
-            "userRequestQueue" ,"userResponseQueue", "queue_name"
-    };
 
 
+    public static void main(String[]args){
+
+    }
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         //HTTP HANDLER
@@ -64,20 +67,49 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         JSONObject requestJson = new JSONObject(getRequestBody());
         requestJson.put("httpRoute",httpRoute);
         String queueName = requestJson.getString("queue");
+        String responseQueue = queueName.split("Req",0)[0]+"Res";
+
         if(validateQueueName(queueName)) {
-            sendMessageToActiveMQ(requestJson.toString(), queueName);
-            System.out.println("Queue : " + queueName);
-            System.out.println("Request Body : " + requestJson.toString() );
+            final String corrId = UUID.randomUUID().toString();
+            sendMessageToActiveMQ(requestJson.toString(), queueName,corrId);
+            System.out.println("Request Body : " + requestJson.toString());
+
+            final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
+
+            if(NettyHTTPServer.channel==null)
+                NettyHTTPServer.instantiateChannel();
+            String ctag = NettyHTTPServer.channel.basicConsume(responseQueue, true, (consumerTag, delivery) -> {
+                if (delivery.getProperties().getCorrelationId().equals(corrId)) {
+                    response.offer(new String(delivery.getBody(), "UTF-8"));
+                }
+            }, consumerTag -> {
+            });
+
+            String result = "";
+            try {
+                result = response.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            NettyHTTPServer.channel.basicCancel(ctag);
+            ByteBuf b = Unpooled.copiedBuffer(result, CharsetUtil.UTF_8);
+            FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
+            response1.headers().set("CONTENT_TYPE", "application/json");
+            response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
+            ctx.write(response1);
+            System.out.println(response1.toString());
         }
     }
 
-    private void sendMessageToActiveMQ(String jsonBody, String queue) throws IOException, TimeoutException {
+    private void sendMessageToActiveMQ(String jsonBody, String queue, String UUID) throws IOException, TimeoutException {
         Producer P = new Producer(queue);
-        P.send(jsonBody);
+        P.send(jsonBody,UUID);
     }
 
     public boolean validateQueueName(String queue){
-        return Arrays.asList(this.queueNames).contains(queue);
+        Dotenv dotenv = Dotenv.load();
+        String strlist = dotenv.get("queues");
+        return Arrays.asList(strlist.split(",")).contains(queue);
     }
 
     public String getRequestBody() {
@@ -102,7 +134,8 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
     }
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.close();
+//        ctx.close();
+        ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
 
 }
