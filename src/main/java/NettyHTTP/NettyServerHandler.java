@@ -1,9 +1,9 @@
 package NettyHTTP;
 
 import RabbitMQ.Producer;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
+import core.CommandDP;
+import core.CommandsMap;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -78,7 +78,10 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
             if(NettyHTTPServer.channel==null)
                 NettyHTTPServer.instantiateChannel();
-            String ctag = NettyHTTPServer.channel.basicConsume(responseQueue, true, (consumerTag, delivery) -> {
+
+            final long[] delTag = {0};
+            String ctag = NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
+                delTag[0] = delivery.getEnvelope().getDeliveryTag();
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
                     response.offer(new String(delivery.getBody(), "UTF-8"));
                 }
@@ -91,13 +94,13 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            NettyHTTPServer.channel.basicCancel(ctag);
             ByteBuf b = Unpooled.copiedBuffer(result, CharsetUtil.UTF_8);
             FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
             response1.headers().set("CONTENT_TYPE", "application/json");
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
-            System.out.println(response1.toString());
+            NettyHTTPServer.channel.basicAck(delTag[0], false);
+            NettyHTTPServer.channel.basicCancel(ctag);
         }
     }
 
@@ -108,7 +111,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
     public boolean validateQueueName(String queue){
         Dotenv dotenv = Dotenv.load();
-        String strlist = dotenv.get("queues");
+        String strlist = dotenv.get("queuesReq");
         return Arrays.asList(strlist.split(",")).contains(queue);
     }
 
