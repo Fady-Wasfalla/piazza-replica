@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
+import core.commands.QuestionCommands.ViewAllQuestionsCommand;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -15,45 +16,43 @@ import java.util.Random;
 
 public class mongoDB {
 
-    public static MongoCollection<Document> getCollection(MongoClient mongoClient, String databaseName,
-                                                          String collectionName) {
+    final static String databaseName ="";
+    public static MongoCollection<Document> getCollection(MongoClient mongoClient,String collectionName) {
         MongoDatabase database = mongoClient.getDatabase(databaseName);
         return database.getCollection(collectionName);
     }
 
-    public static void create(MongoClient mongoClient, String databaseName, String collectionName,
+    public static void create(MongoClient mongoClient, String collectionName,
                               Document document) {
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         collection.insertOne(document);
     }
 
-    public static ArrayList read(MongoClient mongoClient, String databaseName, String collectionName,
-                                 Document filterDocument) {
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+    public static ArrayList read(MongoClient mongoClient, String collectionName,Document filterDocument) {
+        MongoCollection<Document> collection = getCollection(mongoClient,collectionName);
         return collection.find(filterDocument).into(new ArrayList<>());
     }
 
-    public static void update(MongoClient mongoClient, String databaseName, String collectionName,
+    public static void update(MongoClient mongoClient, String collectionName,
                               Document filterDocument, Bson updateOperation, UpdateOptions options) {
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         collection.updateOne(filterDocument, updateOperation, options);
     }
 
-    public static void updateMany(MongoClient mongoClient, String databaseName, String collectionName,
+    public static void updateMany(MongoClient mongoClient, String collectionName,
                                   Document filterDocument, Bson updateOperation, UpdateOptions options) {
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         collection.updateMany(filterDocument, updateOperation, options);
     }
 
-    public static void deleteOne(MongoClient mongoClient, String databaseName, String collectionName,
+    public static void deleteOne(MongoClient mongoClient, String collectionName,
                                  Document filterDocument) {
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         collection.deleteOne(filterDocument);
     }
 
-    public static void deleteMany(MongoClient mongoClient, String databaseName, String collectionName,
-                                  Document filterDocument) {
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+    public static void deleteMany(MongoClient mongoClient, String collectionName, Document filterDocument) {
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         collection.deleteMany(filterDocument);
     }
 
@@ -82,19 +81,21 @@ public class mongoDB {
             //           { type: "homework",
             //             score: 27 }
             //                          ]
-            create(mongoClient,"sample_training", "grades", student);
+            create(mongoClient, "grades", student);
             // returns all instances with student_id > 1002
-            ArrayList x = read(mongoClient,"sample_training", "grades",
+            ArrayList x = read(mongoClient,"grades",
                   new Document("student_id", new Document("$gte",10002)));
 
             // updates the first instance of student_id: 10001
             // update options like set ex: Bson updateOperation = set("comment", "You should learn MongoDB!");
 
-           update(mongoClient,"sample_training", "grades", new Document("student_id",10001),
+           update(mongoClient, "grades", new Document("student_id",10001),
                   set("message", "testing"), new UpdateOptions());
            // delete all instances with student_id > 1001
-             deleteMany(mongoClient,"sample_training", "grades",
+             deleteMany(mongoClient, "grades",
                  new Document("student_id", new Document("$gte",10001)));
+
+            ViewAllQuestionsCommand.viewQuestions("1");
         }
     }
 }
