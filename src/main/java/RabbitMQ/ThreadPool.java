@@ -1,7 +1,7 @@
 package RabbitMQ;
 
 import com.rabbitmq.client.*;
-import core.Command;
+import core.CommandDP;
 import core.CommandsMap;
 import core.commands.UserCommands.UserDAL;
 import org.json.JSONObject;

@@ -1,5 +1,7 @@
 package NettyHTTP;
 
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -8,9 +10,17 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 
 public class NettyHTTPServer {
-    
+
+    public static ConnectionFactory factory;
+    public static Connection connection;
+    public  static com.rabbitmq.client.Channel channel;
+
+
     public static void start(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -36,7 +46,24 @@ public class NettyHTTPServer {
         }
     }
 
+    public static void instantiateChannel(){
+        System.out.println("RUNNN");
+        try {
+            factory = new ConnectionFactory();
+            factory.setHost("localhost");
+            connection = factory.newConnection();
+            channel = connection.createChannel();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public static void main(String[] args) throws Exception {
         NettyHTTPServer.start(8080);
+
+
     }
 }

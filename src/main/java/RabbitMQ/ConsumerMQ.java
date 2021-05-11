@@ -1,5 +1,6 @@
 package RabbitMQ;
 
+import NettyHTTP.NettyHTTPServer;
 import com.rabbitmq.client.*;
 import core.CommandDP;
 import core.CommandsMap;
@@ -7,34 +8,31 @@ import core.commands.UserCommands.UserDAL;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import io.github.cdimascio.dotenv.Dotenv;
+
 
 public class ConsumerMQ {
     //private final static String QUEUE_NAME = "queue_name";
     private static ExecutorService threadPool = Executors.newFixedThreadPool(10);
-    static String[] queueNames = {
-            "chatRequestQueue" ,"chatResponseQueue" ,
-            "courseRequestQueue" ,"courseResponseQueue" ,
-            "mediaRequestQueue" ,"mediaResponseQueue" ,
-            "notificationRequestQueue" ,"notificationResponseQueue" ,
-            "pollRequestQueue" ,"pollResponseQueue" ,
-            "questionRequestQueue" ,"questionResponseQueue" ,
-            "userRequestQueue" ,"userResponseQueue", "queue_name"
-    };
 
     public static void main(String[] argv) throws Exception {
+        Dotenv dotenv = Dotenv.load();
+        String strlist = dotenv.get("queuesReq");
+        List<String> queueReqNames = Arrays.asList(strlist.split(","));
+        strlist = dotenv.get("queuesRes");
+        List<String> queueResNames = Arrays.asList(strlist.split(","));
         CommandsMap.instantiate();
-
         // One Instance of DAL
         ConcurrentMap<String, Object> dalMap = new ConcurrentHashMap<>();
         dalMap.put("core.commands.UserCommands.UserDAL", UserDAL.class.newInstance());
-
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
@@ -42,47 +40,47 @@ public class ConsumerMQ {
         Consumer consumer;
         channel = connection.createChannel();
 
-        for (String QUEUE_NAME:queueNames) {
+        if(NettyHTTPServer.channel==null)
+            NettyHTTPServer.instantiateChannel();
 
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+        for (String QUEUE_NAME:queueResNames) {
+            NettyHTTPServer.channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        }
 
-        consumer = new DefaultConsumer(channel) {
-            @Override
-            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-                    throws IOException {
-                Runnable task = new Runnable() {
-                    public void run() {
-
-
-                        try {
-                            String message = new String(body, "UTF-8");
-                            JSONObject requestJson = new JSONObject(message);
-                            String function = requestJson.getString("function");
-                            String serviceDAL = requestJson.getString("service");
-                            CommandDP command = (CommandDP) CommandsMap.queryClass(function).newInstance();
-                            Class service = command.getClass();
-
-                            // Several Instances of DAL
-//                    Class dalClass = Class.forName("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL");
-//                    Object dal = dalClass.newInstance();
-
-                            Method setData = service.getMethod("setData",JSONObject.class, Object.class);
-
-                            setData.invoke(command, requestJson, dalMap.get("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL"));
-                            command.execute();
-                            channel.basicAck(envelope.getDeliveryTag(), false);
-
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
+        for (String QUEUE_NAME:queueReqNames) {
+            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            System.out.println("[*] "+QUEUE_NAME + " [*] Waiting for messages. To exit press CTRL+C");
+            consumer = new DefaultConsumer(channel) {
+                @Override
+                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+                        throws IOException {
+                    Runnable task = new Runnable() {
+                        public void run() {
+                            try {
+                                String message = new String(body, "UTF-8");
+                                JSONObject requestJson = new JSONObject(message);
+                                String function = requestJson.getString("function");
+                                String serviceDAL = requestJson.getString("service");
+                                CommandDP command = (CommandDP) CommandsMap.queryClass(function).newInstance();
+                                Class service = command.getClass();
+                                Method setData = service.getMethod("setData",JSONObject.class, Object.class);
+                                setData.invoke(command, requestJson, dalMap.get("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL"));
+                                JSONObject result = command.execute();
+                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+                                        .Builder()
+                                        .correlationId(properties.getCorrelationId())
+                                        .build();
+                                channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
+                                channel.basicAck(envelope.getDeliveryTag(), false);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                };
-                threadPool.submit(task);
-            }
-        };
-        channel.basicConsume(QUEUE_NAME, false, consumer);
+                    };
+                    threadPool.submit(task);
+                }
+            };
+            channel.basicConsume(QUEUE_NAME, false, consumer);
         }
     }
 }

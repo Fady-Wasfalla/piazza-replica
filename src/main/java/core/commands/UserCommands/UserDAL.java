@@ -16,6 +16,7 @@ public class UserDAL {
         String password = "f989e5d9f18291eddb927bfbbbcf76121d597dddc5a3350f136b233e7c4af518";
 
         try{
+            System.out.println("USEERDAL");
             con = DriverManager.getConnection(url, user, password);
         }
         catch (SQLException ex){
@@ -28,7 +29,6 @@ public class UserDAL {
     }
 
     public void createUser(JSONObject json) throws SQLException {
-
         String firstName = json.getString("firstName");
         String lastName = json.getString("lastName");
         String query = "INSERT INTO users(firstName,lastName) VALUES(?,?)";
