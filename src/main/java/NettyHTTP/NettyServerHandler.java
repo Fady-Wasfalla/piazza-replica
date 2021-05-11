@@ -75,7 +75,6 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             if(NettyHTTPServer.channel==null)
                 NettyHTTPServer.instantiateChannel();
             NettyHTTPServer.channel.queueDeclare(responseQueue, false, false, false, null);
-            System.out.println("[*RES] "+responseQueue + " [*] Waiting for messages. To exit press CTRL+C");
             String ctag = NettyHTTPServer.channel.basicConsume(responseQueue, true, (consumerTag, delivery) -> {
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
                     response.offer(new String(delivery.getBody(), "UTF-8"));
