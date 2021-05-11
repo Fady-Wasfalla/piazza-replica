@@ -15,13 +15,22 @@ public class ViewAllQuestionsCommand extends CommandDP {
     public JSONObject execute() {
         Dotenv dotenv = Dotenv.load();
         String connectionString = dotenv.get("CONNECTION_STRING");
+        String res="";
         try (MongoClient mongoClient = MongoClients.create(connectionString)) {
+            JSONObject result = new JSONObject();
             ArrayList<Document> results = mongoDB.read(mongoClient,"questions", new Document());
             for(Document doc: results) {
-                System.out.println(doc.toJson().toString());
+                String s = doc.toJson().toString();
+                JSONObject instance = new JSONObject(s); ;
+                result.put("res",instance);
+
+//                System.out.println(doc.toJson().toString());
+//                result.put(doc.toJson().toString());
+
             }
-            JSONObject result = new JSONObject();
-            result.put("response","HELLO from questions");
+
+//            result.put("response","HELLO from questions");
+
             return result;
         }
     }
