@@ -66,12 +66,12 @@ public class ConsumerMQ {
                                 Method setData = service.getMethod("setData",JSONObject.class, Object.class);
                                 setData.invoke(command, requestJson, dalMap.get("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL"));
                                 JSONObject result = command.execute();
-                                channel.basicAck(envelope.getDeliveryTag(), false);
                                 AMQP.BasicProperties replyProps = new AMQP.BasicProperties
                                         .Builder()
                                         .correlationId(properties.getCorrelationId())
                                         .build();
                                 channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
+                                channel.basicAck(envelope.getDeliveryTag(), false);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

@@ -1,9 +1,6 @@
 package NettyHTTP;
 
 import RabbitMQ.Producer;
-import com.rabbitmq.client.*;
-import core.CommandDP;
-import core.CommandsMap;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -63,7 +60,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
     }
 
-    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{
+    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{   
         JSONObject requestJson = new JSONObject(getRequestBody());
         requestJson.put("httpRoute",httpRoute);
         String queueName = requestJson.getString("queue");
@@ -79,11 +76,14 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             if(NettyHTTPServer.channel==null)
                 NettyHTTPServer.instantiateChannel();
 
-            final long[] delTag = {0};
-            String ctag = NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
-                delTag[0] = delivery.getEnvelope().getDeliveryTag();
+           NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
+
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
+                    NettyHTTPServer.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     response.offer(new String(delivery.getBody(), "UTF-8"));
+                    NettyHTTPServer.channel.basicCancel(consumerTag);
+                }else{
+                    NettyHTTPServer.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
                 }
             }, consumerTag -> {
             });
@@ -99,8 +99,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             response1.headers().set("CONTENT_TYPE", "application/json");
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
-            NettyHTTPServer.channel.basicAck(delTag[0], false);
-            NettyHTTPServer.channel.basicCancel(ctag);
+
         }
     }
 
