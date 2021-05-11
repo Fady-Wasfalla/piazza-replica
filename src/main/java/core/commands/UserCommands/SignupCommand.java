@@ -14,7 +14,7 @@ public class SignupCommand extends CommandDP {
         System.out.println(this.data.toString());
 
         JSONObject result = new JSONObject();
-        result.put("response","HELLO");
+        result.put("response",this.data.toString());
         return result;
     }
 
