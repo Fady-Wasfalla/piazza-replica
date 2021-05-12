@@ -1,5 +1,6 @@
 package RabbitMQ;
 
+import NettyHTTP.NettyHTTPServer;
 import com.rabbitmq.client.*;
 import core.CommandDP;
 import core.CommandsMap;
@@ -24,8 +25,10 @@ public class ConsumerMQ {
 
     public static void main(String[] argv) throws Exception {
         Dotenv dotenv = Dotenv.load();
-        String strlist = dotenv.get("queues");
-        List<String> queueNames = Arrays.asList(strlist.split(","));
+        String strlist = dotenv.get("queuesReq");
+        List<String> queueReqNames = Arrays.asList(strlist.split(","));
+        strlist = dotenv.get("queuesRes");
+        List<String> queueResNames = Arrays.asList(strlist.split(","));
         CommandsMap.instantiate();
         // One Instance of DAL
         ConcurrentMap<String, Object> dalMap = new ConcurrentHashMap<>();
@@ -37,7 +40,14 @@ public class ConsumerMQ {
         Consumer consumer;
         channel = connection.createChannel();
 
-        for (String QUEUE_NAME:queueNames) {
+        if(NettyHTTPServer.channel==null)
+            NettyHTTPServer.instantiateChannel();
+
+        for (String QUEUE_NAME:queueResNames) {
+            NettyHTTPServer.channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        }
+
+        for (String QUEUE_NAME:queueReqNames) {
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
             String responseQueue = QUEUE_NAME.split("Req",0)[0]+"Res";
             System.out.println("[*REQ] "+QUEUE_NAME + " [*] Waiting for messages. To exit press CTRL+C");
@@ -59,12 +69,12 @@ public class ConsumerMQ {
                                 Method setData = service.getMethod("setData",JSONObject.class, Object.class);
                                 setData.invoke(command, requestJson, dalMap.get("core.commands."+serviceDAL+"Commands."+serviceDAL+"DAL"));
                                 JSONObject result = command.execute();
-                                channel.basicAck(envelope.getDeliveryTag(), false);
                                 AMQP.BasicProperties replyProps = new AMQP.BasicProperties
                                         .Builder()
                                         .correlationId(properties.getCorrelationId())
                                         .build();
                                 channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
+                                channel.basicAck(envelope.getDeliveryTag(), false);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
