@@ -12,8 +12,8 @@ public class CommandsMap {
 
     public static void instantiate() {
         cmdMap = new ConcurrentHashMap<>();
-        cmdMap.put("SignupCommand",SignupCommand.class);
-        cmdMap.put("ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
+        cmdMap.put("user/SignupCommand",SignupCommand.class);
+        cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
 
     }
 

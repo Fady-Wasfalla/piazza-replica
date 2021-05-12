@@ -59,12 +59,13 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
     private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{   
         JSONObject requestJson = new JSONObject(getRequestBody());
         requestJson.put("httpRoute",httpRoute);
-        String queueName = requestJson.getString("queue");
-        String responseQueue = queueName.split("Req",0)[0]+"Res";
+        String queue = requestJson.getString("queue");
+        String requestQueue = queue + "Req";
+        String responseQueue = queue + "Res";
 
 //        if(validateQueueName(queueName)) {
             final String corrId = UUID.randomUUID().toString();
-            sendMessageToActiveMQ(requestJson.toString(), queueName,corrId);
+            sendMessageToActiveMQ(requestJson.toString(), requestQueue,corrId);
             System.out.println("Request Body : " + requestJson.toString());
 
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);

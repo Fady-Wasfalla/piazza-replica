@@ -23,9 +23,4 @@ public class CreateQuestionCommand extends CommandDP {
         return result;
     }
 
-    @Override
-    public void setData(JSONObject data, Object dal) {
-        this.data = data;
-        this.dal = dal;
-    }
 }
