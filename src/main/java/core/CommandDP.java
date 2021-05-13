@@ -1,12 +1,7 @@
 package core;
 
-
 import com.mongodb.client.MongoClient;
 import org.json.JSONObject;
-import javax.xml.validation.Schema;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 
 public abstract class CommandDP {
     public JSONObject data;
@@ -18,12 +13,10 @@ public abstract class CommandDP {
         this.mongoClient=mongoClient;
     }
 
+    public boolean validateJSON(String[] schema, JSONObject jsonData){
 
-
-    public boolean validateJSON(ArrayList<String> schema, JSONObject jsonData){
-
-        for(int i =0; i < schema.size(); i++) {
-            String key = schema.get(i);
+        for(int i =0; i < schema.length; i++) {
+            String key = schema[i];
             if(!jsonData.has(key)){
                 return false;
             }
