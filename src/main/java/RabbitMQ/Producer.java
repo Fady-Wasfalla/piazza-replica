@@ -28,6 +28,7 @@ public class Producer {
 
     public void send(String message, String corrId) throws IOException, TimeoutException {
         String responseQueue = this.queue.split("Req",0)[0]+"Res";
+        System.out.println(this.queue+" =====> "+message);
         AMQP.BasicProperties props = new AMQP.BasicProperties
                 .Builder()
                 .correlationId(corrId)
