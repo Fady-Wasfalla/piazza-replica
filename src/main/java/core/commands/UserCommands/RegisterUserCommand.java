@@ -3,6 +3,8 @@ package core.commands.UserCommands;
 import Services.mongoDB;
 import com.mongodb.client.result.InsertOneResult;
 import core.CommandDP;
+import org.bson.BsonArray;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
@@ -41,9 +43,10 @@ public class RegisterUserCommand extends CommandDP {
         InsertOneResult insertOneResult = mongoDB.create(this.mongoClient,
                 "register",registrationDocument);
 
-        String registeredId = insertOneResult.getInsertedId().toString();
+        BsonValue registeredId = insertOneResult.getInsertedId();
+        //System.out.println(registeredId.asObjectId().getValue().toString() + "<==== ramy");
 
-        result.put("registeredId", registeredId);
+        result.put("registeredId", registeredId.asObjectId().getValue().toString());
         return result;
     }
 }

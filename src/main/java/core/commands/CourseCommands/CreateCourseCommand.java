@@ -6,7 +6,10 @@ import RabbitMQ.Producer;
 import Services.mongoDB;
 import com.mongodb.client.result.InsertOneResult;
 import core.CommandDP;
+import org.bson.BsonObjectId;
+import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -32,11 +35,10 @@ public class CreateCourseCommand extends CommandDP {
 
         this.data.put("createdAt", new Date().getTime()+"");
 
-        String courseId = mongoDB.create(mongoClient, "course", new Document())
-                .getInsertedId()
-                .toString();
+        BsonValue courseId = mongoDB.create(mongoClient, "course", new Document())
+                .getInsertedId();
 
-        result.put("courseId", courseId);
+        result.put("courseId", courseId.asObjectId().getValue().toString());
 
         String correlationId = UUID.randomUUID().toString();
         String requestQueue = "userReq";
@@ -69,9 +71,13 @@ public class CreateCourseCommand extends CommandDP {
             });
 
             String registerResponse = response.take();
+            System.out.println("Paul ===> " + registerResponse);
             JSONObject registerObject = new JSONObject(registerResponse);
+
             // to be changed
-            result.put("registeredId", registerObject.get("registeredId"));
+            ObjectId id = new ObjectId(registerObject.get("registeredId").toString());
+            System.out.println("Monica" + id);
+            result.put("registeredId", id.toString());
 
         } catch (Exception e){
             e.printStackTrace();
