@@ -1,4 +1,5 @@
 package core.commands.QuestionCommands;
+import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -23,8 +24,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
 
         String courseId = this.data.getString("courseId");
 
-        ArrayList<Document> queryResults = mongoDB.read(this.mongoClient,
-                "questions",
+        ArrayList<Document> queryResults = mongoDB.read(this.mongoClient, Collections.question,
                 new Document("courseId", new ObjectId(courseId)));
 
         if(queryResults.isEmpty()) {

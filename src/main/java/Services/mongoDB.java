@@ -23,37 +23,37 @@ public class mongoDB {
         return database.getCollection(collectionName);
     }
 
-    public static InsertOneResult create(MongoClient mongoClient, String collectionName,
+    public static InsertOneResult create(MongoClient mongoClient, Collections collectionName,
                                          Document document) {
-        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
         return collection.insertOne(document);
     }
 
-    public static ArrayList read(MongoClient mongoClient, String collectionName,Document filterDocument) {
-        MongoCollection<Document> collection = getCollection(mongoClient,collectionName);
+    public static ArrayList read(MongoClient mongoClient, Collections collectionName,Document filterDocument) {
+        MongoCollection<Document> collection = getCollection(mongoClient,collectionName.name());
         return collection.find(filterDocument).into(new ArrayList<>());
     }
 
-    public static void update(MongoClient mongoClient, String collectionName,
+    public static void update(MongoClient mongoClient, Collections collectionName,
                               Document filterDocument, Bson updateOperation, UpdateOptions options) {
-        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
         collection.updateOne(filterDocument, updateOperation, options);
     }
 
-    public static void updateMany(MongoClient mongoClient, String collectionName,
+    public static void updateMany(MongoClient mongoClient, Collections collectionName,
                                   Document filterDocument, Bson updateOperation, UpdateOptions options) {
-        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
         collection.updateMany(filterDocument, updateOperation, options);
     }
 
-    public static void deleteOne(MongoClient mongoClient, String collectionName,
+    public static void deleteOne(MongoClient mongoClient, Collections collectionName,
                                  Document filterDocument) {
-        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
         collection.deleteOne(filterDocument);
     }
 
-    public static void deleteMany(MongoClient mongoClient, String collectionName, Document filterDocument) {
-        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
+    public static void deleteMany(MongoClient mongoClient, Collections collectionName, Document filterDocument) {
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
         collection.deleteMany(filterDocument);
     }
 
@@ -82,19 +82,19 @@ public class mongoDB {
             //           { type: "homework",
             //             score: 27 }
             //                          ]
-            create(mongoClient, "grades", student);
-            // returns all instances with student_id > 1002
-            ArrayList x = read(mongoClient,"grades",
-                  new Document("student_id", new Document("$gte",10002)));
+//            create(mongoClient, "grades", student);
+//             returns all instances with student_id > 1002
+//             ArrayList x = read(mongoClient,"grades",                 //
+                //  new Document("student_id", new Document("$gte",10002)));     //
 
             // updates the first instance of student_id: 10001
             // update options like set ex: Bson updateOperation = set("comment", "You should learn MongoDB!");
 
-           update(mongoClient, "grades", new Document("student_id",10001),
-                  set("message", "testing"), new UpdateOptions());
+           //update(mongoClient, , new Document("student_id",10001),
+                //  set("message", "testing"), new UpdateOptions());
            // delete all instances with student_id > 1001
-             deleteMany(mongoClient, "grades",
-                 new Document("student_id", new Document("$gte",10001)));
+            // deleteMany(mongoClient, "grades",
+              //   new Document("student_id", new Document("$gte",10001)));
 
 //            ViewAllQuestionsCommand.viewQuestions("1");
         }

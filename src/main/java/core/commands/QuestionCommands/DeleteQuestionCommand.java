@@ -1,5 +1,6 @@
 package core.commands.QuestionCommands;
 
+import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -16,7 +17,7 @@ public class DeleteQuestionCommand extends CommandDP {
         String connectionString = dotenv.get("CONNECTION_STRING");
         JSONObject result = new JSONObject();
         try (MongoClient mongoClient = MongoClients.create(connectionString)) {
-            mongoDB.deleteOne(mongoClient,"questions", new Document());
+            mongoDB.deleteOne(mongoClient, Collections.question, new Document());
         }
         result.put("Status", "200 OK: Question deleted successfully");
         return result;

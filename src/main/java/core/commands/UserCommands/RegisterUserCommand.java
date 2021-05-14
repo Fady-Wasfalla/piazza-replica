@@ -1,5 +1,6 @@
 package core.commands.UserCommands;
 
+import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.result.InsertOneResult;
 import core.CommandDP;
@@ -29,22 +30,12 @@ public class RegisterUserCommand extends CommandDP {
             result.put("error", "invalid request parameters");
             return result;
         }
-        JSONObject registrationData= new JSONObject();
-        registrationData.put("courseId", data.get("courseId"));
-        registrationData.put("userName", data.get("userName"));
-        registrationData.put("role", data.get("role"));
-        registrationData.put("banned", data.get("banned"));
-        registrationData.put("banExpiryDate", data.get("banExpiryDate"));
-        registrationData.put("bannerUserName", data.get("bannerUserName"));
-        registrationData.put("createdAt", data.get("createdAt"));
 
-        Document registrationDocument = Document.parse(registrationData.toString());
+        Document registrationDocument = Document.parse(data.toString());
 
-        InsertOneResult insertOneResult = mongoDB.create(this.mongoClient,
-                "register",registrationDocument);
+        InsertOneResult insertOneResult = mongoDB.create(this.mongoClient, Collections.register,registrationDocument);
 
         BsonValue registeredId = insertOneResult.getInsertedId();
-        //System.out.println(registeredId.asObjectId().getValue().toString() + "<==== ramy");
 
         result.put("registeredId", registeredId.asObjectId().getValue().toString());
         return result;

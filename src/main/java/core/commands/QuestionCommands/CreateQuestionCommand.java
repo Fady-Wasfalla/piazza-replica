@@ -1,15 +1,18 @@
 package core.commands.QuestionCommands;
 
+import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import core.CommandDP;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class CreateQuestionCommand extends CommandDP {
 
@@ -18,26 +21,29 @@ public class CreateQuestionCommand extends CommandDP {
     public JSONObject execute() {
         JSONObject result = new JSONObject();
 
-        if(!this.data.keySet().contains("courseId") || !(this.data.get("courseId") instanceof String)) {
-            result.put("error", "invalid request");
+        String[] schema = {
+                "courseId",
+                "userName",
+                "title",
+                "description",
+                "anonymous",
+                "private",
+                "media"
+        };
+
+        if (!validateJSON(schema, data)) {
+            result.put("error", "invalid request parameters");
             return result;
         }
 
-        String courseId = this.data.getString("courseId");
+        this.data.put("createdAt", new Date().getTime() + "");
 
-        ArrayList<Document> queryResults = mongoDB.read(this.mongoClient,
-                "questions",
-                new Document("courseId", new ObjectId(courseId)));
+        Document questionDocument = Document.parse(data.toString());
 
-        if(queryResults.isEmpty()) {
-            result.put("courses", new ArrayList<JSONObject>());
-            return result;
-        }
+        BsonValue questionId = mongoDB.create(mongoClient, Collections.question, questionDocument)
+                .getInsertedId();
 
-        for (Document doc : queryResults) {
-            JSONObject instance = new JSONObject(doc.toJson().toString());
-            result.append("courses", instance);
-        }
+        result.put("questionId", questionId.asObjectId().getValue().toString());
         return result;
     }
 

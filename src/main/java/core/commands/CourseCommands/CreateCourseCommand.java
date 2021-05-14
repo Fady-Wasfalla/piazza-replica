@@ -3,6 +3,7 @@ package core.commands.CourseCommands;
 import NettyHTTP.NettyHTTPServer;
 import NettyHTTP.NettyServerHandler;
 import RabbitMQ.Producer;
+import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.result.InsertOneResult;
 import core.CommandDP;
@@ -35,7 +36,9 @@ public class CreateCourseCommand extends CommandDP {
 
         this.data.put("createdAt", new Date().getTime()+"");
 
-        BsonValue courseId = mongoDB.create(mongoClient, "course", new Document())
+        Document courseDocument = Document.parse(data.toString());
+
+        BsonValue courseId = mongoDB.create(mongoClient, Collections.course, courseDocument)
                 .getInsertedId();
 
         result.put("courseId", courseId.asObjectId().getValue().toString());
@@ -45,15 +48,19 @@ public class CreateCourseCommand extends CommandDP {
         String responseQueue = "userRes";
 
         JSONObject registerRequest = new JSONObject();
-        registerRequest.put("courseId", courseId);
-        registerRequest.put("userName",data.getString("userName"));
-        registerRequest.put("role", "instructor");
-        registerRequest.put("banned", false);
-        registerRequest.put("banExpiryDate",JSONObject.NULL);
-        registerRequest.put("bannerUserName",JSONObject.NULL);
-        registerRequest.put("createdAt", this.data.get("createdAt"));
         registerRequest.put("queue", "user");
         registerRequest.put("function", "RegisterUserCommand");
+
+        JSONObject body = new JSONObject();
+        body.put("courseId", courseId);
+        body.put("userName",data.getString("userName"));
+        body.put("role", "instructor");
+        body.put("banned", false);
+        body.put("banExpiryDate",JSONObject.NULL);
+        body.put("bannerUserName",JSONObject.NULL);
+        body.put("createdAt", this.data.get("createdAt"));
+
+        registerRequest.put("body", body);
 
         try{
             NettyServerHandler.sendMessageToActiveMQ(registerRequest.toString(),requestQueue,correlationId);
@@ -71,12 +78,11 @@ public class CreateCourseCommand extends CommandDP {
             });
 
             String registerResponse = response.take();
-            System.out.println("Paul ===> " + registerResponse);
             JSONObject registerObject = new JSONObject(registerResponse);
 
             // to be changed
             ObjectId id = new ObjectId(registerObject.get("registeredId").toString());
-            System.out.println("Monica" + id);
+
             result.put("registeredId", id.toString());
 
         } catch (Exception e){
