@@ -8,6 +8,7 @@ public abstract class CommandDP {
     public Object dal;
     public MongoClient mongoClient;
     public abstract JSONObject execute();
+
     public void setData(JSONObject data, MongoClient mongoClient ){
         this.data = data;
         this.mongoClient=mongoClient;

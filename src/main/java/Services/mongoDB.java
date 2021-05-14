@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.InsertOneResult;
 import core.commands.QuestionCommands.ViewAllQuestionsCommand;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -22,10 +23,10 @@ public class mongoDB {
         return database.getCollection(collectionName);
     }
 
-    public static void create(MongoClient mongoClient, String collectionName,
-                              Document document) {
+    public static InsertOneResult create(MongoClient mongoClient, String collectionName,
+                                         Document document) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
-        collection.insertOne(document);
+        return collection.insertOne(document);
     }
 
     public static ArrayList read(MongoClient mongoClient, String collectionName,Document filterDocument) {
