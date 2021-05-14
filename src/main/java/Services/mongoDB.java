@@ -8,39 +8,39 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.bson.json.JsonObject;
 import org.bson.types.ObjectId;
-import static com.mongodb.client.model.Updates.*;
 
 import java.util.*;
 
 
 public class mongoDB {
+
+    final static String databaseName ="piazza";
+
     public static MongoClient createMongoClient(String connectionString){
         try (MongoClient mongoClient = MongoClients.create(connectionString)) {
             return mongoClient;
         }
     }
-    public static MongoCollection<Document> getCollection(MongoClient mongoClient, String databaseName,
-                                                          String collectionName) {
+    public static MongoCollection<Document> getCollection(MongoClient mongoClient, String collectionName) {
         MongoDatabase database = mongoClient.getDatabase(databaseName);
         return database.getCollection(collectionName);
     }
 
-    public static void create( MongoClient mongoClient, String databaseName, String collectionName, Document document,
+    public static void create( MongoClient mongoClient, String collectionName, Document document,
                                jedis jedis, String key) {
-        MongoCollection<Document> collection = getCollection( mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
         collection.insertOne(document);
         jedis.deleteCache(collectionName);
         jedis.setLayeredCache(collectionName + document.get(key).toString(), key ,(document.toJson()).toString());
     }
 
-    public static Document readOne(MongoClient mongoClient, String databaseName, String collectionName,
+    public static Document readOne(MongoClient mongoClient, String collectionName,
                                  Document filterDocument, jedis jedis, String key) {
         String cached = jedis.getLayeredCache(collectionName + filterDocument.get(key).toString(), filterDocument.toString());
         if (cached != null)
             return Document.parse(cached);
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         Document document = collection.find(filterDocument).first();
         if (document != null){
             jedis.setLayeredCache(collectionName + filterDocument.get(key).toString(), filterDocument.toString(), (document.toJson()).toString());
@@ -50,10 +50,10 @@ public class mongoDB {
         return new Document();
     }
 
-    public static Document update( MongoClient mongoClient, String databaseName, String collectionName,
+    public static Document update( MongoClient mongoClient, String collectionName,
                               Document filterDocument, Bson updateOperation, FindOneAndUpdateOptions options,
                                    jedis jedis, String key) {
-        MongoCollection<Document> collection = getCollection(mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         Document document =  collection.findOneAndUpdate(filterDocument, updateOperation, options);
         jedis.deleteCache(collectionName);
         jedis.deleteCache(collectionName + document.get(key).toString());
@@ -62,9 +62,9 @@ public class mongoDB {
         return document;
     }
 
-    public static void updateMany(MongoClient mongoClient , String databaseName, String collectionName,
+    public static void updateMany(MongoClient mongoClient , String collectionName,
                                   Document filterDocument, Bson updateOperation, UpdateOptions options, jedis jedis) {
-        MongoCollection<Document> collection = getCollection( mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
         Set<String> cacheKeys = jedis.returnKeys(collectionName + "*");
         Iterator<String> cacheKeysIterator = cacheKeys.iterator();
         while(cacheKeysIterator.hasNext())
@@ -72,9 +72,9 @@ public class mongoDB {
         collection.updateMany(filterDocument, updateOperation, options);
     }
 
-    public static Document deleteOne(MongoClient mongoClient, String databaseName, String collectionName,
+    public static Document deleteOne(MongoClient mongoClient, String collectionName,
                                  Document filterDocument, jedis jedis, String key) {
-        MongoCollection<Document> collection = getCollection( mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
         Document document = collection.findOneAndDelete(filterDocument);
         if(document != null) {
             jedis.deleteCache(collectionName);
@@ -84,9 +84,9 @@ public class mongoDB {
         return  new Document();
     }
 
-    public static void deleteMany(MongoClient mongoClient, String databaseName, String collectionName,
+    public static void deleteMany(MongoClient mongoClient, String collectionName,
                                   Document filterDocument, jedis jedis) {
-        MongoCollection<Document> collection = getCollection( mongoClient, databaseName, collectionName);
+        MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
         Set<String> cacheKeys = jedis.returnKeys(collectionName + "*");
         Iterator<String> cacheKeysIterator = cacheKeys.iterator();
         while(cacheKeysIterator.hasNext())
