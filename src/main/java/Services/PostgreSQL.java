@@ -1,7 +1,5 @@
 package Services;
 
-import javafx.geometry.Pos;
-
 import java.sql.*;
 
 public class PostgreSQL {

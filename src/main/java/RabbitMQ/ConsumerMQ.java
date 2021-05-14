@@ -2,23 +2,24 @@ package RabbitMQ;
 
 import NettyHTTP.NettyHTTPServer;
 import NettyHTTP.NettyServerHandler;
+import Services.jedis;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.rabbitmq.client.*;
 import core.CommandDP;
 import core.CommandsMap;
 import core.commands.UserCommands.UserDAL;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
-
-import io.github.cdimascio.dotenv.Dotenv;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class ConsumerMQ {
@@ -47,8 +48,10 @@ public class ConsumerMQ {
             NettyHTTPServer.instantiateChannel();
         String connectionString = dotenv.get("CONNECTION_STRING") + "10" ; // no. of DP connections
         MongoClient mongoClient = null;
+        jedis jedis = null;
         try  {
             mongoClient = MongoClients.create(connectionString);
+            jedis = new jedis("localhost", 6379, "");
         }catch(Exception error){
             System.out.println("error hhhhhhhhhhhhh :"+error);
         }
@@ -56,6 +59,7 @@ public class ConsumerMQ {
             NettyHTTPServer.channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         }
         MongoClient finalMongoClient = mongoClient;
+        jedis finalJedis = jedis;
         for (String QUEUE_NAME:queueReqNames) {
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
             String responseQueue = QUEUE_NAME.split("Req",0)[0]+"Res";
@@ -73,8 +77,8 @@ public class ConsumerMQ {
                                 String queue = requestJson.getString("queue");
                                 CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                                 Class service = command.getClass();
-                                Method setData = service.getMethod("setData",JSONObject.class, MongoClient.class);
-                                setData.invoke(command, requestJson, finalMongoClient);
+                                Method setData = service.getMethod("setData",JSONObject.class, MongoClient.class, jedis.class);
+                                setData.invoke(command, requestJson, finalMongoClient, finalJedis);
                                 JSONObject result = command.execute();
                                 NettyServerHandler.sendMessageToActiveMQ(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
 //                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties

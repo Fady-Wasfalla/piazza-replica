@@ -2,7 +2,7 @@ package core;
 
 import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.QuestionCommands.CreateQuestionCommand;
-import core.commands.QuestionCommands.ViewAllQuestionsCommand;
+//import core.commands.QuestionCommands.ViewAllQuestionsCommand;
 import core.commands.UserCommands.RegisterUserCommand;
 import core.commands.UserCommands.SignupCommand;
 
@@ -16,7 +16,7 @@ public class CommandsMap {
     public static void instantiate() {
         cmdMap = new ConcurrentHashMap<>();
         cmdMap.put("user/SignupCommand",SignupCommand.class);
-        cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
+//        cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
         cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
