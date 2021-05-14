@@ -1,6 +1,7 @@
 package RabbitMQ;
 
 import NettyHTTP.NettyHTTPServer;
+import NettyHTTP.NettyServerHandler;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.rabbitmq.client.*;
@@ -15,10 +16,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 
@@ -77,27 +76,29 @@ public class ConsumerMQ {
                                 Method setData = service.getMethod("setData",JSONObject.class, MongoClient.class);
                                 setData.invoke(command, requestJson, finalMongoClient);
                                 JSONObject result = command.execute();
-                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-                                        .Builder()
-                                        .correlationId(properties.getCorrelationId())
-                                        .build();
-                                channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
+                                NettyServerHandler.sendMessageToActiveMQ(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
+//                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+//                                        .Builder()
+//                                        .correlationId(properties.getCorrelationId())
+//                                        .build();
+//                                channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
                                 channel.basicAck(envelope.getDeliveryTag(), false);
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-                                        .Builder()
-                                        .correlationId(properties.getCorrelationId())
-                                        .build();
+//                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+//                                        .Builder()
+//                                        .correlationId(properties.getCorrelationId())
+//                                        .build();
                                 JSONObject result = new JSONObject();
-                                result.put("Message","Invalid d7ka");
+                                result.put("Message","Invalid d7kaaaaa here consumer ");
                                 System.out.println(result.toString());
                                 try {
-                                    channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
+//                                    channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
+                                    NettyServerHandler.sendMessageToActiveMQ(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
                                     channel.basicAck(envelope.getDeliveryTag(), false);
 
-                                } catch (IOException ioException) {
-                                    ioException.printStackTrace();
+                                } catch (Exception e1) {
+                                    e1.printStackTrace();
                                 }
                             }
                         }

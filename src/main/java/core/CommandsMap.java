@@ -1,6 +1,8 @@
 package core;
 
+import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.QuestionCommands.ViewAllQuestionsCommand;
+import core.commands.UserCommands.RegisterUserCommand;
 import core.commands.UserCommands.SignupCommand;
 
 import java.util.Map;
@@ -14,7 +16,8 @@ public class CommandsMap {
         cmdMap = new ConcurrentHashMap<>();
         cmdMap.put("user/SignupCommand",SignupCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
-
+        cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
+        cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
     }
 
         public static Class<?> queryClass(String cmd) {

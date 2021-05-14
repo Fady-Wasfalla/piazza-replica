@@ -63,7 +63,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         String requestQueue = queue + "Req";
         String responseQueue = queue + "Res";
 
-//        if(validateQueueName(queueName)) {
+        if(validateQueueName(requestQueue)) {
             final String corrId = UUID.randomUUID().toString();
             sendMessageToActiveMQ(requestJson.toString(), requestQueue,corrId);
             System.out.println("Request Body : " + requestJson.toString());
@@ -97,10 +97,19 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
 
-        // }
+         }
+        else {
+            JSONObject result_error = new JSONObject();
+            result_error.put("Message","Invalid d7ka NETTYYYYYY");
+            ByteBuf b = Unpooled.copiedBuffer(result_error.toString(), CharsetUtil.UTF_8);
+            FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
+            response1.headers().set("CONTENT_TYPE", "application/json");
+            response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
+            ctx.write(response1);
+        }
     }
 
-    private void sendMessageToActiveMQ(String jsonBody, String queue, String UUID) throws IOException, TimeoutException {
+    public static void sendMessageToActiveMQ(String jsonBody, String queue, String UUID) throws IOException, TimeoutException {
         Producer P = new Producer(queue);
         P.send(jsonBody,UUID);
     }
