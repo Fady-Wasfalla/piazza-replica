@@ -6,6 +6,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.InsertOneResult;
+//import core.commands.QuestionCommands.ViewAllQuestionsCommand;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -22,72 +24,73 @@ public class mongoDB {
             return mongoClient;
         }
     }
-    public static MongoCollection<Document> getCollection(MongoClient mongoClient, String collectionName) {
+    public static MongoCollection<Document> getCollection(MongoClient mongoClient, Collections collectionName) {
         MongoDatabase database = mongoClient.getDatabase(databaseName);
-        return database.getCollection(collectionName);
+        return database.getCollection(collectionName.name());
     }
 
-    public static void create( MongoClient mongoClient, String collectionName, Document document,
-                               jedis jedis, String key) {
+    public static InsertOneResult create( MongoClient mongoClient, Collections collectionName, Document document,
+                                          jedis jedis, String key) {
         MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
-        collection.insertOne(document);
-        jedis.deleteCache(collectionName);
-        jedis.setLayeredCache(collectionName + document.get(key).toString(), key ,(document.toJson()).toString());
+        InsertOneResult created_document =  collection.insertOne(document);
+        jedis.deleteCache(collectionName.name());
+        jedis.setLayeredCache(collectionName.name() + document.get(key).toString(), key ,(document.toJson()).toString());
+        return created_document;
     }
 
-    public static Document readOne(MongoClient mongoClient, String collectionName,
-                                 Document filterDocument, jedis jedis, String key) {
-        String cached = jedis.getLayeredCache(collectionName + filterDocument.get(key).toString(), filterDocument.toString());
+    public static Document readOne(MongoClient mongoClient, Collections collectionName,
+                                   Document filterDocument, jedis jedis, String key) {
+        String cached = jedis.getLayeredCache(collectionName.name() + filterDocument.get(key).toString(), filterDocument.toString());
         if (cached != null)
             return Document.parse(cached);
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         Document document = collection.find(filterDocument).first();
         if (document != null){
-            jedis.setLayeredCache(collectionName + filterDocument.get(key).toString(), filterDocument.toString(), (document.toJson()).toString());
+            jedis.setLayeredCache(collectionName.name() + filterDocument.get(key).toString(), filterDocument.toString(), (document.toJson()).toString());
 
-        return document;
-               }
+            return document;
+        }
         return new Document();
     }
 
-    public static Document update( MongoClient mongoClient, String collectionName,
-                              Document filterDocument, Bson updateOperation, FindOneAndUpdateOptions options,
+    public static Document update( MongoClient mongoClient, Collections collectionName,
+                                   Document filterDocument, Bson updateOperation, FindOneAndUpdateOptions options,
                                    jedis jedis, String key) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         Document document =  collection.findOneAndUpdate(filterDocument, updateOperation, options);
-        jedis.deleteCache(collectionName);
-        jedis.deleteCache(collectionName + document.get(key).toString());
-        jedis.setLayeredCache(collectionName + filterDocument.get(key).toString(), filterDocument.toString(),
+        jedis.deleteCache(collectionName.name());
+        jedis.deleteCache(collectionName.name() + document.get(key).toString());
+        jedis.setLayeredCache(collectionName.name() + filterDocument.get(key).toString(), filterDocument.toString(),
                 (document.toJson()).toString());
         return document;
     }
 
-    public static void updateMany(MongoClient mongoClient , String collectionName,
+    public static void updateMany(MongoClient mongoClient , Collections collectionName,
                                   Document filterDocument, Bson updateOperation, UpdateOptions options, jedis jedis) {
         MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
-        Set<String> cacheKeys = jedis.returnKeys(collectionName + "*");
+        Set<String> cacheKeys = jedis.returnKeys(collectionName.name() + "*");
         Iterator<String> cacheKeysIterator = cacheKeys.iterator();
         while(cacheKeysIterator.hasNext())
             jedis.deleteCache(cacheKeysIterator.next());
         collection.updateMany(filterDocument, updateOperation, options);
     }
 
-    public static Document deleteOne(MongoClient mongoClient, String collectionName,
-                                 Document filterDocument, jedis jedis, String key) {
+    public static Document deleteOne(MongoClient mongoClient, Collections collectionName,
+                                     Document filterDocument, jedis jedis, String key) {
         MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
         Document document = collection.findOneAndDelete(filterDocument);
         if(document != null) {
-            jedis.deleteCache(collectionName);
-            jedis.deleteCache(collectionName + document.get(key).toString());
+            jedis.deleteCache(collectionName.name());
+            jedis.deleteCache(collectionName.name() + document.get(key).toString());
             return document;
         }
         return  new Document();
     }
 
-    public static void deleteMany(MongoClient mongoClient, String collectionName,
+    public static void deleteMany(MongoClient mongoClient, Collections collectionName,
                                   Document filterDocument, jedis jedis) {
         MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
-        Set<String> cacheKeys = jedis.returnKeys(collectionName + "*");
+        Set<String> cacheKeys = jedis.returnKeys(collectionName.name() + "*");
         Iterator<String> cacheKeysIterator = cacheKeys.iterator();
         while(cacheKeysIterator.hasNext())
             jedis.deleteCache(cacheKeysIterator.next());
@@ -123,6 +126,7 @@ public class mongoDB {
             //           { type: "homework",
             //             score: 27 }
             //                          ]
+
 //            create(mongo_client, "sample_training", "grades", student , jedis, "_id");
 //             returns all instances with student_id > 1002
 //            Document x = readOne(mongo_client, "sample_training", "grades",
@@ -139,6 +143,21 @@ public class mongoDB {
 //            System.out.println(deleted_document);
 //            deleteMany(mongo_client, "sample_training", "grades",
 //                    new Document("student_id", new Document("$gte", 10000)), jedis);
+//            create(mongoClient, "grades", student);
+//             returns all instances with student_id > 1002
+//             ArrayList x = read(mongoClient,"grades",                 //
+            //  new Document("student_id", new Document("$gte",10002)));     //
+
+            // updates the first instance of student_id: 10001
+            // update options like set ex: Bson updateOperation = set("comment", "You should learn MongoDB!");
+
+            //update(mongoClient, , new Document("student_id",10001),
+            //  set("message", "testing"), new UpdateOptions());
+            // delete all instances with student_id > 1001
+            // deleteMany(mongoClient, "grades",
+            //   new Document("student_id", new Document("$gte",10001)));
+
+//            ViewAllQuestionsCommand.viewQuestions("1");
         }
     }
 }
