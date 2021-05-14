@@ -146,7 +146,7 @@ public class PostgreSQL {
     public static void main(String[] args) throws SQLException {
         String url = "jdbc:postgresql://localhost/postgres";
         String user = "postgres";
-        String password = "supermina";
+        String password = "";
         PostgreSQL postgres = new PostgreSQL(url, user, password);
         postgres.create_user_table();
 //          Creating a User
