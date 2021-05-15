@@ -1,8 +1,14 @@
 package core;
 
 import core.commands.CourseCommands.CreateCourseCommand;
+import core.commands.CourseCommands.DeleteCourseCommand;
+import core.commands.CourseCommands.ViewCourseCommand;
+import core.commands.PollCommands.CreatePollCommand;
+import core.commands.PollCommands.DeleteCoursePollsCommand;
 import core.commands.QuestionCommands.CreateQuestionCommand;
+import core.commands.QuestionCommands.DeleteCourseQuestionsCommand;
 import core.commands.QuestionCommands.ViewAllQuestionsCommand;
+import core.commands.UserCommands.DeleteCourseRegistersCommand;
 import core.commands.UserCommands.RegisterUserCommand;
 import core.commands.UserCommands.SignupCommand;
 
@@ -16,10 +22,21 @@ public class CommandsMap {
     public static void instantiate() {
         cmdMap = new ConcurrentHashMap<>();
         cmdMap.put("user/SignupCommand",SignupCommand.class);
-        cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
-        cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
+        cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
+
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
+        cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
+        cmdMap.put("question/DeleteCourseQuestionsCommand", DeleteCourseQuestionsCommand.class);
+
+        cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
+        cmdMap.put("course/ViewCourseCommand", ViewCourseCommand.class);
+        cmdMap.put("course/DeleteCourseCommand", DeleteCourseCommand.class);
+
+        cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
+        cmdMap.put("poll/DeleteCoursePollsCommand", DeleteCoursePollsCommand.class);
+
+
     }
 
         public static Class<?> queryClass(String cmd) {

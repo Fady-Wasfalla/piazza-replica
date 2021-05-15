@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import core.commands.QuestionCommands.ViewAllQuestionsCommand;
 import org.bson.Document;
@@ -46,15 +47,15 @@ public class mongoDB {
         collection.updateMany(filterDocument, updateOperation, options);
     }
 
-    public static void deleteOne(MongoClient mongoClient, Collections collectionName,
+    public static DeleteResult deleteOne(MongoClient mongoClient, Collections collectionName,
                                  Document filterDocument) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
-        collection.deleteOne(filterDocument);
+        return collection.deleteOne(filterDocument);
     }
 
-    public static void deleteMany(MongoClient mongoClient, Collections collectionName, Document filterDocument) {
+    public static DeleteResult deleteMany(MongoClient mongoClient, Collections collectionName, Document filterDocument) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
-        collection.deleteMany(filterDocument);
+        return collection.deleteMany(filterDocument);
     }
 
     public static void main(String[] args) {
