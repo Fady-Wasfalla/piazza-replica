@@ -1,4 +1,4 @@
-package NettyHTTP;
+package ServiceNettyServer;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -14,12 +14,20 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 
-public class NettyHTTPServer {
+public class ServiceNettyHTTPServer {
 
     public static ConnectionFactory factory;
     public static Connection connection;
-    public  static com.rabbitmq.client.Channel channel;
+    public static com.rabbitmq.client.Channel channel;
 
+    public int port;
+    public String service;
+
+    public ServiceNettyHTTPServer(int port , String service){
+        this.port=port;
+        this.service=service;
+        ServiceNettyHTTPServer.start(port);
+    }
 
     public static void start(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -47,7 +55,6 @@ public class NettyHTTPServer {
     }
 
     public static void instantiateChannel(){
-        System.out.println("Service Server is running");
         try {
             factory = new ConnectionFactory();
             factory.setHost("localhost");
@@ -60,7 +67,4 @@ public class NettyHTTPServer {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        NettyHTTPServer.start(8080);
-    }
 }

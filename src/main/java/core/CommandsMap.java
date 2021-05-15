@@ -1,5 +1,6 @@
 package core;
 
+import Services.AddCommand;
 import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.QuestionCommands.ViewAllQuestionsCommand;
 import core.commands.UserCommands.RegisterUserCommand;
@@ -18,6 +19,7 @@ public class CommandsMap {
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
         cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
+        cmdMap.put("command/AddCommand", AddCommand.class);
     }
 
         public static Class<?> queryClass(String cmd) {
