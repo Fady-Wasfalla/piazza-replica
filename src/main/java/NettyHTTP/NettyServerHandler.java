@@ -63,7 +63,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         String requestQueue = queue + "Req";
         String responseQueue = queue + "Res";
 
-        if(validateQueueName(requestQueue)) {
+        if(validateQueueName(queue)) {
             final String corrId = UUID.randomUUID().toString();
             sendMessageToActiveMQ(requestJson.toString(), requestQueue,corrId);
             System.out.println("Request Body : " + requestJson.toString());
@@ -100,7 +100,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
          }
         else {
             JSONObject result_error = new JSONObject();
-            result_error.put("Message","Invalid d7ka NETTYYYYYY");
+            result_error.put("Message","Invalid Queue Name");
             ByteBuf b = Unpooled.copiedBuffer(result_error.toString(), CharsetUtil.UTF_8);
             FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
             response1.headers().set("CONTENT_TYPE", "application/json");
@@ -116,7 +116,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
     public boolean validateQueueName(String queue){
         Dotenv dotenv = Dotenv.load();
-        String strlist = dotenv.get("queuesReq");
+        String strlist = dotenv.get("queues");
         return Arrays.asList(strlist.split(",")).contains(queue);
     }
 
@@ -142,7 +142,6 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
     }
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-//        ctx.close();
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
 
