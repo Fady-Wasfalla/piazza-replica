@@ -38,6 +38,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
             JSONObject instance = new JSONObject(doc.toJson().toString());
             result.append("question", instance);
         }
+
         
         return result;
     }
