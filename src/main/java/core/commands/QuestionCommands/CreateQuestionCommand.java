@@ -29,7 +29,9 @@ public class CreateQuestionCommand extends CommandDP {
                 "description",
                 "anonymous",
                 "private",
-                "media"
+                "media",
+                "likes",
+                "answers"
         };
 
         if (!validateJSON(schema, data)) {

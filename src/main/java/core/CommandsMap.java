@@ -6,10 +6,7 @@ import core.commands.CourseCommands.ViewCourseCommand;
 import core.commands.CourseCommands.ViewUserCoursesCommand;
 import core.commands.PollCommands.CreatePollCommand;
 import core.commands.PollCommands.DeleteCoursePollsCommand;
-import core.commands.QuestionCommands.CreateQuestionCommand;
-import core.commands.QuestionCommands.DeleteCourseQuestionsCommand;
-import core.commands.QuestionCommands.SearchQuestionsCommand;
-import core.commands.QuestionCommands.ViewAllQuestionsCommand;
+import core.commands.QuestionCommands.*;
 import core.commands.UserCommands.DeleteCourseRegistersCommand;
 import core.commands.UserCommands.RegisterUserCommand;
 import core.commands.UserCommands.SignupCommand;
@@ -32,6 +29,7 @@ public class CommandsMap {
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
         cmdMap.put("question/DeleteCourseQuestionsCommand", DeleteCourseQuestionsCommand.class);
         cmdMap.put("question/SearchQuestionsCommand", SearchQuestionsCommand.class);
+        cmdMap.put("question/AnswerQuestionCommand", AnswerQuestionCommand.class);
 
         cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("course/ViewCourseCommand", ViewCourseCommand.class);

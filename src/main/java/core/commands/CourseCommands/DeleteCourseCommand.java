@@ -56,7 +56,6 @@ public class DeleteCourseCommand extends CommandDP {
         registerDeleteResquest.put("body", registerBody);
         
         if(deletedCount == 1){
-            System.out.println("Monica is ModelZZZZZZZZZZZZ!");
             result.put("courseDeletedCount", deletedCount);
 
             String pollCorrelationId = UUID.randomUUID().toString();
