@@ -18,7 +18,7 @@ import java.util.*;
 
 public class mongoDB {
 
-    final static String databaseName ="sample_training";
+    final static String databaseName ="piazza";
 
     public static MongoClient createMongoClient(String connectionString){
         try (MongoClient mongoClient = MongoClients.create(connectionString)) {
@@ -52,13 +52,12 @@ public class mongoDB {
         }
         return new Document();
     }
-    public static ArrayList<Document> readAll(MongoClient mongoClient, String collectionName,
+    public static ArrayList<Document> readAll(MongoClient mongoClient, Collections collectionName,
                                               Document filterDocument,Document projection, Bson sort, int skip,int limit, jedis jedis){
 //        ArrayList<Document> cached_documents = Document.parse(jedis.getLayeredCache(collectionName, filterDocument.toString()));
 //        if(cached_documents != null)
 //            return  cached_documents;
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        MongoCollection<Document> collection = database.getCollection(collectionName);
+        MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         ArrayList<Document> documents = collection.find(filterDocument).projection(projection).sort(sort)
                 .skip(skip).limit(limit).into(new ArrayList<>());
         return documents;
