@@ -36,7 +36,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
 
         for (Document doc : queryResults) {
             JSONObject instance = new JSONObject(doc.toJson().toString());
-            result.append("courses", instance);
+            result.append("question", instance);
         }
         
         return result;

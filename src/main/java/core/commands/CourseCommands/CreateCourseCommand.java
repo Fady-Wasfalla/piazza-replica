@@ -52,7 +52,7 @@ public class CreateCourseCommand extends CommandDP {
         registerRequest.put("function", "RegisterUserCommand");
 
         JSONObject body = new JSONObject();
-        body.put("courseId", courseId);
+        body.put("courseId", courseId.asObjectId().getValue().toString());
         body.put("userName",data.getString("userName"));
         body.put("role", "instructor");
         
