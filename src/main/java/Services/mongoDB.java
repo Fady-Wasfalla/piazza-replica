@@ -5,19 +5,20 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.InsertOneResult;
 //import core.commands.QuestionCommands.ViewAllQuestionsCommand;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-
+import com.mongodb.client.model.Sorts.*;
 import java.util.*;
 
 
 public class mongoDB {
 
-    final static String databaseName ="piazza";
+    final static String databaseName ="sample_training";
 
     public static MongoClient createMongoClient(String connectionString){
         try (MongoClient mongoClient = MongoClients.create(connectionString)) {
@@ -47,12 +48,21 @@ public class mongoDB {
         Document document = collection.find(filterDocument).first();
         if (document != null){
             jedis.setLayeredCache(collectionName.name() + filterDocument.get(key).toString(), filterDocument.toString(), (document.toJson()).toString());
-
             return document;
         }
         return new Document();
     }
-
+    public static ArrayList<Document> readAll(MongoClient mongoClient, String collectionName,
+                                              Document filterDocument,Document projection, Bson sort, int skip,int limit, jedis jedis){
+//        ArrayList<Document> cached_documents = Document.parse(jedis.getLayeredCache(collectionName, filterDocument.toString()));
+//        if(cached_documents != null)
+//            return  cached_documents;
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
+        MongoCollection<Document> collection = database.getCollection(collectionName);
+        ArrayList<Document> documents = collection.find(filterDocument).projection(projection).sort(sort)
+                .skip(skip).limit(limit).into(new ArrayList<>());
+        return documents;
+    }
     public static Document update( MongoClient mongoClient, Collections collectionName,
                                    Document filterDocument, Bson updateOperation, FindOneAndUpdateOptions options,
                                    jedis jedis, String key) {
@@ -158,6 +168,13 @@ public class mongoDB {
             //   new Document("student_id", new Document("$gte",10001)));
 
 //            ViewAllQuestionsCommand.viewQuestions("1");
+//            read all operator
+//            ArrayList<Document> x = readAll(mongo_client,"grades",new Document("student_id", new Document("$gte",1000)),
+//                    new Document("scores",1).append("_id",0) , Sorts.ascending("scores"), 10, 5 ,jedis);
+//            Iterator it = x.iterator();
+//            System.out.println(x);
+//            while(it.hasNext())
+//                System.out.println(it.next());
         }
     }
 }
