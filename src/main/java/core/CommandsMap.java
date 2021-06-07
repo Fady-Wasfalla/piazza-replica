@@ -6,6 +6,7 @@ import core.commands.CourseCommands.ViewCourseCommand;
 import core.commands.CourseCommands.ViewUserCoursesCommand;
 import core.commands.PollCommands.CreatePollCommand;
 import core.commands.PollCommands.DeleteCoursePollsCommand;
+import core.commands.PollCommands.ViewAllPollsCommand;
 import core.commands.QuestionCommands.*;
 import core.commands.UserCommands.DeleteCourseRegistersCommand;
 import core.commands.UserCommands.RegisterUserCommand;
@@ -37,6 +38,9 @@ public class CommandsMap {
 
         cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
         cmdMap.put("poll/DeleteCoursePollsCommand", DeleteCoursePollsCommand.class);
+        cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
+//        cmdMap.put("poll/DeleteCoursePollsCommand", ViewAllPollsCommand.class);
+
 
 
 
