@@ -1,5 +1,4 @@
-package core.commands.QuestionCommands;
-import Services.Collections;
+package Services;
 import Services.mongoDB;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -18,13 +17,14 @@ public class ViewAllQuestionsCommand extends CommandDP {
         JSONObject result = new JSONObject();
 
         if(!this.data.keySet().contains("courseId") || !(this.data.get("courseId") instanceof String)) {
-            result.put("error", "invalid request");
+            result.put("error UPDATED5 HHHH", "invalid request");
             return result;
         }
 
         String courseId = this.data.getString("courseId");
 
-        ArrayList<Document> queryResults = mongoDB.read(this.mongoClient, Collections.question,
+        ArrayList<Document> queryResults = mongoDB.read(this.mongoClient,
+                "questions",
                 new Document("courseId", new ObjectId(courseId)));
 
         if(queryResults.isEmpty()) {

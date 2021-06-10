@@ -1,7 +1,9 @@
-package NettyHTTP;
+package ServiceNettyServer;
 
+import NettyHTTP.NettyHTTPServer;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import core.CommandsMap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -14,14 +16,23 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 
-public class NettyHTTPServer {
+public class ServiceNettyHTTPServer {
 
     public static ConnectionFactory factory;
     public static Connection connection;
-    public  static com.rabbitmq.client.Channel channel;
+    public static com.rabbitmq.client.Channel channel;
 
+    public int port;
+    public String service;
+    public CommandsMap cmdMap;
 
-    public static void start(int port) {
+    public ServiceNettyHTTPServer(int port, String service, CommandsMap cmdMap){
+        this.port=port;
+        this.service=service;
+        this.cmdMap = cmdMap;
+    }
+
+    public void start() {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -29,11 +40,11 @@ public class NettyHTTPServer {
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new HTTPServerInitializer());
+                    .childHandler(new HTTPServerInitializer(cmdMap));
 //            b.option(ChannelOption.SO_KEEPALIVE, true);
             Channel ch = b.bind(port).sync().channel();
 
-            System.err.println("Server is listening on http://127.0.0.1:" + port + '/');
+            System.err.println(service + " Service server is listening on http://127.0.0.1:" + port + '/');
 
             ch.closeFuture().sync();
 
@@ -47,7 +58,6 @@ public class NettyHTTPServer {
     }
 
     public static void instantiateChannel(){
-        System.out.println("Main Server is running");
         try {
             factory = new ConnectionFactory();
             factory.setHost("localhost");
@@ -59,8 +69,8 @@ public class NettyHTTPServer {
             e.printStackTrace();
         }
     }
-
     public static void main(String[] args) throws Exception {
-        NettyHTTPServer.start(8080);
+//        ServiceNettyServerHandler x = new ServiceNettyServerHandler();
     }
+
 }
