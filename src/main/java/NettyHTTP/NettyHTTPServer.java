@@ -47,7 +47,7 @@ public class NettyHTTPServer {
     }
 
     public static void instantiateChannel(){
-        System.out.println("Service Server is running");
+        System.out.println("Main Server is running");
         try {
             factory = new ConnectionFactory();
             factory.setHost("localhost");

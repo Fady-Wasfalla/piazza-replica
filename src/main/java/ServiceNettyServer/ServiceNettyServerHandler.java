@@ -27,7 +27,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 
-public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
+public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
 
     private HttpRequest request;
@@ -35,6 +35,11 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
     private String requestBody;
     private String httpRoute;
     volatile String responseBody;
+    private CommandsMap cmdMap;
+
+    public ServiceNettyServerHandler(CommandsMap cmdMap){
+        this.cmdMap=cmdMap;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -64,7 +69,6 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
     private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{   
         JSONObject requestJson = new JSONObject(getRequestBody());
-        CommandsMap.instantiate();
         Dotenv dotenv = Dotenv.load();
         MongoClient mongoClient = null;
         try  {
@@ -75,10 +79,13 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
         String function = requestJson.getString("function");
         String serviceName = requestJson.getString("service");
-        CommandDP command = (CommandDP) CommandsMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
+        CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
         Class service = command.getClass();
         Method setData = service.getMethod("setData",JSONObject.class, MongoClient.class);
         setData.invoke(command, requestJson,mongoClient);
+        Method setCmd = service.getMethod("setCmd",CommandsMap.class);
+        setCmd.invoke(command, cmdMap);
+//        cmdMap.getAllClasses();
         JSONObject resultCommand = command.execute();
         if(true) {
             if(ServiceNettyHTTPServer.channel==null)

@@ -19,13 +19,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-public class AddCommand extends CommandDP {
+public class UpdateCommand extends CommandDP {
 
     public CommandsMap cmdMap;
 
     public void setCmd(CommandsMap cmdMap){
         this.cmdMap = cmdMap;
     }
+
     @Override
     public JSONObject execute() {
         JSONObject result = new JSONObject();
@@ -41,6 +42,9 @@ public class AddCommand extends CommandDP {
         String queue = (String) this.data.get("queue");
 
         try{
+            String fullPath = filePath+"/"+parentPackage+"/"+className;
+            Files.deleteIfExists(Paths.get(fullPath));
+            Files.deleteIfExists(Paths.get(String.valueOf(fullPath).replace("src/main/java","target/classes").replace(".java",".class")));
             File root = new File(filePath);
             File sourceFile = new File(root, parentPackage+"/"+className);
             sourceFile.getParentFile().mkdirs();
@@ -75,8 +79,9 @@ public class AddCommand extends CommandDP {
 
             Class<?> newClass = Class.forName("Services.ViewAllQuestionsCommand", true, classLoader);
             String key = queue+"/"+className.split("\\.java")[0];
+            cmdMap.cmdMap.remove(key);
             cmdMap.replace(key,newClass);
-            System.out.println("ADD");
+            System.out.println("UPDATE");
             cmdMap.getAllClasses();
         }catch (Exception e){
             System.out.println(e.toString());

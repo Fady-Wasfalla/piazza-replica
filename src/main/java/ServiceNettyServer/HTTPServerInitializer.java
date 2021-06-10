@@ -1,5 +1,6 @@
 package ServiceNettyServer;
 
+import core.CommandsMap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -12,6 +13,11 @@ import io.netty.handler.codec.http.cors.CorsHandler;
 
 
 public class HTTPServerInitializer extends ChannelInitializer<SocketChannel> {
+    public CommandsMap cmdMap;
+
+    public HTTPServerInitializer(CommandsMap cmdMap){
+        this.cmdMap = cmdMap;
+    }
     @Override
     protected void initChannel(SocketChannel arg0) {
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
@@ -22,6 +28,6 @@ public class HTTPServerInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast("decoder", new HttpRequestDecoder());
         p.addLast("encoder", new HttpResponseEncoder());
         p.addLast(new CorsHandler(corsConfig));
-        p.addLast(new NettyServerHandler());
+        p.addLast(new ServiceNettyServerHandler(cmdMap));
     }
 }
