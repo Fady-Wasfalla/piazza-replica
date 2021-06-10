@@ -28,12 +28,12 @@ public class ConsumerMQ {
 
 
     public static void main(String[] args) throws Exception {
-        String microservice = "question";
-//        if(args.length>0){
-//            microservice = args[0];
-//        }else{
-//            throw new Exception("Enter Microservice Name");
-//        }
+        String microservice = "";
+        if(args.length>0){
+            microservice = args[0];
+        }else{
+            throw new Exception("Enter Microservice Name");
+        }
 
         Dotenv dotenv = Dotenv.load();
         String strlist = dotenv.get("queuesReq");
