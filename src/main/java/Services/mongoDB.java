@@ -5,8 +5,9 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
-import core.commands.QuestionCommands.ViewAllQuestionsCommand;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -34,27 +35,27 @@ public class mongoDB {
         return collection.find(filterDocument).into(new ArrayList<>());
     }
 
-    public static void update(MongoClient mongoClient, Collections collectionName,
-                              Document filterDocument, Bson updateOperation, UpdateOptions options) {
+    public static UpdateResult update(MongoClient mongoClient, Collections collectionName,
+                                      Document filterDocument, Bson updateOperation, UpdateOptions options) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
-        collection.updateOne(filterDocument, updateOperation, options);
+        return collection.updateOne(filterDocument, updateOperation, options);
     }
 
-    public static void updateMany(MongoClient mongoClient, Collections collectionName,
+    public static UpdateResult updateMany(MongoClient mongoClient, Collections collectionName,
                                   Document filterDocument, Bson updateOperation, UpdateOptions options) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
-        collection.updateMany(filterDocument, updateOperation, options);
+        return collection.updateMany(filterDocument, updateOperation, options);
     }
 
-    public static void deleteOne(MongoClient mongoClient, Collections collectionName,
+    public static DeleteResult deleteOne(MongoClient mongoClient, Collections collectionName,
                                  Document filterDocument) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
-        collection.deleteOne(filterDocument);
+        return collection.deleteOne(filterDocument);
     }
 
-    public static void deleteMany(MongoClient mongoClient, Collections collectionName, Document filterDocument) {
+    public static DeleteResult deleteMany(MongoClient mongoClient, Collections collectionName, Document filterDocument) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName.name());
-        collection.deleteMany(filterDocument);
+        return collection.deleteMany(filterDocument);
     }
 
     public static void main(String[] args) {
@@ -90,8 +91,8 @@ public class mongoDB {
             // updates the first instance of student_id: 10001
             // update options like set ex: Bson updateOperation = set("comment", "You should learn MongoDB!");
 
-           //update(mongoClient, , new Document("student_id",10001),
-                //  set("message", "testing"), new UpdateOptions());
+           update(mongoClient,Collections.question , new Document("student_id",10001),
+                  set("message", "testing"), new UpdateOptions());
            // delete all instances with student_id > 1001
             // deleteMany(mongoClient, "grades",
               //   new Document("student_id", new Document("$gte",10001)));
