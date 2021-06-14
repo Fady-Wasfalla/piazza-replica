@@ -17,25 +17,29 @@ public class ViewAllQuestionsCommand extends CommandDP {
     public JSONObject execute() {
         JSONObject result = new JSONObject();
 
-        if(!this.data.keySet().contains("courseId") || !(this.data.get("courseId") instanceof String)) {
-            result.put("error", "invalid request");
+        String[] schema = {"courseId"};
+        
+        if(!validateJSON(schema, data)) {
+            result.put("error", "invalid request parameters");
             return result;
         }
-
+        
         String courseId = this.data.getString("courseId");
 
         ArrayList<Document> queryResults = mongoDB.read(this.mongoClient, Collections.question,
-                new Document("courseId", new ObjectId(courseId)));
+                new Document("courseId", courseId));
 
         if(queryResults.isEmpty()) {
-            result.put("courses", new ArrayList<JSONObject>());
+            result.put("[]", "No questions to show for this course");
             return result;
         }
 
         for (Document doc : queryResults) {
             JSONObject instance = new JSONObject(doc.toJson().toString());
-            result.append("courses", instance);
+            result.append("question", instance);
         }
+
+        
         return result;
     }
 }

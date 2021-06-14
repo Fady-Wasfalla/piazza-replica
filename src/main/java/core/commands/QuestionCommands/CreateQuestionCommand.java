@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 public class CreateQuestionCommand extends CommandDP {
 
@@ -28,7 +29,9 @@ public class CreateQuestionCommand extends CommandDP {
                 "description",
                 "anonymous",
                 "private",
-                "media"
+                "media",
+                "likes",
+                "answers"
         };
 
         if (!validateJSON(schema, data)) {
@@ -37,6 +40,9 @@ public class CreateQuestionCommand extends CommandDP {
         }
 
         this.data.put("createdAt", new Date().getTime() + "");
+
+        String description = this.data.getString("description").toLowerCase(Locale.ROOT);
+        this.data.put("description",description);
 
         Document questionDocument = Document.parse(data.toString());
 
