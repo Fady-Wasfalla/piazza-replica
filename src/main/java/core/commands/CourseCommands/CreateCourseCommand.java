@@ -23,6 +23,9 @@ public class CreateCourseCommand extends CommandDP {
 
     @Override
     public JSONObject execute() {
+
+        System.out.println("from create course" + this.user);
+
         String[] schema = {
                 "name",
                 "userName",
@@ -61,6 +64,7 @@ public class CreateCourseCommand extends CommandDP {
         body.put("createdAt", this.data.get("createdAt"));
 
         registerRequest.put("body", body);
+        registerRequest.put("user", user);
 
         try{
             NettyServerHandler.sendMessageToActiveMQ(registerRequest.toString(),requestQueue,correlationId);
