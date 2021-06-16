@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class CreatePollCommand extends CommandDP {
@@ -37,7 +38,33 @@ public class CreatePollCommand extends CommandDP {
                 .getInsertedId();
 
         result.put("pollId", pollId.asObjectId().getValue().toString());
+
+        sendNotification(pollId, data.get("courseId"));
+
         return result;
     }
+
+    private void sendNotification(BsonValue pollId, Object courseId) {
+
+        Document filterDocument = new Document("role", "student").append("course",courseId.toString()).append("banned","false");
+        ArrayList<Document> students = mongoDB.read(mongoClient,Collections.register,filterDocument);
+
+        for (Document d:students) {
+
+            String username = d.getString("username");
+            JSONObject notification = new JSONObject();
+            notification.put("userName",username);
+            notification.put("description","An instructor posted a new poll");
+            notification.put("model",pollId.asObjectId().getValue().toString());
+            notification.put("onModel","Poll");
+
+            Document notificationDocument = Document.parse(notification.toString());
+
+            BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument).getInsertedId();
+        }
+
+
+    }
+
 
 }
