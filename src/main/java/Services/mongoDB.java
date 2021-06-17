@@ -70,15 +70,15 @@ public class mongoDB {
             JSONObject notification = new JSONObject();
             notification.put("userName","");
             notification.put("description","");
-            notification.put("model","123");
+            notification.put("model","567");
             notification.put("onModel","Poll");
 
             Document notificationDocument = Document.parse(notification.toString());
-//            BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument).getInsertedId();
+            BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument).getInsertedId();
 
             Document filterDocument = new Document("onModel", "Poll").append("_id","60c7b92f9939255235a2e2e9");
 
-            ArrayList x = read(mongoClient,Collections.notification,filterDocument);
+            ArrayList x = read(mongoClient,Collections.notification,new Document());
             System.out.println(x);
 
 //            Document student = new Document("_id", new ObjectId());

@@ -39,19 +39,19 @@ public class CreatePollCommand extends CommandDP {
 
         result.put("pollId", pollId.asObjectId().getValue().toString());
 
-        sendNotification(pollId, data.get("courseId"));
+        sendNotification(pollId, data.get("courseId").toString());
 
         return result;
     }
 
-    private void sendNotification(BsonValue pollId, Object courseId) {
+    private void sendNotification(BsonValue pollId, String courseId) {
 
-        Document filterDocument = new Document("role", "student").append("course",courseId.toString()).append("banned","false");
+        Document filterDocument = new Document("role", "student").append("courseId",courseId).append("banned",false);
         ArrayList<Document> students = mongoDB.read(mongoClient,Collections.register,filterDocument);
 
         for (Document d:students) {
 
-            String username = d.getString("username");
+            String username = d.getString("userName");
             JSONObject notification = new JSONObject();
             notification.put("userName",username);
             notification.put("description","An instructor posted a new poll");

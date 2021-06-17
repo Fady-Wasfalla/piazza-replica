@@ -52,19 +52,19 @@ public class CreateQuestionCommand extends CommandDP {
 
         result.put("questionId", questionId.asObjectId().getValue().toString());
         
-        sendNotification(questionId, data.get("courseId"));
+        sendNotification(questionId, data.get("courseId").toString());
         
         return result;
     }
 
-    private void sendNotification(BsonValue questionId, Object courseId) {
+    private void sendNotification(BsonValue questionId, String courseId) {
 
-        Document filterDocument = new Document("role", "instructor").append("course",courseId.toString());
+        Document filterDocument = new Document("role", "instructor").append("courseId",courseId);
         ArrayList<Document> instructors = mongoDB.read(mongoClient,Collections.register,filterDocument);
 
         for (Document d:instructors) {
 
-            String username = d.getString("username");
+            String username = d.getString("userName");
             JSONObject notification = new JSONObject();
             notification.put("userName",username);
             notification.put("description","A student asked a new question");
