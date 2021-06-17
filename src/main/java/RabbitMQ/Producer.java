@@ -1,11 +1,11 @@
 package RabbitMQ;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.concurrent.TimeoutException;
 
 public class Producer {
@@ -26,8 +26,15 @@ public class Producer {
         this.connection = connection;
     }
 
-    public void send(String message) throws IOException, TimeoutException {
-        this.channel.basicPublish("", this.queue, null, message.getBytes("UTF-8"));
+    public void send(String message, String corrId) throws IOException, TimeoutException {
+        String responseQueue = this.queue.split("Req",0)[0]+"Res";
+        System.out.println(this.queue+" =====> "+message);
+        AMQP.BasicProperties props = new AMQP.BasicProperties
+                .Builder()
+                .correlationId(corrId)
+                .replyTo(responseQueue)
+                .build();
+        this.channel.basicPublish("", this.queue, props, message.getBytes("UTF-8"));
         this.channel.close();
         this.connection.close();
     }

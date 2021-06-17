@@ -1,33 +1,22 @@
 package core.commands.UserCommands;
-import core.Command;
+import RabbitMQ.Producer;
+import com.mongodb.client.MongoClient;
+import core.CommandDP;
 import org.json.JSONObject;
 
-import java.sql.SQLException;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-public class SignupCommand extends Command {
+public class SignupCommand extends CommandDP {
 
 
     @Override
-    public void execute() {
+    public JSONObject execute() {
         System.out.println(this.data.toString());
-
-        if(this.data.getString("firstName")!="" && this.data.getString("lastName")!="") {
-            try {
-                ((UserDAL)dal).createUser(this.data);
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-                System.out.println(throwables);
-            }
-        }
-        else {
-            System.out.println("else");
-        }
+        JSONObject result = new JSONObject();
+        result.put("response",this.data.toString());
+        return result;
     }
 
-    @Override
-    public void setData(JSONObject data, Object dal) {
-        this.data = data;
-        this.dal = dal;
 
-    }
 }

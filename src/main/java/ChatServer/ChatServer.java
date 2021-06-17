@@ -21,6 +21,7 @@ public class ChatServer {
 
     public ChatServer(int port){
         ChannelFuture future = start(new InetSocketAddress(port));
+        System.err.println("Server is listening on http://127.0.0.1:" + port + '/');
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -53,18 +54,6 @@ public class ChatServer {
     }
 
     public static void main(String[] args) throws Exception {
-
-//        int port = 8081;
-//        final ChatServer endpoint = new ChatServer();
-//        ChannelFuture future = endpoint.start(new InetSocketAddress(port));
-//        Runtime.getRuntime().addShutdownHook(new Thread() {
-//            @Override
-//            public void run() {
-//                endpoint.destroy();
-//            }
-//        });
-//        future.channel().closeFuture().syncUninterruptibly();
-
         new ChatServer(8081);
     }
 }
