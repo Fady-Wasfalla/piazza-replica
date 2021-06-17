@@ -1,5 +1,6 @@
 package core.commands.PollCommands;
 
+import Notifications.Notifications;
 import Services.Collections;
 import Services.mongoDB;
 import core.CommandDP;
@@ -57,10 +58,24 @@ public class CreatePollCommand extends CommandDP {
             notification.put("description","An instructor posted a new poll");
             notification.put("model",pollId.asObjectId().getValue().toString());
             notification.put("onModel","Poll");
+            notification.put("createdAt", new Date().getTime() + "");
 
             Document notificationDocument = Document.parse(notification.toString());
 
             BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument).getInsertedId();
+
+            Document tokenFilterDocument = new Document("userName", username);
+            ArrayList<Document> token = mongoDB.read(mongoClient, Collections.token, tokenFilterDocument);
+            if(token.size()>0){
+                Notifications notify = new Notifications();
+                try {
+                    notify.notify(token.get(0).getString("token"),"An instructor posted a new poll");
+//                    notify.notify("d3-GpfzqP5WOaJBfZB05yP:APA91bFOtEuWyXTvYcSZQI0eWhTu48IuncorBWpLyHXVdUoUMFt8d7lR5OudjOH2RiUjch47obFj_G4tDGTRTBmfCZhNzkNCLce_KhWJnhDD-5wglEJdThCS4Ps53KCpA_qGRjbwn0SP","A student asked a new question");
+
+                } catch (Exception e) {
+
+                }
+            }
         }
 
 

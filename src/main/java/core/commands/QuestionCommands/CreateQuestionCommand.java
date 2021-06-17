@@ -1,5 +1,6 @@
 package core.commands.QuestionCommands;
 
+import Notifications.Notifications;
 import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.MongoClient;
@@ -12,6 +13,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
@@ -70,10 +72,24 @@ public class CreateQuestionCommand extends CommandDP {
             notification.put("description","A student asked a new question");
             notification.put("model",questionId.asObjectId().getValue().toString());
             notification.put("onModel","Question");
+            notification.put("createdAt", new Date().getTime() + "");
 
             Document notificationDocument = Document.parse(notification.toString());
 
             BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument).getInsertedId();
+
+            Document tokenFilterDocument = new Document("userName", username);
+            ArrayList<Document> token = mongoDB.read(mongoClient, Collections.token, tokenFilterDocument);
+            if(token.size()>0){
+                Notifications notify = new Notifications();
+                try {
+                    notify.notify(token.get(0).getString("token"),"A student asked a new question");
+//                    notify.notify("d3-GpfzqP5WOaJBfZB05yP:APA91bFOtEuWyXTvYcSZQI0eWhTu48IuncorBWpLyHXVdUoUMFt8d7lR5OudjOH2RiUjch47obFj_G4tDGTRTBmfCZhNzkNCLce_KhWJnhDD-5wglEJdThCS4Ps53KCpA_qGRjbwn0SP","A student asked a new question");
+
+                } catch (Exception e) {
+
+                }
+            }
         }
         
 

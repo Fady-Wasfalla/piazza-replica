@@ -10,6 +10,7 @@ import core.commands.PollCommands.ViewAllPollsCommand;
 import core.commands.QuestionCommands.*;
 import core.commands.UserCommands.DeleteCourseRegistersCommand;
 import core.commands.UserCommands.RegisterUserCommand;
+import core.commands.UserCommands.SetNotificationTokenCommand;
 import core.commands.UserCommands.SignupCommand;
 
 import java.util.Map;
@@ -25,6 +26,7 @@ public class CommandsMap {
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
         cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
         cmdMap.put("user/ViewUserCoursesCommand", ViewUserCoursesCommand.class);
+        cmdMap.put("user/SetNotificationTokenCommand", SetNotificationTokenCommand.class);
 
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
