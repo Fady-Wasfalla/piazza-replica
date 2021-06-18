@@ -21,6 +21,7 @@ public class CreatePollCommand extends CommandDP {
                 "userName",
                 "options",
                 "expiryDate",
+                "title"
         };
 
         if (!validateJSON(schema, data)) {
@@ -33,7 +34,7 @@ public class CreatePollCommand extends CommandDP {
 
         Document pollDocument = Document.parse(data.toString());
 
-        BsonValue pollId = mongoDB.create(mongoClient, Collections.poll, pollDocument)
+        BsonValue pollId = mongoDB.create(mongoClient, Collections.poll, pollDocument, jedis, "_id")
                 .getInsertedId();
 
         result.put("pollId", pollId.asObjectId().getValue().toString());
