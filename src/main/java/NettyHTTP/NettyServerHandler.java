@@ -64,7 +64,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
     }
 
-    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{   
+    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{
         JSONObject requestJson = new JSONObject(getRequestBody());
         requestJson.put("httpRoute",httpRoute);
         String queue = requestJson.getString("queue");
@@ -86,7 +86,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             if(NettyHTTPServer.channel==null)
                 NettyHTTPServer.instantiateChannel();
 
-           NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
+            NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
 
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
                     NettyHTTPServer.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
@@ -110,7 +110,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
 
-         }
+        }
         else {
             JSONObject result_error = new JSONObject();
             result_error.put("Message","Invalid Queue Name");
