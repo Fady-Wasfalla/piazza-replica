@@ -7,8 +7,10 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 //import core.commands.QuestionCommands.ViewAllQuestionsCommand;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -53,12 +55,15 @@ public class mongoDB {
         return new Document();
     }
     public static ArrayList<Document> readAll(MongoClient mongoClient, Collections collectionName,
-                                              Document filterDocument,Document projection, Bson sort, int skip,int limit, jedis jedis){
+                                              Document filterDocument, Bson sort, int skip,int limit, jedis jedis){
+
+        // to be updated
+
 //        ArrayList<Document> cached_documents = Document.parse(jedis.getLayeredCache(collectionName, filterDocument.toString()));
 //        if(cached_documents != null)
 //            return  cached_documents;
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
-        ArrayList<Document> documents = collection.find(filterDocument).projection(projection).sort(sort)
+        ArrayList<Document> documents = collection.find(filterDocument).sort(sort)
                 .skip(skip).limit(limit).into(new ArrayList<>());
         return documents;
     }
@@ -67,21 +72,27 @@ public class mongoDB {
                                    jedis jedis, String key) {
         MongoCollection<Document> collection = getCollection(mongoClient, collectionName);
         Document document =  collection.findOneAndUpdate(filterDocument, updateOperation, options);
-        jedis.deleteCache(collectionName.name());
-        jedis.deleteCache(collectionName.name() + document.get(key).toString());
-        jedis.setLayeredCache(collectionName.name() + filterDocument.get(key).toString(), filterDocument.toString(),
+
+        if(document != null){
+            jedis.deleteCache(collectionName.name());
+            jedis.deleteCache(collectionName.name() + document.get(key).toString());
+            jedis.setLayeredCache(collectionName.name() + filterDocument.get(key).toString(), filterDocument.toString(),
                 (document.toJson()).toString());
-        return document;
+
+            return document;
+        } 
+        
+        return null;
     }
 
-    public static void updateMany(MongoClient mongoClient , Collections collectionName,
+    public static UpdateResult updateMany(MongoClient mongoClient , Collections collectionName,
                                   Document filterDocument, Bson updateOperation, UpdateOptions options, jedis jedis) {
         MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
         Set<String> cacheKeys = jedis.returnKeys(collectionName.name() + "*");
         Iterator<String> cacheKeysIterator = cacheKeys.iterator();
         while(cacheKeysIterator.hasNext())
             jedis.deleteCache(cacheKeysIterator.next());
-        collection.updateMany(filterDocument, updateOperation, options);
+        return collection.updateMany(filterDocument, updateOperation, options);
     }
 
     public static Document deleteOne(MongoClient mongoClient, Collections collectionName,
@@ -93,19 +104,21 @@ public class mongoDB {
             jedis.deleteCache(collectionName.name() + document.get(key).toString());
             return document;
         }
-        return  new Document();
+        return  null;
     }
 
-    public static void deleteMany(MongoClient mongoClient, Collections collectionName,
+    public static DeleteResult deleteMany(MongoClient mongoClient, Collections collectionName,
                                   Document filterDocument, jedis jedis) {
         MongoCollection<Document> collection = getCollection( mongoClient, collectionName);
         Set<String> cacheKeys = jedis.returnKeys(collectionName.name() + "*");
         Iterator<String> cacheKeysIterator = cacheKeys.iterator();
         while(cacheKeysIterator.hasNext())
             jedis.deleteCache(cacheKeysIterator.next());
-        collection.deleteMany(filterDocument);
-
+        return collection.deleteMany(filterDocument);
     }
+
+
+///////////////////////////////////////////////////
 
     public static void main(String[] args) {
         String connectionString = "mongodb+srv://admin:admin@cluster0.rcrnf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
@@ -113,14 +126,15 @@ public class mongoDB {
         //check whether server is running or not
         try (MongoClient mongo_client = MongoClients.create(connectionString)) {
             System.out.println("Connection to server sucessfully");
-            Random rand = new Random();
-            Document student = new Document("_id", new ObjectId());
-            student.append("student_id", 10002d)
-                    .append("class_id", 1d)
-                    .append("scores", Arrays.asList(new Document("type", "exam").append("score", rand.nextDouble() * 100),
-                            new Document("type", "quiz").append("score", 89d),
-                            new Document("type", "homework").append("score", rand.nextDouble() * 100),
-                            new Document("type", "homework").append("score", rand.nextDouble() * 100)));
+            // Random rand = new Random();
+            // Document student = new Document("_id", new ObjectId());
+            // student.append("student_id", 10002d)
+            //         .append("class_id", 1d)
+            //         .append("scores", Arrays.asList(new Document("type", "exam").append("score", rand.nextDouble() * 100),
+            //                 new Document("type", "quiz").append("score", 89d),
+            //                 new Document("type", "homework").append("score", rand.nextDouble() * 100),
+            //                 new Document("type", "homework").append("score", rand.nextDouble() * 100)));
+        }
             // creates an instance of this json format
             //{ _id: ObjectId("6084b687d5433f16094a680b"),
             //  student_id: 10002,
@@ -163,6 +177,9 @@ public class mongoDB {
             //update(mongoClient, , new Document("student_id",10001),
             //  set("message", "testing"), new UpdateOptions());
             // delete all instances with student_id > 1001
+        //    update(mongoClient,Collections.question , new Document("student_id",10001),
+        //           set("message", "testing"), new UpdateOptions());
+           // delete all instances with student_id > 1001
             // deleteMany(mongoClient, "grades",
             //   new Document("student_id", new Document("$gte",10001)));
 
@@ -174,6 +191,6 @@ public class mongoDB {
 //            System.out.println(x);
 //            while(it.hasNext())
 //                System.out.println(it.next());
-        }
+        
     }
 }

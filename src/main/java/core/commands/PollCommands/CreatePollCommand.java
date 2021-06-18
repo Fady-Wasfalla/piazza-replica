@@ -21,6 +21,7 @@ public class CreatePollCommand extends CommandDP {
                 "userName",
                 "options",
                 "expiryDate",
+                "title"
         };
 
         if (!validateJSON(schema, data)) {

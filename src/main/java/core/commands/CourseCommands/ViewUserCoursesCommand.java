@@ -1,4 +1,4 @@
-package core.commands.PollCommands;
+package core.commands.CourseCommands;
 
 import Services.Collections;
 import Services.mongoDB;
@@ -9,42 +9,39 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class ViewAllPollsCommand extends CommandDP {
+public class ViewUserCoursesCommand extends CommandDP {
     @Override
     public JSONObject execute() {
         JSONObject result = new JSONObject();
 
-        String[] schema = {"courseId", "sort", "limit", "skip"};
-
-
+        String[] schema = {"userName", "skip", "limit", "sort"};
 
         if(!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
 
-        String courseId = this.data.getString("courseId");
+        String userName = this.data.getString("userName");
         int skip = this.data.getInt("skip");
         int limit = this.data.getInt("limit");
         String sort = this.data.getString("sort");
 
         if(sort == null){
-            sort = "title";
+            sort = "name";
         }
 
-        ArrayList<Document> queryResults = mongoDB.readAll(this.mongoClient, Collections.poll,
-                new Document("courseId", courseId),  Sorts.ascending(sort), skip, limit, jedis);
+        ArrayList<Document> queryResults = mongoDB.readAll(this.mongoClient, Collections.register,
+                new Document("userName", userName), Sorts.ascending(sort), skip, limit, jedis);
 
         if(queryResults.isEmpty()) {
-            result.put("[]", "No polls to show for this course");
+            result.put("[]", "User not registered in any courses");
             return result;
         }
 
         for (Document doc : queryResults) {
             JSONObject instance = new JSONObject(doc.toJson().toString());
-            result.append("poll", instance);
+            result.append("course", instance);
         }
-
 
         return result;
     }

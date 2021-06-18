@@ -29,14 +29,12 @@ public class ConsumerMQ {
 
     public static void main(String[] argv) throws Exception {
         Dotenv dotenv = Dotenv.load();
-        String strlist = dotenv.get("queuesReq");
-        List<String> queueReqNames = Arrays.asList(strlist.split(","));
-        strlist = dotenv.get("queuesRes");
-        List<String> queueResNames = Arrays.asList(strlist.split(","));
+        String strlist = dotenv.get("queues");
+        List<String> queueNames = Arrays.asList(strlist.split(","));
         CommandsMap.instantiate();
         // One Instance of DAL
         ConcurrentMap<String, Object> dalMap = new ConcurrentHashMap<>();
-        dalMap.put("core.commands.UserCommands.UserDAL", UserDAL.class.newInstance());
+        dalMap.put("core.commands.UserCommands.UserDAL", UserDAL.class.getDeclaredConstructor().newInstance());
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
@@ -53,14 +51,16 @@ public class ConsumerMQ {
             mongoClient = MongoClients.create(connectionString);
             jedis = new jedis("localhost", 6379, "");
         }catch(Exception error){
-            System.out.println("error hhhhhhhhhhhhh :"+error);
+            System.out.println("ERROR CREATING MONGODB CONNECTION :"+error);
         }
-        for (String QUEUE_NAME:queueResNames) {
+        for (String QUEUE_NAME:queueNames) {
+            QUEUE_NAME = QUEUE_NAME + "Res";
             NettyHTTPServer.channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         }
         MongoClient finalMongoClient = mongoClient;
         jedis finalJedis = jedis;
-        for (String QUEUE_NAME:queueReqNames) {
+        for (String QUEUE_NAME:queueNames) {
+            QUEUE_NAME = QUEUE_NAME +   "Req";
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
             String responseQueue = QUEUE_NAME.split("Req",0)[0]+"Res";
             System.out.println("[*REQ] "+QUEUE_NAME + " [*] Waiting for messages. To exit press CTRL+C");
@@ -75,30 +75,21 @@ public class ConsumerMQ {
                                 JSONObject requestJson = new JSONObject(message);
                                 String function = requestJson.getString("function");
                                 String queue = requestJson.getString("queue");
+                                
                                 CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                                 Class service = command.getClass();
                                 Method setData = service.getMethod("setData",JSONObject.class, MongoClient.class, jedis.class);
                                 setData.invoke(command, requestJson, finalMongoClient, finalJedis);
                                 JSONObject result = command.execute();
                                 NettyServerHandler.sendMessageToActiveMQ(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
-//                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-//                                        .Builder()
-//                                        .correlationId(properties.getCorrelationId())
-//                                        .build();
-//                                channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
+
                                 channel.basicAck(envelope.getDeliveryTag(), false);
                             } catch (Exception e) {
                                 e.printStackTrace();
-//                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-//                                        .Builder()
-//                                        .correlationId(properties.getCorrelationId())
-//                                        .build();
-
                                 JSONObject result = new JSONObject();
                                 result.put("Message","Invalid d7kaaaaa here consumer ");
                                 System.out.println(result.toString());
                                 try {
-//                                    channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
                                     NettyServerHandler.sendMessageToActiveMQ(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
                                     channel.basicAck(envelope.getDeliveryTag(), false);
 

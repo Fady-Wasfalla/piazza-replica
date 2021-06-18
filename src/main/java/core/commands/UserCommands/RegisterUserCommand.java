@@ -10,6 +10,8 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import java.util.Date;
+
 public class RegisterUserCommand extends CommandDP {
     JSONObject result = new JSONObject();
 
@@ -20,16 +22,17 @@ public class RegisterUserCommand extends CommandDP {
                 "courseId",
                 "userName",
                 "role",
-                "banned",
-                "banExpiryDate",
-                "bannerUserName",
-                "createdAt"
         };
 
         if(!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
+
+        data.put("banned", false);
+        data.put("banExpiryDate",JSONObject.NULL);
+        data.put("bannerUserName",JSONObject.NULL);
+        data.put("createdAt", new Date().getTime()+"");
 
         Document registrationDocument = Document.parse(data.toString());
 
