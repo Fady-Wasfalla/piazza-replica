@@ -54,6 +54,6 @@ public class ChatServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new ChatServer(8081);
+        new ChatServer(4000);
     }
 }
