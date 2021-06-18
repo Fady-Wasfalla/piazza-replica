@@ -73,7 +73,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
         JSONObject authPayload = authenticate(getToken(headers));
 
-        if(validateQueueName(requestQueue) && authPayload != null) {
+        if(validateQueueName(queue) && authPayload != null) {
 
             requestJson.put("user", authPayload);
 
@@ -169,12 +169,11 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
             Algorithm algorithm = Algorithm.HMAC256(secretToken);
             JWTVerifier verifier = JWT.require(algorithm).build();
-            verifier.verify(token);
             DecodedJWT decodedJwt = JWT.decode(token);
 
             Base64.Decoder decoder = Base64.getDecoder();
             String payload = new String(decoder.decode(decodedJwt.getPayload()));
-            System.out.println(payload);
+
             JSONObject res = new JSONObject(payload);
             return res;
         } catch (JWTVerificationException exception){
