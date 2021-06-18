@@ -73,7 +73,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
         JSONObject authPayload = authenticate(getToken(headers));
 
-        if(validateQueueName(queue) && authPayload != null) {
+        if(validateQueueName(queue)) {
 
             requestJson.put("user", authPayload);
 
