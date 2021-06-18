@@ -25,6 +25,11 @@
             console.log('firebase-message-sw: ServiceWorker registration failed: ', err);
           });
 
+          var notifications = ""
+var button = document.getElementById("button");
+button.onclick = function() {
+  notifications = ""
+  document.getElementById("notify").innerHTML = ""
   var currentToken;
   messaging.requestPermission().
   then(function(){
@@ -35,7 +40,7 @@
     console.log(token);
     const json = {
       body:{
-      userName: 'abdo',
+      userName: document.getElementById("userName").value,
       token: currentToken
       },
       function:"SetNotificationTokenCommand",
@@ -52,13 +57,15 @@
   .then(res => res.json())
   .then(res => console.log(res))
   .catch(err => console.error(err));
-  
+
   })
   .catch(function(err){
     console.log(err)
   })
-
+}
   messaging.onMessage(function(payload){
     console.log('onMessage' ,payload);
+    notifications = payload.data.Description + "<br/> " + notifications
+    document.getElementById("notify").innerHTML = notifications
   })
 

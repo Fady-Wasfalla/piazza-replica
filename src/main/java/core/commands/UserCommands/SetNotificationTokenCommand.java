@@ -32,7 +32,10 @@ public class SetNotificationTokenCommand extends CommandDP {
 
         this.data.put("createdAt", new Date().getTime() + "");
 
-        Document filterDocument = new Document("userName", data.getString("userName"));
+        Document filterDocument = new Document("token", data.getString("token"));
+        mongoDB.deleteMany(mongoClient, Collections.token, filterDocument);
+        
+        filterDocument = new Document("userName", data.getString("userName"));
 
         ArrayList<Document> token = mongoDB.read(mongoClient, Collections.token, filterDocument);
 
