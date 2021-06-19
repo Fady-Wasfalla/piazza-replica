@@ -42,22 +42,22 @@ public class ReqBodyCreator {
         }
     }
     public static void main(String[] args) {
-//        createReqBody("src/main/java/core/commands/QuestionCommands/ViewAllQuestionsCommand.java","command","AddCommand"
-//        ,"src/main/java/core/commands","QuestionCommands","question","ViewAllQuestionsCommand");
-        String sourceFile ="src/main/java/core/commands/QuestionCommands/ViewAllQuestionsCommand.java";
-        Path temp = null;
-        try {
-            temp = Files.move(Paths.get(String.valueOf(sourceFile)),Paths.get(String.valueOf(sourceFile).replace("src/main/java","target/classes").replace(".java",".class")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if(temp != null)
-        {
-            System.out.println("File renamed and moved successfully");
-        }
-        else
-        {
-            System.out.println("Failed to move the file");
-        }
+        createReqBody("src/main/java/core/Test.java","command","AddCommand"
+        ,"src/main/java/core","QuestionCommands","question","ViewAllQuestionsCommand");
+//        String sourceFile ="";
+//        Path temp = null;
+//        try {
+//            temp = Files.move(Paths.get(String.valueOf(sourceFile)),Paths.get(String.valueOf(sourceFile).replace("src/main/java","target/classes").replace(".java",".class")));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        if(temp != null)
+//        {
+//            System.out.println("File renamed and moved successfully");
+//        }
+//        else
+//        {
+//            System.out.println("Failed to move the file");
+//        }
     }
 }

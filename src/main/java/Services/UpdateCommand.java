@@ -76,7 +76,6 @@ public class UpdateCommand extends CommandDP {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-
             Class<?> newClass = Class.forName("Services.ViewAllQuestionsCommand", true, classLoader);
             String key = queue+"/"+className.split("\\.java")[0];
             cmdMap.cmdMap.remove(key);

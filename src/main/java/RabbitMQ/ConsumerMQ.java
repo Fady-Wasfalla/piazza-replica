@@ -32,8 +32,10 @@ public class ConsumerMQ {
         if(args.length>0){
             microservice = args[0];
         }else{
-            throw new Exception("Enter Microservice Name");
+            microservice="question";
+//            throw new Exception("Enter Microservice Name");
         }
+        microservice="question";
 
         Dotenv dotenv = Dotenv.load();
         String strlist = dotenv.get("queuesReq");

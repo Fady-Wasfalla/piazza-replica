@@ -10,7 +10,7 @@ public abstract class CommandDP {
     public abstract JSONObject execute();
 
     public void setData(JSONObject data, MongoClient mongoClient ){
-        this.data = data.getJSONObject("body");
+        this.data = data;
         this.mongoClient=mongoClient;
     }
 
