@@ -4,41 +4,40 @@ import NettyHTTP.NettyHTTPServer;
 import NettyHTTP.NettyServerHandler;
 import Services.Collections;
 import Services.mongoDB;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
-import com.rabbitmq.client.Command;
 import core.CommandDP;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
-import com.mongodb.client.model.UpdateOptions;
+
+import static Services.mongoDB.getCollection;
+import static com.mongodb.client.model.Updates.*;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static Services.mongoDB.getCollection;
-import static com.mongodb.client.model.Updates.set;
-
-public class AnswerQuestionCommand extends CommandDP {
-
+public class EndorseQuestionCommand extends CommandDP {
     @Override
     public JSONObject execute() {
-        JSONObject result= new JSONObject();
-        String [] schema= {
+        JSONObject result = new JSONObject();
+
+        String[] schema = {
                 "questionId",
                 "userName",
-                "description",
-                "endorsed",
+                "description" ,
                 "media"
         };
 
-        if(!validateJSON(schema, data)) {
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
+
         String questionId= this.data.getString("questionId");
         ArrayList<Object> myQuestions = mongoDB.read(mongoClient, Collections.question, new Document("_id", new ObjectId(questionId)));
 
@@ -50,44 +49,53 @@ public class AnswerQuestionCommand extends CommandDP {
             result.put("error","no Questions with such ID");
             return result;
         }
-        System.out.println(myQuestion);
-//        ArrayList<JSONObject> answers = (ArrayList<JSONObject>) myQuestion.get("answers");
+        MongoCollection<Document> collection = getCollection(mongoClient, Collections.question.name());
 
+//        JSONObject x1 = new JSONObject();
+//        x1.put("questionId",questionId);
+//        JSONObject x2 = new JSONObject();
+//        x2.put("userName",this.data.getString("userName"));
+//        x2.put("description",this.data.getString("description"));
+//        x1.put("answers",x2);
+//
+//        Document x3 = Document.parse(x1.toString());
+//        Document projection = new Document("_id",new ObjectId(questionId))
+//                .append("$elemMatch", new Document("answers",
+//                new Document("userName", this.data.getString("userName"))
+//                        .append("description",this.data.getString("description"))) )
+//                ;
+//
+//        ArrayList<Document> x =  mongoDB.read(this.mongoClient, Collections.question,
+//                projection);
+//        System.out.println(projection);
+//        System.out.println(x);
 
-//        Object [] newAnswersArray = new Object [answers.length+1];
-//        ArrayList<Object> myAnswers = new ArrayList<Object>();
-//        for(int i=0; i<answers.length;i++){
-//            myAnswers.add(answers[i]);
-//            newAnswersArray[i]=answers[i];
-//        }
         JSONObject newAnswer= new JSONObject();
         newAnswer.put("username", data.getString("userName"));
         newAnswer.put("description", data.getString("description"));
-        newAnswer.put("endorsed", data.get("endorsed"));
-        newAnswer.put("media", data.get("media"));
+        newAnswer.put("media", data.getJSONArray("media"));
 
         Document finalAns = Document.parse(newAnswer.toString());
-//        answers.add(newAnswer);
-//        System.out.println(answers);
-
-//        newAnswersArray[newAnswersArray.length-1]=newAnswer;
-
-//        JSONObject[] finalAnswers = new JSONObject[answers.size()];
-//        finalAnswers = answers.toArray(finalAnswers);
-
-//        System.out.println(answers);
 //        UpdateResult resultDocument = mongoDB.update(mongoClient, Collections.question,
-//                new Document("_id", new ObjectId(questionId)) ,pushEach("answers", answers), new UpdateOptions());
+//                new Document("_id", new ObjectId(questionId)) ,set("answers", true), new UpdateOptions());
 
-        MongoCollection<Document> collection = getCollection(mongoClient, Collections.question.name());
+
         UpdateResult resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
+                new Document().append("$pull", new Document("answers",finalAns)
+                ));
+        if(resultDocument.getModifiedCount() == 0){
+            result.put("error","no such answer to this question");
+            return result;
+        }
+
+        newAnswer.put("endorsed", true);
+        finalAns = Document.parse(newAnswer.toString());
+        resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
                 new Document().append("$push", new Document("answers",finalAns)
-        ));
+                ));
 
-//
-        long modifiedQuestionsCount= resultDocument.getModifiedCount();
+        long modifiedQuestionsCount = resultDocument.getModifiedCount();
         result.put("Modified Questions Count", modifiedQuestionsCount);
-
 
         String correlationId = UUID.randomUUID().toString();
         String requestQueue = "notificationReq";
@@ -99,7 +107,7 @@ public class AnswerQuestionCommand extends CommandDP {
 
         JSONObject body = new JSONObject();
         body.put("userName", myQuestion.getString("userName"));
-        body.put("description","Your question have a new answer");
+        body.put("description","Your answer was endorsed");
         body.put("model",  this.data.getString("questionId"));
         body.put("onModel", "Question");
 
@@ -130,10 +138,7 @@ public class AnswerQuestionCommand extends CommandDP {
             e.printStackTrace();
         }
 
-
-
-
-
         return result;
+
     }
 }

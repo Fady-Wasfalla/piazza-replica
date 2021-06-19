@@ -4,14 +4,14 @@ import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.CourseCommands.DeleteCourseCommand;
 import core.commands.CourseCommands.ViewCourseCommand;
 import core.commands.CourseCommands.ViewUserCoursesCommand;
+import core.commands.NotificationCommands.NotifyAllStudentsCommand;
+import core.commands.NotificationCommands.NotifyAllInstructorsCommand;
+import core.commands.NotificationCommands.NotifyStudentCommand;
 import core.commands.PollCommands.CreatePollCommand;
 import core.commands.PollCommands.DeleteCoursePollsCommand;
 import core.commands.PollCommands.ViewAllPollsCommand;
 import core.commands.QuestionCommands.*;
-import core.commands.UserCommands.DeleteCourseRegistersCommand;
-import core.commands.UserCommands.RegisterUserCommand;
-import core.commands.UserCommands.SetNotificationTokenCommand;
-import core.commands.UserCommands.SignupCommand;
+import core.commands.UserCommands.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,12 +27,16 @@ public class CommandsMap {
         cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
         cmdMap.put("user/ViewUserCoursesCommand", ViewUserCoursesCommand.class);
         cmdMap.put("user/SetNotificationTokenCommand", SetNotificationTokenCommand.class);
+        cmdMap.put("user/BanStudentCommand", BanStudentCommand.class);
+
 
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
         cmdMap.put("question/DeleteCourseQuestionsCommand", DeleteCourseQuestionsCommand.class);
         cmdMap.put("question/SearchQuestionsCommand", SearchQuestionsCommand.class);
         cmdMap.put("question/AnswerQuestionCommand", AnswerQuestionCommand.class);
+        cmdMap.put("question/EndorseQuestionCommand", EndorseQuestionCommand.class);
+
 
         cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("course/ViewCourseCommand", ViewCourseCommand.class);
@@ -42,6 +46,13 @@ public class CommandsMap {
         cmdMap.put("poll/DeleteCoursePollsCommand", DeleteCoursePollsCommand.class);
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
 //        cmdMap.put("poll/DeleteCoursePollsCommand", ViewAllPollsCommand.class);
+
+        cmdMap.put("notification/NotifyAllStudentsCommand", NotifyAllStudentsCommand.class);
+        cmdMap.put("notification/NotifyAllInstructorsCommand", NotifyAllInstructorsCommand.class);
+        cmdMap.put("notification/NotifyStudentCommand", NotifyStudentCommand.class);
+
+
+
 
 
 
