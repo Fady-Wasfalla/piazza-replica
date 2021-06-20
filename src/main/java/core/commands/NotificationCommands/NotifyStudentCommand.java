@@ -23,7 +23,10 @@ public class NotifyStudentCommand extends CommandDP {
                 "userName",
                 "description",
                 "model",
-                "onModel"
+                "onModel" ,
+                "sort",
+                "skip",
+                "limit"
         };
 
         if (!validateJSON(schema, data)) {
@@ -36,7 +39,9 @@ public class NotifyStudentCommand extends CommandDP {
         String model = this.data.getString("model");
         String onModel = this.data.getString("onModel");
         String description = this.data.getString("description").toLowerCase(Locale.ROOT);;
-
+        String sort = this.data.getString("sort");
+        int skip = this.data.getInt("skip");
+        int limit = this.data.getInt("limit");
         this.data.put("description",description);
 
 
@@ -51,14 +56,14 @@ public class NotifyStudentCommand extends CommandDP {
 
         Document notificationDocument = Document.parse(notification.toString());
 
-        BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument).getInsertedId();
+        BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument,jedis,"_id").getInsertedId();
 
         Document tokenFilterDocument = new Document("userName", username);
-        ArrayList<Document> token = mongoDB.read(mongoClient, Collections.token, tokenFilterDocument);
+        Document token = mongoDB.readOne(mongoClient, Collections.token, tokenFilterDocument,jedis,"_id");
         if (token.size() > 0) {
             Notifications notify = new Notifications();
             try {
-                notify.notify(token.get(0).getString("token"), description);
+                notify.notify(token.getString("token"), description);
 //                    notify.notify("d3-GpfzqP5WOaJBfZB05yP:APA91bFOtEuWyXTvYcSZQI0eWhTu48IuncorBWpLyHXVdUoUMFt8d7lR5OudjOH2RiUjch47obFj_G4tDGTRTBmfCZhNzkNCLce_KhWJnhDD-5wglEJdThCS4Ps53KCpA_qGRjbwn0SP","A student asked a new question");
 
             } catch (Exception e) {

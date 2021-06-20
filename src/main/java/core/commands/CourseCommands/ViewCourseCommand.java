@@ -24,17 +24,17 @@ public class ViewCourseCommand extends CommandDP {
 
         String courseId = this.data.getString("courseId");
 
-        ArrayList<Document> queryResults = mongoDB.read(this.mongoClient, Collections.course,
-                new Document("_id", new ObjectId(courseId)));
+        Document queryResult = mongoDB.readOne(this.mongoClient, Collections.course,
+                new Document("_id", new ObjectId(courseId)), jedis, "_id");
 
-        if(queryResults.isEmpty()) {
+        if(queryResult.isEmpty()) {
             result.put("[]", "Invalid Course ID");
             return result;
         }
 
-        System.out.println("Monica ==> " + queryResults.get(0));
+        System.out.println("Monica ==> " + queryResult);
 
-        JSONObject result = new JSONObject(queryResults.get(0).toJson().toString());
+        JSONObject result = new JSONObject(queryResult.toJson().toString());
         return result;
     }
 }

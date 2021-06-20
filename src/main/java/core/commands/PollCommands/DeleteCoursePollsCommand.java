@@ -22,7 +22,7 @@ public class DeleteCoursePollsCommand extends CommandDP {
 
         String courseId= data.getString("courseId");
 
-        DeleteResult deletedPolls = mongoDB.deleteMany(mongoClient, Collections.poll, new Document("courseId", courseId));
+        DeleteResult deletedPolls = mongoDB.deleteMany(mongoClient, Collections.poll, new Document("courseId", courseId), jedis);
 
         long pollDeletedCount= deletedPolls.getDeletedCount();
         result.put("pollDeletedCount",pollDeletedCount);

@@ -4,6 +4,7 @@ import NettyHTTP.NettyHTTPServer;
 import NettyHTTP.NettyServerHandler;
 import Services.Collections;
 import Services.mongoDB;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 import com.rabbitmq.client.Command;
@@ -32,7 +33,10 @@ public class AnswerQuestionCommand extends CommandDP {
                 "userName",
                 "description",
                 "endorsed",
-                "media"
+                "media",
+                "sort",
+                "skip",
+                "limit"
         };
 
         if(!validateJSON(schema, data)) {
@@ -40,7 +44,16 @@ public class AnswerQuestionCommand extends CommandDP {
             return result;
         }
         String questionId= this.data.getString("questionId");
-        ArrayList<Object> myQuestions = mongoDB.read(mongoClient, Collections.question, new Document("_id", new ObjectId(questionId)));
+        int skip = this.data.getInt("skip");
+        int limit = this.data.getInt("limit");
+        String sort = this.data.getString("sort");
+
+        if(sort == null){
+            sort = "title";
+        }
+
+        ArrayList<Document> myQuestions = mongoDB.readAll(mongoClient, Collections.question,
+                new Document("_id", new ObjectId(questionId)), Sorts.ascending(sort), skip, limit, jedis);
 
         Document myQuestion;
         if(!(myQuestions.size()==0)){
@@ -79,7 +92,7 @@ public class AnswerQuestionCommand extends CommandDP {
 //        UpdateResult resultDocument = mongoDB.update(mongoClient, Collections.question,
 //                new Document("_id", new ObjectId(questionId)) ,pushEach("answers", answers), new UpdateOptions());
 
-        MongoCollection<Document> collection = getCollection(mongoClient, Collections.question.name());
+        MongoCollection<Document> collection = getCollection(mongoClient, Collections.question);
         UpdateResult resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
                 new Document().append("$push", new Document("answers",finalAns)
         ));

@@ -28,11 +28,8 @@ public class DeleteCourseCommand extends CommandDP {
         }
 
         String courseId = data.getString("courseId");
-        DeleteResult deleteCourseResult = mongoDB.deleteOne(this.mongoClient, Collections.course,
-                new Document("_id", new ObjectId(courseId)));
-
-        long deletedCount = deleteCourseResult.getDeletedCount();
-        System.out.println(deleteCourseResult.getDeletedCount() + "<<<<< deleted count");
+        Document deletedCourse = mongoDB.deleteOne(this.mongoClient, Collections.course,
+                new Document("_id", new ObjectId(courseId)), jedis, "_id");
 
         JSONObject pollDeleteResquest = new JSONObject();
         pollDeleteResquest.put("function", "DeleteCoursePollsCommand");
@@ -55,8 +52,8 @@ public class DeleteCourseCommand extends CommandDP {
         registerBody.put("courseId", courseId);
         registerDeleteResquest.put("body", registerBody);
         
-        if(deletedCount == 1){
-            result.put("courseDeletedCount", deletedCount);
+        if(deletedCourse != null){
+            result.put("courseDeletedCount", 1);
 
             String pollCorrelationId = UUID.randomUUID().toString();
             String questionCorrelationId = UUID.randomUUID().toString();
@@ -117,7 +114,7 @@ public class DeleteCourseCommand extends CommandDP {
             }
 
         } else{
-          result.put("error", "Monica is AmaarZZZZZZZZZz");
+          result.put("error", "Error deleting course");
         }
 
         return result;

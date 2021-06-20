@@ -22,7 +22,8 @@ public class DeleteCourseQuestionsCommand extends CommandDP {
         }
         String courseId= data.getString("courseId");
 
-        DeleteResult deletedQuestions = mongoDB.deleteMany(mongoClient, Collections.question, new Document("courseId", courseId));
+        DeleteResult deletedQuestions = mongoDB.deleteMany(mongoClient, Collections.question,
+                new Document("courseId", courseId), jedis);
 
         long questionDeletedCount= deletedQuestions.getDeletedCount();
         result.put("questionDeletedCount",questionDeletedCount);

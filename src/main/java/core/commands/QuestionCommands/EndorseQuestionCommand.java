@@ -39,17 +39,10 @@ public class EndorseQuestionCommand extends CommandDP {
         }
 
         String questionId= this.data.getString("questionId");
-        ArrayList<Object> myQuestions = mongoDB.read(mongoClient, Collections.question, new Document("_id", new ObjectId(questionId)));
+        Document myQuestion = mongoDB.readOne(mongoClient, Collections.question, new Document("_id", new ObjectId(questionId)),jedis,"_id");
 
-        Document myQuestion;
-        if(!(myQuestions.size()==0)){
-            myQuestion= (Document) myQuestions.get(0);
-        }
-        else{
-            result.put("error","no Questions with such ID");
-            return result;
-        }
-        MongoCollection<Document> collection = getCollection(mongoClient, Collections.question.name());
+
+        MongoCollection<Document> collection = getCollection(mongoClient, Collections.question);
 
 //        JSONObject x1 = new JSONObject();
 //        x1.put("questionId",questionId);

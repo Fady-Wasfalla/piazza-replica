@@ -5,6 +5,7 @@ import NettyHTTP.NettyServerHandler;
 import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import core.CommandDP;
@@ -42,17 +43,16 @@ public class BanStudentCommand extends CommandDP {
 
         Document filterDocument = new Document("role", "student").append("courseId",courseId).append("userName",userName);
 
-        UpdateResult resultDocument = mongoDB.update(mongoClient,Collections.register,
-                filterDocument,set("banned",true), new UpdateOptions());
+        Document resultDocument = mongoDB.update(mongoClient,Collections.register,
+                filterDocument,set("banned",true), new FindOneAndUpdateOptions(),jedis,"_id");
 
         resultDocument = mongoDB.update(mongoClient,Collections.register,
-                filterDocument,set("banExpiryDate",banExpiryDate), new UpdateOptions());
+                filterDocument,set("banExpiryDate",banExpiryDate), new FindOneAndUpdateOptions(),jedis,"_id");
 
         resultDocument = mongoDB.update(mongoClient,Collections.register,
-                filterDocument,set("bannerUserName",bannerUserName), new UpdateOptions());
+                filterDocument,set("bannerUserName",bannerUserName), new FindOneAndUpdateOptions(),jedis,"_id");
 
-        long modifiedBanCount = resultDocument.getModifiedCount();
-        result.put("Modified Ban Count", modifiedBanCount);
+        result.put("Modified Ban Count", resultDocument);
 
         String correlationId = UUID.randomUUID().toString();
         String requestQueue = "notificationReq";

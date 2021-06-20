@@ -23,6 +23,9 @@ public class CreateCourseCommand extends CommandDP {
 
     @Override
     public JSONObject execute() {
+
+        System.out.println("from create course" + this.user);
+
         String[] schema = {
                 "name",
                 "userName",
@@ -38,7 +41,7 @@ public class CreateCourseCommand extends CommandDP {
 
         Document courseDocument = Document.parse(data.toString());
 
-        BsonValue courseId = mongoDB.create(mongoClient, Collections.course, courseDocument)
+        BsonValue courseId = mongoDB.create(mongoClient, Collections.course, courseDocument,jedis,"_id")
                 .getInsertedId();
 
         result.put("courseId", courseId.asObjectId().getValue().toString());
@@ -57,6 +60,7 @@ public class CreateCourseCommand extends CommandDP {
         body.put("role", "instructor");
         
         registerRequest.put("body", body);
+        registerRequest.put("user", user);
 
         try{
             NettyServerHandler.sendMessageToActiveMQ(registerRequest.toString(),requestQueue,correlationId);

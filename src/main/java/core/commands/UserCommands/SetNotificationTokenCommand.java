@@ -2,8 +2,10 @@ package core.commands.UserCommands;
 
 import Services.Collections;
 import Services.mongoDB;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
+import com.mongodb.internal.operation.UpdateOperation;
 import core.CommandDP;
 import org.bson.BsonValue;
 import org.bson.Document;
@@ -33,17 +35,17 @@ public class SetNotificationTokenCommand extends CommandDP {
         this.data.put("createdAt", new Date().getTime() + "");
 
         Document filterDocument = new Document("token", data.getString("token"));
-        mongoDB.deleteMany(mongoClient, Collections.token, filterDocument);
+        mongoDB.deleteMany(mongoClient, Collections.token, filterDocument,jedis);
         
         filterDocument = new Document("userName", data.getString("userName"));
 
-        ArrayList<Document> token = mongoDB.read(mongoClient, Collections.token, filterDocument);
+        Document token = mongoDB.readOne(mongoClient, Collections.token, filterDocument,jedis,"_id");
 
         if(token.size() == 0){
 
             Document tokenDocument = Document.parse(data.toString());
 
-            BsonValue tokenId = mongoDB.create(mongoClient, Collections.token, tokenDocument)
+            BsonValue tokenId = mongoDB.create(mongoClient, Collections.token, tokenDocument,jedis,"_id")
                     .getInsertedId();
 
             result.put("tokenId", tokenId.asObjectId().getValue().toString());
@@ -52,10 +54,10 @@ public class SetNotificationTokenCommand extends CommandDP {
         else{
 
             Bson updateOperation = set("token", data.getString("token"));
-            mongoDB.update(mongoClient, Collections.token, filterDocument, updateOperation, new UpdateOptions());
+            mongoDB.update(mongoClient, Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),jedis,"_id");
             updateOperation = set("createdAt", new Date().getTime() + "");
-            mongoDB.update(mongoClient, Collections.token, filterDocument, updateOperation, new UpdateOptions());
-            result.put("tokenId", token.get(0).get("_id").toString());
+            mongoDB.update(mongoClient, Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),jedis,"_id");
+            result.put("tokenId", token.get("_id").toString());
             System.out.println("second");
         }
 
