@@ -51,7 +51,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
             result.append("question", instance);
         }
 
-        
+        System.out.println("======="+result);
         return result;
     }
 }

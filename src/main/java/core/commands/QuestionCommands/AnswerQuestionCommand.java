@@ -38,7 +38,7 @@ public class AnswerQuestionCommand extends CommandDP {
                 "skip",
                 "limit"
         };
-
+        System.out.println(data);
         if(!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;

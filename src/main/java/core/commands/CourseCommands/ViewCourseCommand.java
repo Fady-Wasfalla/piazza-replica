@@ -16,7 +16,9 @@ public class ViewCourseCommand extends CommandDP {
     public JSONObject execute() {
 
         String[] schema = {"courseId"};
-
+        System.out.println(data);
+        System.out.println("=============================");
+        System.out.println(schema);
         if(!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;

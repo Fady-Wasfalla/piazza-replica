@@ -21,12 +21,12 @@ public class DeleteCoursePollsCommand extends CommandDP {
         }
 
         String courseId= data.getString("courseId");
-
+        System.out.println(data);
         DeleteResult deletedPolls = mongoDB.deleteMany(mongoClient, Collections.poll, new Document("courseId", courseId), jedis);
-
+        System.out.println("=============="+deletedPolls);
         long pollDeletedCount= deletedPolls.getDeletedCount();
         result.put("pollDeletedCount",pollDeletedCount);
-
+        System.out.println("=============="+result);
         return result;
         
     }

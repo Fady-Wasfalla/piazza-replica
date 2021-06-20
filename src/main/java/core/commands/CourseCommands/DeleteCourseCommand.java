@@ -116,7 +116,7 @@ public class DeleteCourseCommand extends CommandDP {
         } else{
           result.put("error", "Error deleting course");
         }
-
+        System.out.println("======================"+result);
         return result;
     }
 }
