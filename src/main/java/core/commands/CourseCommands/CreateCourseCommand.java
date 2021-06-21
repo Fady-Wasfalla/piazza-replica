@@ -1,13 +1,9 @@
 package core.commands.CourseCommands;
 
-import NettyHTTP.NettyHTTPServer;
-import NettyHTTP.NettyServerHandler;
-import RabbitMQ.Producer;
+import RabbitMQ.MessageQueue;
 import Services.Collections;
 import Services.mongoDB;
-import com.mongodb.client.result.InsertOneResult;
 import core.CommandDP;
-import org.bson.BsonObjectId;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -28,13 +24,13 @@ public class CreateCourseCommand extends CommandDP {
                 "userName",
                 "code",
         };
-
-        if(!validateJSON(schema, data)) {
+        data = (JSONObject) data.get("body");
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
 
-        this.data.put("createdAt", new Date().getTime()+"");
+        this.data.put("createdAt", new Date().getTime() + "");
 
         Document courseDocument = Document.parse(data.toString());
 
@@ -53,26 +49,26 @@ public class CreateCourseCommand extends CommandDP {
 
         JSONObject body = new JSONObject();
         body.put("courseId", courseId);
-        body.put("userName",data.getString("userName"));
+        body.put("userName", data.getString("userName"));
         body.put("role", "instructor");
         body.put("banned", false);
-        body.put("banExpiryDate",JSONObject.NULL);
-        body.put("bannerUserName",JSONObject.NULL);
+        body.put("banExpiryDate", JSONObject.NULL);
+        body.put("bannerUserName", JSONObject.NULL);
         body.put("createdAt", this.data.get("createdAt"));
 
         registerRequest.put("body", body);
 
-        try{
-            NettyServerHandler.sendMessageToActiveMQ(registerRequest.toString(),requestQueue,correlationId);
+        try {
+            System.out.println("Create Course Command: " + registerRequest);
+            MessageQueue.send(registerRequest.toString(), requestQueue, correlationId);
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
-            NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
-
+            MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
                 if (delivery.getProperties().getCorrelationId().equals(correlationId)) {
-                    NettyHTTPServer.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     response.offer(new String(delivery.getBody(), "UTF-8"));
-                    NettyHTTPServer.channel.basicCancel(consumerTag);
-                }else{
-                    NettyHTTPServer.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
+                    MessageQueue.channel.basicCancel(consumerTag);
+                } else {
+                    MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
                 }
             }, consumerTag -> {
             });
@@ -85,7 +81,7 @@ public class CreateCourseCommand extends CommandDP {
 
             result.put("registeredId", id.toString());
 
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

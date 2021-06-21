@@ -2,16 +2,11 @@ package core.commands.QuestionCommands;
 
 import Services.Collections;
 import Services.mongoDB;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import core.CommandDP;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class CreateQuestionCommand extends CommandDP {

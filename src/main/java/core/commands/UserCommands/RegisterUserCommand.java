@@ -4,10 +4,8 @@ import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.result.InsertOneResult;
 import core.CommandDP;
-import org.bson.BsonArray;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
 public class RegisterUserCommand extends CommandDP {

@@ -1,141 +1,114 @@
 package RabbitMQ;
 
-import NettyHTTP.NettyHTTPServer;
-import NettyHTTP.NettyServerHandler;
 import ServiceNettyServer.ServiceNettyHTTPServer;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import core.CommandDP;
 import core.CommandsMap;
-import core.commands.UserCommands.UserDAL;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
-
-import io.github.cdimascio.dotenv.Dotenv;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class ConsumerMQ {
-    //private final static String QUEUE_NAME = "queue_name";
     private static ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
-
-    public static void main(String[] args) throws Exception {
-        String microservice = "";
-        if(args.length>0){
-            microservice = args[0];
-        }else{
-            microservice="question";
-//            throw new Exception("Enter Microservice Name");
-        }
-        microservice="question";
-
+    public static void run(String microservice, int port) throws Exception {
         Dotenv dotenv = Dotenv.load();
         String strlist = dotenv.get("queuesReq");
         List<String> queueReqNames = Arrays.asList(strlist.split(","));
         strlist = dotenv.get("queuesRes");
         List<String> queueResNames = Arrays.asList(strlist.split(","));
 
-        if(!queueReqNames.contains(microservice+"Req")){
+        if (!queueReqNames.contains(microservice + "Req")) {
             throw new Exception("Microservice Does Not Exist");
         }
-        if(!queueResNames.contains(microservice+"Res")){
+        if (!queueResNames.contains(microservice + "Res")) {
             throw new Exception("Microservice Does Not Exist");
         }
 
         CommandsMap cmdMap = new CommandsMap();
         cmdMap.instantiate();
-        System.out.println(cmdMap.cmdMap.size());
-        System.out.println("yes");
+        System.out.println("Command Map Size: " + cmdMap.cmdMap.size());
         cmdMap.getAllClasses();
-
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        Connection connection = factory.newConnection();
-        Channel channel;
         Consumer consumer;
-        channel = connection.createChannel();
+        if (MessageQueue.channel == null)
+            MessageQueue.instantiateChannel();
 
-        if(NettyHTTPServer.channel==null)
-            NettyHTTPServer.instantiateChannel();
-
-        String connectionString = dotenv.get("CONNECTION_STRING") + "10" ; // no. of DP connections
+        String connectionString = dotenv.get("CONNECTION_STRING") + "10"; // no. of DP connections
         MongoClient mongoClient = null;
-        try  {
+        try {
             mongoClient = MongoClients.create(connectionString);
-        }catch(Exception error){
-            System.out.println("error no. of DP connections :"+error);
+        } catch (Exception error) {
+            System.out.println("error no. of DP connections :" + error);
         }
         MongoClient finalMongoClient = mongoClient;
 
-        NettyHTTPServer.channel.queueDeclare(microservice+"Res", false, false, false, null);
+        //Response Queue Declare
+        String RES_QUEUE_NAME = microservice + "Res";
+        MessageQueue.channel.queueDeclare(RES_QUEUE_NAME, false, false, false, null);
 
-        String QUEUE_NAME = microservice+"Req";
+        //Request Queue Declare
+        String REQ_QUEUE_NAME = microservice + "Req";
+        MessageQueue.channel.queueDeclare(REQ_QUEUE_NAME, false, false, false, null);
 
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-        String responseQueue = QUEUE_NAME.split("Req",0)[0]+"Res";
-        System.out.println("[*REQ] "+QUEUE_NAME + " [*] Waiting for messages. To exit press CTRL+C");
-        consumer = new DefaultConsumer(channel) {
+        System.out.println("[*REQ] " + REQ_QUEUE_NAME + " [*] Waiting for messages. To exit press CTRL+C");
+
+        consumer = new DefaultConsumer(MessageQueue.channel) {
             @Override
-            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-                    throws IOException {
-                Runnable task = new Runnable() {
-                    public void run() {
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+                Runnable task = () -> {
+                    try {
+                        System.out.println("Handle Delivery");
+                        String message = new String(body, "UTF-8");
+                        JSONObject requestJson = new JSONObject(message);
+                        String function = requestJson.getString("function");
+                        String queue = requestJson.getString("queue");
+                        cmdMap.getAllClasses();
+                        CommandDP command = (CommandDP) cmdMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
+                        Class service = command.getClass();
+                        System.out.println("services ==> " + service);
+                        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
+                        setData.invoke(command, requestJson, finalMongoClient);
+                        System.out.println("Before execution");
+                        JSONObject result = command.execute();
+                        System.out.println("After execution");
+                        System.out.println("Consumer MQ invoke result:" + result.toString());
+                        MessageQueue.send(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
+                        MessageQueue.channel.basicAck(envelope.getDeliveryTag(), false);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        JSONObject result = new JSONObject();
+                        result.put("Err Message MQ", e.toString());
+                        System.out.println(result.toString());
                         try {
-                            String message = new String(body, "UTF-8");
-                            JSONObject requestJson = new JSONObject(message);
-                            String function = requestJson.getString("function");
-                            String queue = requestJson.getString("queue");
-                            cmdMap.getAllClasses();
-                            CommandDP command = (CommandDP) cmdMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
-                            Class service = command.getClass();
-                            Method setData = service.getMethod("setData",JSONObject.class, MongoClient.class);
-                            setData.invoke(command, requestJson, finalMongoClient);
-                            JSONObject result = command.execute();
-                            System.out.println("MQ ");
-                            NettyServerHandler.sendMessageToActiveMQ(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
-//                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-//                                        .Builder()
-//                                        .correlationId(properties.getCorrelationId())
-//                                        .build();
-//                                channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
-                            channel.basicAck(envelope.getDeliveryTag(), false);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-//                                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-//                                        .Builder()
-//                                        .correlationId(properties.getCorrelationId())
-//                                        .build();
-                            JSONObject result = new JSONObject();
-                            result.put("Err Message MQ",e.toString());
-                            System.out.println(result.toString());
-                            try {
+                            System.out.println("ConsumerMQ send message inside try: " + result.toString());
 //                                    channel.basicPublish("", properties.getReplyTo(), replyProps, result.toString().getBytes("UTF-8"));
-                                NettyServerHandler.sendMessageToActiveMQ(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
-                                channel.basicAck(envelope.getDeliveryTag(), false);
+                            MessageQueue.send(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
+                            MessageQueue.channel.basicAck(envelope.getDeliveryTag(), false);
 
-                            } catch (Exception e1) {
-                                e1.printStackTrace();
-                            }
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
                         }
                     }
                 };
                 threadPool.submit(task);
             }
         };
-        channel.basicConsume(QUEUE_NAME, false, consumer);
+        System.out.println("Request queue name (consumer): "+REQ_QUEUE_NAME);
+        MessageQueue.channel.basicConsume(REQ_QUEUE_NAME, false, consumer);
 
         System.out.println("User Service Server is UP");
-        ServiceNettyHTTPServer serviceServer = new ServiceNettyHTTPServer(8081,microservice,cmdMap);
+        ServiceNettyHTTPServer serviceServer = new ServiceNettyHTTPServer(port, microservice, cmdMap);
         serviceServer.start();
-
     }
-
 }

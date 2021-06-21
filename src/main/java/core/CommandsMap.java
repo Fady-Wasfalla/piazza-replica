@@ -4,15 +4,12 @@ import Services.AddCommand;
 import Services.DeleteCommand;
 import Services.UpdateCommand;
 import core.commands.CourseCommands.CreateCourseCommand;
+import core.commands.PollCommands.CreatePollCommand;
 import core.commands.UserCommands.RegisterUserCommand;
 import core.commands.UserCommands.SignupCommand;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class CommandsMap implements Serializable {
     public static HashMap<String, Class<?>> cmdMap ;
@@ -29,6 +26,7 @@ public class CommandsMap implements Serializable {
         cmdMap.put("command/AddCommand", AddCommand.class);
         cmdMap.put("command/UpdateCommand", UpdateCommand.class);
         cmdMap.put("command/DeleteCommand", DeleteCommand.class);
+        cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
 //        saveStatus(cmdMap,"src/main/java/Services/cmdMap.ser");
     }
 
@@ -78,9 +76,10 @@ public class CommandsMap implements Serializable {
     }
 
     public static void getAllClasses(){
-        System.out.println("------------------------------");
+        System.out.println("---------Command Map Classes---------");
 //        cmdMap = loadStatus("src/main/java/Services/cmdMap.ser");
         cmdMap.forEach( (k, v) -> System.out.println(k+" ==> "+v));
+        System.out.println("-------------------------------------");
     }
 
 

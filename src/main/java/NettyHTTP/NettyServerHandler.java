@@ -1,6 +1,6 @@
 package NettyHTTP;
 
-import RabbitMQ.Producer;
+import RabbitMQ.MessageQueue;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,12 +11,10 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeoutException;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -30,6 +28,25 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
     private String requestBody;
     private String httpRoute;
     volatile String responseBody;
+
+
+//    public static ConnectionFactory factory;
+//    public static Connection connection;
+//    public  static com.rabbitmq.client.Channel channel;
+//
+//    public static void instantiateChannel(){
+//        System.out.println("Main Server is running");
+//        try {
+//            factory = new ConnectionFactory();
+//            factory.setHost("localhost");
+//            connection = factory.newConnection();
+//            channel = connection.createChannel();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (TimeoutException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -65,22 +82,22 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
         if(validateQueueName(requestQueue)) {
             final String corrId = UUID.randomUUID().toString();
-            sendMessageToActiveMQ(requestJson.toString(), requestQueue,corrId);
+            System.out.println("Netty Http Server Handler "+requestJson.toString());
+            MessageQueue.send(requestJson.toString(), requestQueue,corrId);
             System.out.println("Request Body : " + requestJson.toString());
 
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 
-            if(NettyHTTPServer.channel==null)
-                NettyHTTPServer.instantiateChannel();
-
-           NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
+            if(MessageQueue.channel==null)
+                MessageQueue.instantiateChannel();
+            MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
 
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
-                    NettyHTTPServer.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     response.offer(new String(delivery.getBody(), "UTF-8"));
-                    NettyHTTPServer.channel.basicCancel(consumerTag);
+                    MessageQueue.channel.basicCancel(consumerTag);
                 }else{
-                    NettyHTTPServer.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
+                    MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
                 }
             }, consumerTag -> {
             });
@@ -107,11 +124,6 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
         }
-    }
-
-    public static void sendMessageToActiveMQ(String jsonBody, String queue, String UUID) throws IOException, TimeoutException {
-        Producer P = new Producer(queue);
-        P.send(jsonBody,UUID);
     }
 
     public boolean validateQueueName(String queue){

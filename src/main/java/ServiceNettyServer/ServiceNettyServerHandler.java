@@ -1,8 +1,6 @@
 package ServiceNettyServer;
 
-import RabbitMQ.Producer;
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import core.CommandDP;
 import core.CommandsMap;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -15,13 +13,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeoutException;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -108,12 +100,6 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
         }
     }
 
-    public static void sendMessageToActiveMQ(String jsonBody, String queue, String UUID) throws IOException, TimeoutException {
-        Producer P = new Producer(queue);
-        P.send(jsonBody,UUID);
-    }
-
-
     public String getRequestBody() {
         return requestBody;
     }
@@ -121,7 +107,6 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
     public String getResponseBody() {
         return responseBody;
     }
-
 
     private static void send100Continue(ChannelHandlerContext ctx) {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,

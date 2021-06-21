@@ -6,6 +6,7 @@ import java.io.IOException;
 
 public class ChatConsumer {
 
+    //TODO Merge it with consumerMQ
     private final static String QUEUE_NAME = "ChatRequestQueue";
 
     public static void main(String[] argv) throws Exception {
