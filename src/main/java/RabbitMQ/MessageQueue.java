@@ -39,8 +39,8 @@ public class MessageQueue {
                 .correlationId(corrId)
                 .replyTo(responseQueue)
                 .build();
-        System.out.println("Message===>"+message);
-        if(MessageQueue.channel==null){
+        System.out.println("Message===>" + message);
+        if (MessageQueue.channel == null) {
             MessageQueue.instantiateChannel();
         }
         MessageQueue.channel.basicPublish("", queue, props, message.getBytes("UTF-8"));

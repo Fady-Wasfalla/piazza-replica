@@ -23,27 +23,27 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
 
 
     private HttpRequest request;
-    private  int counter = 0;
+    private int counter = 0;
     private String requestBody;
     private String httpRoute;
     volatile String responseBody;
     private CommandsMap cmdMap;
 
-    public ServiceNettyServerHandler(CommandsMap cmdMap){
-        this.cmdMap=cmdMap;
+    public ServiceNettyServerHandler(CommandsMap cmdMap) {
+        this.cmdMap = cmdMap;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         //HTTP HANDLER
         if (msg instanceof HttpRequest) {
-            requestBody="";
-            httpRoute="";
+            requestBody = "";
+            httpRoute = "";
             HttpRequest request = this.request = (HttpRequest) msg;
             if (HttpUtil.is100ContinueExpected(request)) {
                 send100Continue(ctx);
             }
-            httpRoute=request.uri();
+            httpRoute = request.uri();
         }
         if (msg instanceof HttpContent) {
             HttpContent httpContent = (HttpContent) msg;
@@ -59,28 +59,28 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
 
     }
 
-    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{   
+    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception {
         JSONObject requestJson = new JSONObject(getRequestBody());
         Dotenv dotenv = Dotenv.load();
         MongoClient mongoClient = null;
-        try  {
+        try {
 //            mongoClient = MongoClients.create(dotenv.get("CONNECTION_STRING")+10);
-        }catch(Exception error){
-            System.out.println("error hhhhhhhhhhhhh :"+error);
+        } catch (Exception error) {
+            System.out.println("error hhhhhhhhhhhhh :" + error);
         }
 
         String function = requestJson.getString("function");
         String serviceName = requestJson.getString("service");
         CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
         Class service = command.getClass();
-        Method setData = service.getMethod("setData",JSONObject.class, MongoClient.class);
-        setData.invoke(command, requestJson,mongoClient);
-        Method setCmd = service.getMethod("setCmd",CommandsMap.class);
+        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
+        setData.invoke(command, requestJson, mongoClient);
+        Method setCmd = service.getMethod("setCmd", CommandsMap.class);
         setCmd.invoke(command, cmdMap);
 //        cmdMap.getAllClasses();
         JSONObject resultCommand = command.execute();
-        if(true) {
-            if(ServiceNettyHTTPServer.channel==null)
+        if (true) {
+            if (ServiceNettyHTTPServer.channel == null)
                 ServiceNettyHTTPServer.instantiateChannel();
             String result = "HELLO";
             ByteBuf b = Unpooled.copiedBuffer(result, CharsetUtil.UTF_8);
@@ -88,10 +88,9 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
             response1.headers().set("CONTENT_TYPE", "application/json");
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
-         }
-        else {
+        } else {
             JSONObject result_error = new JSONObject();
-            result_error.put("Message","");
+            result_error.put("Message", "");
             ByteBuf b = Unpooled.copiedBuffer(result_error.toString(), CharsetUtil.UTF_8);
             FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(b));
             response1.headers().set("CONTENT_TYPE", "application/json");
@@ -119,6 +118,7 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
         cause.printStackTrace();
         ctx.close();
     }
+
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
 //        ctx.close();

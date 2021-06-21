@@ -1,6 +1,5 @@
 package ServiceNettyServer;
 
-import NettyHTTP.NettyHTTPServer;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import core.CommandsMap;
@@ -26,9 +25,9 @@ public class ServiceNettyHTTPServer {
     public String service;
     public CommandsMap cmdMap;
 
-    public ServiceNettyHTTPServer(int port, String service, CommandsMap cmdMap){
-        this.port=port;
-        this.service=service;
+    public ServiceNettyHTTPServer(int port, String service, CommandsMap cmdMap) {
+        this.port = port;
+        this.service = service;
         this.cmdMap = cmdMap;
     }
 
@@ -57,7 +56,7 @@ public class ServiceNettyHTTPServer {
         }
     }
 
-    public static void instantiateChannel(){
+    public static void instantiateChannel() {
         try {
             factory = new ConnectionFactory();
             factory.setHost("localhost");
@@ -69,6 +68,7 @@ public class ServiceNettyHTTPServer {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) throws Exception {
 //        ServiceNettyServerHandler x = new ServiceNettyServerHandler();
     }

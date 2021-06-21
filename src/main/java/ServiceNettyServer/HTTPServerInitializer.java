@@ -15,14 +15,15 @@ import io.netty.handler.codec.http.cors.CorsHandler;
 public class HTTPServerInitializer extends ChannelInitializer<SocketChannel> {
     public CommandsMap cmdMap;
 
-    public HTTPServerInitializer(CommandsMap cmdMap){
+    public HTTPServerInitializer(CommandsMap cmdMap) {
         this.cmdMap = cmdMap;
     }
+
     @Override
     protected void initChannel(SocketChannel arg0) {
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
-                .allowedRequestHeaders("X-Requested-With", "Content-Type","Content-Length")
-                .allowedRequestMethods(HttpMethod.GET,HttpMethod.POST,HttpMethod.PUT,HttpMethod.DELETE,HttpMethod.OPTIONS)
+                .allowedRequestHeaders("X-Requested-With", "Content-Type", "Content-Length")
+                .allowedRequestMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.OPTIONS)
                 .build();
         ChannelPipeline p = arg0.pipeline();
         p.addLast("decoder", new HttpRequestDecoder());

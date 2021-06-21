@@ -10,18 +10,18 @@ public class PostgreSQL {
         user = "fbqvcficlrhimr";
         String password = "f989e5d9f18291eddb927bfbbbcf76121d597dddc5a3350f136b233e7c4af518";
 
-        try{
+        try {
             Connection c = DriverManager.getConnection(url, user, password);
             Statement st = c.createStatement();
             ResultSet rs = st.executeQuery("SELECT table_name\n" +
                     "FROM information_schema.tables\n" +
                     "WHERE table_schema = 'public'\n" +
                     "ORDER BY table_name;");
-            while ( rs.next() ) {
-                String  table = rs.getString("table_name");
-                System.out.println( table );
+            while (rs.next()) {
+                String table = rs.getString("table_name");
+                System.out.println(table);
             }
-            
+
 //            String name = "Ahmed";
 //            String query = "INSERT INTO users(name) VALUES(?)";
 //            PreparedStatement pst = con.prepareStatement(query);
@@ -139,8 +139,7 @@ public class PostgreSQL {
 //            stmt.close();
 //            c.close();
 
-        }
-        catch (SQLException ex){
+        } catch (SQLException ex) {
             System.out.println(ex);
         }
     }
