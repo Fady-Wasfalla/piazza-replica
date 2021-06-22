@@ -16,7 +16,7 @@ public class ViewUserCoursesCommand extends CommandDP {
 
         String[] schema = {"userName", "skip", "limit", "sort"};
 
-        if(!validateJSON(schema, data)) {
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
@@ -26,14 +26,14 @@ public class ViewUserCoursesCommand extends CommandDP {
         int limit = this.data.getInt("limit");
         String sort = this.data.getString("sort");
 
-        if(sort == null){
+        if (sort == null) {
             sort = "name";
         }
 
         ArrayList<Document> queryResults = mongoDB.readAll(this.mongoClient, Collections.register,
                 new Document("userName", userName), Sorts.ascending(sort), skip, limit, jedis);
 
-        if(queryResults.isEmpty()) {
+        if (queryResults.isEmpty()) {
             result.put("[]", "User not registered in any courses");
             return result;
         }

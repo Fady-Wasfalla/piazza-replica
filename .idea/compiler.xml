@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="PiazzaInit" target="15" />
+      <module name="PiazzaInit" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

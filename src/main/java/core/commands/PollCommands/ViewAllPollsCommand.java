@@ -17,8 +17,7 @@ public class ViewAllPollsCommand extends CommandDP {
         String[] schema = {"courseId", "sort", "limit", "skip"};
 
 
-
-        if(!validateJSON(schema, data)) {
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
@@ -28,14 +27,14 @@ public class ViewAllPollsCommand extends CommandDP {
         int limit = this.data.getInt("limit");
         String sort = this.data.getString("sort");
 
-        if(sort == null){
+        if (sort == null) {
             sort = "title";
         }
 
         ArrayList<Document> queryResults = mongoDB.readAll(this.mongoClient, Collections.poll,
-                new Document("courseId", courseId),  Sorts.ascending(sort), skip, limit, jedis);
+                new Document("courseId", courseId), Sorts.ascending(sort), skip, limit, jedis);
 
-        if(queryResults.isEmpty()) {
+        if (queryResults.isEmpty()) {
             result.put("[]", "No polls to show for this course");
             return result;
         }

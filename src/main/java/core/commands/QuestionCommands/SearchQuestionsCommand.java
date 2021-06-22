@@ -17,15 +17,15 @@ public class SearchQuestionsCommand extends CommandDP {
     public JSONObject execute() {
         JSONObject result = new JSONObject();
 
-        String [] schema = {
+        String[] schema = {
                 "courseId",
                 "query",
                 "sort",
                 "skip",
                 "limit"
         };
-        
-        if(!validateJSON(schema, data)) {
+
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
@@ -35,12 +35,12 @@ public class SearchQuestionsCommand extends CommandDP {
         int limit = this.data.getInt("limit");
         String sort = this.data.getString("sort");
 
-        if(sort == null){
+        if (sort == null) {
             sort = "title";
         }
 
-        query= query.toLowerCase(Locale.ROOT);
-        String [] keywords = query.split(" ");
+        query = query.toLowerCase(Locale.ROOT);
+        String[] keywords = query.split(" ");
 
 //        Document[] parameters = new Document[keywords.length];
 //
@@ -53,27 +53,27 @@ public class SearchQuestionsCommand extends CommandDP {
 
 //        Document queries = new Document("$or", parameters);
         String expression = "";
-        for(int i=0; i<keywords.length; i++) {
-            expression+=".*";
-            expression+=keywords[i];
-            expression+=".*";
-            if(! (i== keywords.length-1)){
-                expression+="|";
+        for (int i = 0; i < keywords.length; i++) {
+            expression += ".*";
+            expression += keywords[i];
+            expression += ".*";
+            if (!(i == keywords.length - 1)) {
+                expression += "|";
             }
             System.out.println(expression);
 
         }
-        Document regex = new Document("$regex",expression);
+        Document regex = new Document("$regex", expression);
         Document queryDocument = new Document("description", regex);
-        
-        ArrayList<Document> queryResults= mongoDB.readAll(mongoClient, Collections.question,
+
+        ArrayList<Document> queryResults = mongoDB.readAll(mongoClient, Collections.question,
                 queryDocument, Sorts.ascending(sort), skip, limit, jedis);
 
-        if(queryResults.isEmpty()) {
+        if (queryResults.isEmpty()) {
             result.put("[]", "No questions to show for this course");
             return result;
         }
-        
+
         for (Document doc : queryResults) {
             JSONObject instance = new JSONObject(doc.toJson().toString());
             result.append("question", instance);

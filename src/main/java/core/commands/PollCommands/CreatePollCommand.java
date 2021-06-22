@@ -15,7 +15,7 @@ public class CreatePollCommand extends CommandDP {
     @Override
     public JSONObject execute() {
         JSONObject result = new JSONObject();
-
+        System.out.println("Execute Poll Create");
         String[] schema = {
                 "courseId",
                 "userName",
@@ -25,6 +25,7 @@ public class CreatePollCommand extends CommandDP {
         };
 
         if (!validateJSON(schema, data)) {
+            System.out.println("Invalid Json");
             result.put("error", "invalid request parameters");
             return result;
         }

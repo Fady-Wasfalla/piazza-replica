@@ -1,13 +1,9 @@
 package core.commands.QuestionCommands;
 
-import Services.mongoDB;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.model.UpdateOptions;
 import core.CommandDP;
 import io.github.cdimascio.dotenv.Dotenv;
-import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.json.JSONObject;
 
 public class UpdateQuestionCommand extends CommandDP {

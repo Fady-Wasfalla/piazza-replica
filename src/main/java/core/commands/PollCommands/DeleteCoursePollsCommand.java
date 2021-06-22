@@ -11,23 +11,23 @@ public class DeleteCoursePollsCommand extends CommandDP {
 
     @Override
     public JSONObject execute() {
-        JSONObject result= new JSONObject();
+        JSONObject result = new JSONObject();
 
-        String [] schema= {"courseId"};
+        String[] schema = {"courseId"};
 
-        if(!validateJSON(schema, data)) {
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
 
-        String courseId= data.getString("courseId");
+        String courseId = data.getString("courseId");
 
         DeleteResult deletedPolls = mongoDB.deleteMany(mongoClient, Collections.poll, new Document("courseId", courseId), jedis);
 
-        long pollDeletedCount= deletedPolls.getDeletedCount();
-        result.put("pollDeletedCount",pollDeletedCount);
+        long pollDeletedCount = deletedPolls.getDeletedCount();
+        result.put("pollDeletedCount", pollDeletedCount);
 
         return result;
-        
+
     }
 }
