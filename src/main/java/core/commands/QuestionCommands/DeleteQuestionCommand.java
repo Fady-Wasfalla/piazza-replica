@@ -16,9 +16,9 @@ public class DeleteQuestionCommand extends CommandDP {
         Dotenv dotenv = Dotenv.load();
         String connectionString = dotenv.get("CONNECTION_STRING");
         JSONObject result = new JSONObject();
-        try (MongoClient mongoClient = MongoClients.create(connectionString)) {
-            mongoDB.deleteOne(mongoClient, Collections.question, new Document());
-        }
+//        try (MongoClient mongoClient = MongoClients.create(connectionString)) {
+//            mongoDB.deleteOne(mongoClient, Collections.question, new Document());
+//        }
         result.put("Status", "200 OK: Question deleted successfully");
         return result;
     }

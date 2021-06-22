@@ -2,6 +2,7 @@ package core.commands.QuestionCommands;
 
 import Services.Collections;
 import Services.mongoDB;
+import com.mongodb.client.model.Sorts;
 import core.CommandDP;
 import org.bson.Document;
 import org.json.JSONObject;
@@ -18,7 +19,10 @@ public class SearchQuestionsCommand extends CommandDP {
 
         String [] schema = {
                 "courseId",
-                "query"
+                "query",
+                "sort",
+                "skip",
+                "limit"
         };
         
         if(!validateJSON(schema, data)) {
@@ -27,6 +31,14 @@ public class SearchQuestionsCommand extends CommandDP {
         }
 
         String query = data.getString("query");
+        int skip = this.data.getInt("skip");
+        int limit = this.data.getInt("limit");
+        String sort = this.data.getString("sort");
+
+        if(sort == null){
+            sort = "title";
+        }
+
         query= query.toLowerCase(Locale.ROOT);
         String [] keywords = query.split(" ");
 
@@ -54,8 +66,8 @@ public class SearchQuestionsCommand extends CommandDP {
         Document regex = new Document("$regex",expression);
         Document queryDocument = new Document("description", regex);
         
-        ArrayList<Document> queryResults= mongoDB.read(mongoClient, Collections.question,
-                queryDocument);
+        ArrayList<Document> queryResults= mongoDB.readAll(mongoClient, Collections.question,
+                queryDocument, Sorts.ascending(sort), skip, limit, jedis);
 
         if(queryResults.isEmpty()) {
             result.put("[]", "No questions to show for this course");
