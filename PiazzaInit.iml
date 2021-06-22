@@ -35,5 +35,6 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.11.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.0" level="project" />
     <orderEntry type="library" name="Maven: io.jsonwebtoken:jjwt:0.7.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.ibatis:ibatis-core:3.0" level="project" />
   </component>
 </module>
