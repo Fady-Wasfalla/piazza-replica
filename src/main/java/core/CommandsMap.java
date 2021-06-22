@@ -8,7 +8,8 @@ import core.commands.CourseCommands.DeleteCourseCommand;
 import core.commands.CourseCommands.ViewCourseCommand;
 import core.commands.CourseCommands.ViewUserCoursesCommand;
 import core.commands.PollCommands.CreatePollCommand;
-import core.commands.PollCommands.DeleteCoursePollsCommand;
+import core.commands.PollCommands.DeletePollCommand;
+import core.commands.PollCommands.UpdatePollCommand;
 import core.commands.PollCommands.ViewAllPollsCommand;
 import core.commands.QuestionCommands.AnswerQuestionCommand;
 import core.commands.QuestionCommands.CreateQuestionCommand;
@@ -48,8 +49,11 @@ public class CommandsMap implements Serializable {
         cmdMap.put("course/DeleteCourseCommand", DeleteCourseCommand.class);
 
         cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
-        cmdMap.put("poll/DeleteCoursePollsCommand", DeleteCoursePollsCommand.class);
+//        cmdMap.put("poll/DeleteCoursePollsCommand", DeleteCoursePollsCommand.class);
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
+        cmdMap.put("poll/DeletePollCommand", DeletePollCommand.class);
+        cmdMap.put("poll/UpdatePollCommand", UpdatePollCommand.class);
+
     }
 
     public static void saveStatus(Serializable object, String path) {
