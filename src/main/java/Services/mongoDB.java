@@ -9,6 +9,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -123,8 +124,9 @@ public class mongoDB {
 ///////////////////////////////////////////////////
 
     public static void main(String[] args) {
+        Dotenv dotenv = Dotenv.load();
         String connectionString = "mongodb+srv://admin:admin@cluster0.rcrnf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-        jedis jedis = new jedis("localhost", 6379, "");
+        jedis jedis = new jedis(dotenv.get("redis_host", "localhost"), 6379, "");
         //check whether server is running or not
         try (MongoClient mongo_client = MongoClients.create(connectionString)) {
             System.out.println("Connection to server sucessfully");

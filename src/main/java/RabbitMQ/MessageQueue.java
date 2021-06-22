@@ -3,8 +3,10 @@ package RabbitMQ;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
 public class MessageQueue {
@@ -13,10 +15,11 @@ public class MessageQueue {
     public static com.rabbitmq.client.Channel channel;
 
     public static void instantiateChannel() {
+        Dotenv dotenv = Dotenv.load();
         System.out.println("Instantiate Channel MessageQueue");
         try {
             factory = new ConnectionFactory();
-            factory.setHost("localhost");
+            factory.setHost(dotenv.get("rabbitmq_host", "localhost"));
             connection = factory.newConnection();
             channel = connection.createChannel();
         } catch (IOException e) {
@@ -25,11 +28,6 @@ public class MessageQueue {
             e.printStackTrace();
         }
     }
-
-//    public static void send(String message, String queue, String corrId) throws IOException, TimeoutException {
-//        Producer P = new Producer(queue);
-//        P.send(message, corrId);
-//    }
 
     public static void send(String message, String queue, String corrId) throws IOException, TimeoutException {
         String responseQueue = queue.split("Req", 0)[0] + "Res";
@@ -43,7 +41,7 @@ public class MessageQueue {
         if (MessageQueue.channel == null) {
             MessageQueue.instantiateChannel();
         }
-        MessageQueue.channel.basicPublish("", queue, props, message.getBytes("UTF-8"));
+        MessageQueue.channel.basicPublish("", queue, props, message.getBytes(StandardCharsets.UTF_8));
         //TODO clean resources When closing the project (channel and connection)
 //        MessageQueue.channel.close();
 //        MessageQueue.connection.close();

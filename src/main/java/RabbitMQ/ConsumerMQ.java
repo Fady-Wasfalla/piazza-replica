@@ -15,8 +15,6 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,7 +24,6 @@ public class ConsumerMQ {
 
     public static void run(String microservice, int port) throws Exception {
         Dotenv dotenv = Dotenv.load();
-
         CommandsMap cmdMap = new CommandsMap();
         CommandsMap.instantiate();
         System.out.println("Command Map Size: " + CommandsMap.cmdMap.size());
@@ -40,7 +37,7 @@ public class ConsumerMQ {
         jedis jedis = null;
         try {
             mongoClient = MongoClients.create(connectionString);
-            jedis = new jedis("localhost", 6379, "");
+            jedis = new jedis(dotenv.get("redis_host","localhost"), 6379, "");
         } catch (Exception error) {
             System.out.println("ERROR CREATING MONGODB/Redis CONNECTION :" + error);
 

@@ -59,6 +59,7 @@ public class ServiceNettyHTTPServer {
     public static void instantiateChannel() {
         try {
             factory = new ConnectionFactory();
+            //TODO check host
             factory.setHost("localhost");
             connection = factory.newConnection();
             channel = connection.createChannel();

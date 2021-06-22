@@ -1,5 +1,7 @@
 package Services;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.sql.*;
 
 public class PostgreSQL {
@@ -144,7 +146,8 @@ public class PostgreSQL {
     }
 
     public static void main(String[] args) throws SQLException {
-        String url = "jdbc:postgresql://localhost/postgres";
+        Dotenv dotenv = Dotenv.load();
+        String url = "jdbc:postgresql://"+dotenv.get("postgres_host","localhost")+"/postgres";
         String user = "postgres";
         String password = "";
         PostgreSQL postgres = new PostgreSQL(url, user, password);
