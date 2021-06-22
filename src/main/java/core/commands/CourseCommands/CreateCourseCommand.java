@@ -27,7 +27,6 @@ public class CreateCourseCommand extends CommandDP {
                 "userName",
                 "code",
         };
-        data = (JSONObject) data.get("body");
         if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;

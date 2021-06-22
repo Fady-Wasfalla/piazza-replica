@@ -31,7 +31,6 @@ public class CommandsMap implements Serializable {
     public static void instantiate() {
         cmdMap = new HashMap<>();
         cmdMap.put("user/SignupCommand", SignupCommand.class);
-        cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("command/AddCommand", AddCommand.class);
         cmdMap.put("command/UpdateCommand", UpdateCommand.class);
         cmdMap.put("command/DeleteCommand", DeleteCommand.class);
@@ -44,6 +43,7 @@ public class CommandsMap implements Serializable {
         cmdMap.put("question/SearchQuestionsCommand", SearchQuestionsCommand.class);
         cmdMap.put("question/AnswerQuestionCommand", AnswerQuestionCommand.class);
 
+        cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("course/ViewCourseCommand", ViewCourseCommand.class);
         cmdMap.put("course/DeleteCourseCommand", DeleteCourseCommand.class);
 

@@ -26,17 +26,6 @@ public class ConsumerMQ {
 
     public static void run(String microservice, int port) throws Exception {
         Dotenv dotenv = Dotenv.load();
-        String strlist = dotenv.get("queuesReq");
-        List<String> queueReqNames = Arrays.asList(strlist.split(","));
-        strlist = dotenv.get("queuesRes");
-        List<String> queueResNames = Arrays.asList(strlist.split(","));
-
-        if (!queueReqNames.contains(microservice + "Req")) {
-            throw new Exception("Microservice Does Not Exist");
-        }
-        if (!queueResNames.contains(microservice + "Res")) {
-            throw new Exception("Microservice Does Not Exist");
-        }
 
         CommandsMap cmdMap = new CommandsMap();
         CommandsMap.instantiate();
@@ -79,16 +68,18 @@ public class ConsumerMQ {
                         String function = requestJson.getString("function");
                         String queue = requestJson.getString("queue");
 
+                        System.out.println("Method to be found: "+ queue + "/" + function);
                         CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
-                        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
-                        setData.invoke(command, requestJson, finalMongoClient);
+                        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class,jedis.class);
+                        setData.invoke(command, requestJson, finalMongoClient,finalJedis);
                         JSONObject result = command.execute();
                         MessageQueue.send(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
                         MessageQueue.channel.basicAck(envelope.getDeliveryTag(), false);
                     } catch (Exception e) {
                         e.printStackTrace();
                         JSONObject result = new JSONObject();
+                        System.out.println(e);
                         result.put("Err Message MQ", e.toString());
                         System.out.println(result);
                         try {
