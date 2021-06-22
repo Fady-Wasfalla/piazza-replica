@@ -3,25 +3,19 @@ package core.commands.QuestionCommands;
 import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.model.Sorts;
-import com.mongodb.client.result.UpdateResult;
-import com.rabbitmq.client.Command;
 import core.CommandDP;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
-import com.mongodb.client.model.UpdateOptions;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import static com.mongodb.client.model.Updates.set;
+import java.util.ArrayList;
 
 public class AnswerQuestionCommand extends CommandDP {
 
     @Override
     public JSONObject execute() {
-        JSONObject result= new JSONObject();
-        String [] schema= {
+        JSONObject result = new JSONObject();
+        String[] schema = {
                 "questionId",
                 "userName",
                 "description",
@@ -32,16 +26,16 @@ public class AnswerQuestionCommand extends CommandDP {
                 "limit"
         };
 
-        if(!validateJSON(schema, data)) {
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
-        String questionId= this.data.getString("questionId");
+        String questionId = this.data.getString("questionId");
         int skip = this.data.getInt("skip");
         int limit = this.data.getInt("limit");
         String sort = this.data.getString("sort");
 
-        if(sort == null){
+        if (sort == null) {
             sort = "title";
         }
 
@@ -49,11 +43,10 @@ public class AnswerQuestionCommand extends CommandDP {
                 new Document("_id", new ObjectId(questionId)), Sorts.ascending(sort), skip, limit, jedis);
 
         Document myQuestion;
-        if(!(myQuestions.size()==0)){
-            myQuestion= (Document) myQuestions.get(0);
-        }
-        else{
-            result.put("error","no Questions with such ID");
+        if (!(myQuestions.size() == 0)) {
+            myQuestion = (Document) myQuestions.get(0);
+        } else {
+            result.put("error", "no Questions with such ID");
             return result;
         }
         System.out.println(myQuestion);
@@ -65,7 +58,7 @@ public class AnswerQuestionCommand extends CommandDP {
 //            myAnswers.add(answers[i]);
 //            newAnswersArray[i]=answers[i];
 //        }
-        JSONObject newAnswer= new JSONObject();
+        JSONObject newAnswer = new JSONObject();
         newAnswer.put("username", data.getString("userName"));
         newAnswer.put("description", data.getString("description"));
         newAnswer.put("endorsed", data.get("endorsed"));

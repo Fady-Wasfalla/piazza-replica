@@ -2,16 +2,11 @@ package core.commands.QuestionCommands;
 
 import Services.Collections;
 import Services.mongoDB;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import core.CommandDP;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -42,7 +37,7 @@ public class CreateQuestionCommand extends CommandDP {
         this.data.put("createdAt", new Date().getTime() + "");
 
         String description = this.data.getString("description").toLowerCase(Locale.ROOT);
-        this.data.put("description",description);
+        this.data.put("description", description);
 
         Document questionDocument = Document.parse(data.toString());
 

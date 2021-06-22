@@ -1,4 +1,4 @@
 package core.commands.PollCommands;
 
-public class DeletePollComand {
+public class DeletePollCommand {
 }
