@@ -15,7 +15,7 @@ public abstract class CommandDP {
 
     public void setData(JSONObject data, MongoClient mongoClient, jedis jedis) {
         this.data = data.getJSONObject("body");
-        this.user = data.getJSONObject("user");
+//        this.user = data.getJSONObject("user");
         this.mongoClient = mongoClient;
         this.jedis = jedis;
     }

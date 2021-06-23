@@ -10,16 +10,21 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.util.CharsetUtil;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 
-public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Object> {
+public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
 
     private HttpRequest request;
@@ -34,7 +39,7 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         //HTTP HANDLER
         if (msg instanceof HttpRequest) {
             requestBody = "";
@@ -45,16 +50,71 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
             }
             httpRoute = request.uri();
         }
+
         if (msg instanceof HttpContent) {
+            System.out.println("hello 1");
             HttpContent httpContent = (HttpContent) msg;
             ByteBuf content = httpContent.content();
-            requestBody = requestBody + content.toString(CharsetUtil.UTF_8);
+            ByteBuffer content2 = content.nioBuffer();
+
+            QueryStringDecoder decoder = new QueryStringDecoder(String.valueOf(msg.getUri()));
+            String serviceName = decoder.parameters().get("service").get(0);
+            String className = decoder.parameters().get("className").get(0);
+            String service = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1).toLowerCase() + "Commands";
+            String filePath = "src/main/java/core/commands/"+service+"/"+className+".class";
+//            String filePath = "src/main/java/core/commands/x.class";
+            System.out.println(filePath);
+            File file = new File(filePath);
+
+            FileChannel wChannel = new FileOutputStream(file, false).getChannel();
+            wChannel.write(content2);
+            wChannel.close();
+
+//            Class<?> newClass = Class.forName("Services.ViewAllQuestionsCommand", true, classLoader);
+//            String key = queue + "/" + className.split("\\.java")[0];
+//            cmdMap.replace(key, newClass);
+//            System.out.println("ADD");
+//            cmdMap.getAllClasses();
+
+
+//            byte[] bytes = new byte[requestBody.readableBytes()];
+//            content.duplicate().readBytes(bytes);
+// src/main/java/core/commands/QuestionCommands/AnswerQuestionCommand.java
+// src/main/java/core/QuestionsCommands/ViewAllQuestionsCommand.class
+//            try (FileOutputStream fos = new FileOutputStream("test.class")) {
+//                fos.write(content.nioBuffer());
+//                //fos.close // no need, try-with-resources auto close
+//            }
+//            try {
+//                File myObj = new File("test.class");
+//                if (myObj.createNewFile()) {
+//                    myObj.write
+//                    System.out.println("File created: " + myObj.getName());
+//                } else {
+//                    System.out.println("File already exists.");
+//                }
+//            } catch (IOException e) {
+//                System.out.println("An error occurred.");
+//                e.printStackTrace();
+//            }
+
             ctx.fireChannelRead(content.copy());
         }
         if (msg instanceof LastHttpContent) {
+            System.out.println("hello 2");
             LastHttpContent trailer = (LastHttpContent) msg;
+            if (trailer instanceof BinaryWebSocketFrame) {
+                System.out.println("AA&AAAAAA");
+                ByteBuf content2 = ((BinaryWebSocketFrame)msg).content();
+                File file = new File("test.class");
+
+                FileChannel wChannel = new FileOutputStream(file, true).getChannel();
+                System.out.println("HELLLLLLLLLLLLLLLLLLLLLLLL"+content2);
+//            wChannel.write(content2);
+                wChannel.close();
+            }
             System.out.println(getRequestBody());
-            writeResponse(trailer, ctx);
+//            writeResponse(trailer, ctx);
         }
 
     }
@@ -124,5 +184,4 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
 //        ctx.close();
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
-
 }
