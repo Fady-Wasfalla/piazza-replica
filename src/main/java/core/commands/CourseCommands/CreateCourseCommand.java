@@ -9,6 +9,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -36,7 +37,7 @@ public class CreateCourseCommand extends CommandDP {
 
         Document courseDocument = Document.parse(data.toString());
 
-        BsonValue courseId = mongoDB.create(mongoClient, Collections.course, courseDocument, jedis, "_id")
+        BsonValue courseId = mongoDB.create(Collections.course, courseDocument, jedis, "_id")
                 .getInsertedId();
 
         result.put("courseId", courseId.asObjectId().getValue().toString());
@@ -64,7 +65,7 @@ public class CreateCourseCommand extends CommandDP {
             MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
                 if (delivery.getProperties().getCorrelationId().equals(correlationId)) {
                     MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                    response.offer(new String(delivery.getBody(), "UTF-8"));
+                    response.offer(new String(delivery.getBody(), StandardCharsets.UTF_8));
                     MessageQueue.channel.basicCancel(consumerTag);
                 } else {
                     MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);

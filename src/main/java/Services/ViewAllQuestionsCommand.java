@@ -33,7 +33,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
             sort = "title";
         }
 
-        ArrayList<Document> queryResults = mongoDB.readAll(this.mongoClient, Collections.question,
+        ArrayList<Document> queryResults = mongoDB.readAll(Collections.question,
                 new Document("courseId", courseId), Sorts.ascending(sort), skip, limit, jedis);
 
         if (queryResults.isEmpty()) {
@@ -42,7 +42,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
         }
 
         for (Document doc : queryResults) {
-            JSONObject instance = new JSONObject(doc.toJson().toString());
+            JSONObject instance = new JSONObject(doc.toJson());
             result.append("question", instance);
         }
 

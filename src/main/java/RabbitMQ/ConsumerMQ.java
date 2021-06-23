@@ -1,7 +1,9 @@
 package RabbitMQ;
 
 import ServiceNettyServer.ServiceNettyHTTPServer;
+import Services.PostgreSQL;
 import Services.jedis;
+import Services.mongoDB;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.rabbitmq.client.AMQP;
@@ -32,17 +34,15 @@ public class ConsumerMQ {
         if (MessageQueue.channel == null)
             MessageQueue.instantiateChannel();
 
-        String connectionString = dotenv.get("CONNECTION_STRING") + "10"; // no. of DP connections
-        MongoClient mongoClient = null;
         jedis jedis = null;
         try {
-            mongoClient = MongoClients.create(connectionString);
-            jedis = new jedis(dotenv.get("redis_host","localhost"), 6379, "");
+            mongoDB.initMongo();
+            jedis = new jedis(dotenv.get("redis_host", "localhost"), 6379, "");
+            PostgreSQL.initPostgres();
         } catch (Exception error) {
-            System.out.println("ERROR CREATING MONGODB/Redis CONNECTION :" + error);
+            System.out.println("ERROR CREATING MONGODB/REDIS/POSTGRES CONNECTION :" + error);
 
         }
-        MongoClient finalMongoClient = mongoClient;
         jedis finalJedis = jedis;
 
         //Response Queue Declare
@@ -65,11 +65,11 @@ public class ConsumerMQ {
                         String function = requestJson.getString("function");
                         String queue = requestJson.getString("queue");
 
-                        System.out.println("Method to be found: "+ queue + "/" + function);
+                        System.out.println("Method to be found: " + queue + "/" + function);
                         CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
-                        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class,jedis.class);
-                        setData.invoke(command, requestJson, finalMongoClient,finalJedis);
+                        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class, jedis.class);
+                        setData.invoke(command, requestJson, finalJedis);
                         JSONObject result = command.execute();
                         MessageQueue.send(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
                         MessageQueue.channel.basicAck(envelope.getDeliveryTag(), false);

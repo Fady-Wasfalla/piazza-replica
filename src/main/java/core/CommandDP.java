@@ -8,15 +8,13 @@ public abstract class CommandDP {
     public JSONObject data;
     public JSONObject user;
     public Object dal;
-    public MongoClient mongoClient;
     public jedis jedis;
 
     public abstract JSONObject execute();
 
-    public void setData(JSONObject data, MongoClient mongoClient, jedis jedis) {
+    public void setData(JSONObject data, jedis jedis) {
         this.data = data.getJSONObject("body");
         this.user = data.getJSONObject("user");
-        this.mongoClient = mongoClient;
         this.jedis = jedis;
     }
 

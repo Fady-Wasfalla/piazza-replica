@@ -20,7 +20,7 @@ public class DeleteCourseRegistersCommand extends CommandDP {
         }
 
         String courseId = data.getString("courseId");
-        DeleteResult deletedRegisters = mongoDB.deleteMany(mongoClient, Collections.register,
+        DeleteResult deletedRegisters = mongoDB.deleteMany(Collections.register,
                 new Document("courseId", courseId), jedis);
 
         long registerDeletedCount = deletedRegisters.getDeletedCount();

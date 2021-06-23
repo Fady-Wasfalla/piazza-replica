@@ -22,15 +22,21 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
 
+    volatile String responseBody;
     private HttpRequest request;
-    private int counter = 0;
+    private final int counter = 0;
     private String requestBody;
     private String httpRoute;
-    volatile String responseBody;
-    private CommandsMap cmdMap;
+    private final CommandsMap cmdMap;
 
     public ServiceNettyServerHandler(CommandsMap cmdMap) {
         this.cmdMap = cmdMap;
+    }
+
+    private static void send100Continue(ChannelHandlerContext ctx) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+                CONTINUE);
+        ctx.writeAndFlush(response);
     }
 
     @Override
@@ -71,7 +77,7 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
 
         String function = requestJson.getString("function");
         String serviceName = requestJson.getString("service");
-        CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
+        CommandDP command = (CommandDP) CommandsMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
         Class service = command.getClass();
         Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
         setData.invoke(command, requestJson, mongoClient);
@@ -105,12 +111,6 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
 
     public String getResponseBody() {
         return responseBody;
-    }
-
-    private static void send100Continue(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                CONTINUE);
-        ctx.writeAndFlush(response);
     }
 
     @Override

@@ -1,5 +1,3 @@
--- Database: piazza
-
 -- DROP DATABASE piazza;
 
 -- CREATE DATABASE piazza
@@ -32,11 +30,14 @@ CREATE TRIGGER set_timestamp BEFORE INSERT OR UPDATE ON users FOR EACH ROW EXECU
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- CREATE OR REPLACE FUNCTION public.get_education(user_id integer) RETURNS refcursor AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN OPEN cursor FOR SELECT * FROM education E WHERE E.user_id = $1; RETURN cursor; END; $$ LANGUAGE PLPGSQL;
-CREATE OR REPLACE FUNCTION register_user( inputUserName CHAR(20), inputFirstName CHAR(20), inputLastName CHAR(20), inputEmail CHAR(100), inputPassword TEXT, inputRole CHAR(20)) RETURNS refcursor AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN INSERT INTO users(userName, firstName, lastName, email, password, role) VALUES($1, $2, $3, $4, crypt($5, gen_salt('bf')), $6); OPEN cursor FOR SELECT users.userId FROM users WHERE users.userName = $1; RETURN cursor; END; $$ LANGUAGE PLPGSQL;
+DROP FUNCTION IF EXISTS register_user;
+CREATE OR REPLACE FUNCTION register_user( inputUserName CHAR(20), inputFirstName CHAR(20), inputLastName CHAR(20), inputEmail CHAR(100), inputPassword TEXT, inputRole CHAR(20)) RETURNS REFCURSOR AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN INSERT INTO users(userName, firstName, lastName, email, password, role) VALUES($1, $2, $3, $4, crypt($5, gen_salt('bf')), $6); OPEN cursor FOR SELECT users.userId FROM users WHERE users.userName = $1; RETURN cursor; END; $$ LANGUAGE PLPGSQL;
 
-CREATE OR REPLACE FUNCTION login_user( inputEmail CHAR(100), inputPassword CHAR(20)) RETURNS TABLE( userId INT, userName CHAR(20), firstName CHAR(20), lastName CHAR(20), email CHAR(100), password TEXT, role CHAR(20), createdAt TIMESTAMPTZ, updatedAt TIMESTAMPTZ) AS $$ BEGIN return query SELECT * FROM users WHERE email = $1 AND password = crypt($2, password); END; $$ LANGUAGE PLPGSQL;
---
-CREATE OR REPLACE FUNCTION delete_user(inputUserName CHAR(20)) RETURNS TABLE( userId INT, userName CHAR(20), firstName CHAR(20), lastName CHAR(20), email CHAR(100), password TEXT, role CHAR(20), createdAt TIMESTAMPTZ, updatedAt TIMESTAMPTZ) AS $$ BEGIN DELETE FROM users WHERE userName = $1; return query SELECT * FROM users WHERE userName = $1; END; $$ LANGUAGE PLPGSQL;
---
-CREATE OR REPLACE FUNCTION update_user( inputFirstName VARCHAR(20), inputLastName VARCHAR(20), inputPassword TEXT, inputUserName CHAR(20)) RETURNS TABLE( userId INT, userName CHAR(20), firstName CHAR(20), lastName CHAR(20), email CHAR(100), password TEXT, role CHAR(20), createdAt TIMESTAMPTZ, updatedAt TIMESTAMPTZ) AS $$ BEGIN UPDATE users SET firstName = COALESCE($1, firstName), lastName = COALESCE($2, lastName), password = COALESCE(crypt($3, gen_salt('bf')), password) WHERE userName = $4; return query SELECT * FROM users WHERE userName = $4; END; $$ LANGUAGE PLPGSQL;
+DROP FUNCTION IF EXISTS login_user;
+CREATE OR REPLACE FUNCTION login_user( inputEmail CHAR(100), inputPassword CHAR(20)) RETURNS REFCURSOR AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN OPEN cursor FOR SELECT * FROM users WHERE email = $1 AND password = crypt($2, password); RETURN cursor; END; $$ LANGUAGE PLPGSQL;
+
+DROP FUNCTION IF EXISTS delete_user;
+CREATE OR REPLACE FUNCTION delete_user(inputUserName CHAR(20)) RETURNS VOID AS $$ BEGIN DELETE FROM users WHERE users.userName = $1; END; $$ LANGUAGE PLPGSQL;
+
+DROP FUNCTION IF EXISTS update_user;
+CREATE OR REPLACE FUNCTION update_user( inputFirstName VARCHAR(20), inputLastName VARCHAR(20), inputPassword TEXT, inputUserName CHAR(20)) RETURNS VOID AS $$ BEGIN UPDATE users SET firstName = COALESCE($1, firstName), lastName = COALESCE($2, lastName), password = COALESCE(crypt($3, gen_salt('bf')), password) WHERE userName = $4; END; $$ LANGUAGE PLPGSQL;

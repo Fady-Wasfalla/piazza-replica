@@ -32,7 +32,7 @@ public class ReqBodyCreator {
             commandReqJSON.put("className", className);
 
             System.out.println("Request Body : ");
-            System.out.println(commandReqJSON.toString());   //returns a string that textually represents the object
+            System.out.println(commandReqJSON);   //returns a string that textually represents the object
         } catch (IOException e) {
             e.printStackTrace();
 
