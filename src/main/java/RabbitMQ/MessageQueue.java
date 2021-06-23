@@ -29,6 +29,17 @@ public class MessageQueue {
         }
     }
 
+    public static void declareQueue(String microservice) throws IOException {
+        //Response Queue Declare
+        String RES_QUEUE_NAME = microservice + "Res";
+        MessageQueue.channel.queueDeclare(RES_QUEUE_NAME, false, false, false, null);
+
+        //Request Queue Declare
+        String REQ_QUEUE_NAME = microservice + "Req";
+        MessageQueue.channel.queueDeclare(REQ_QUEUE_NAME, false, false, false, null);
+
+    }
+
     public static void send(String message, String queue, String corrId) throws IOException, TimeoutException {
         String responseQueue = queue.split("Req", 0)[0] + "Res";
         System.out.println("Send Message (MessageQueue.class):" + queue + " =====> " + message);

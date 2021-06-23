@@ -75,7 +75,7 @@ public class SearchQuestionsCommand extends CommandDP {
         }
 
         for (Document doc : queryResults) {
-            JSONObject instance = new JSONObject(doc.toJson().toString());
+            JSONObject instance = new JSONObject(doc.toJson());
             result.append("question", instance);
         }
 

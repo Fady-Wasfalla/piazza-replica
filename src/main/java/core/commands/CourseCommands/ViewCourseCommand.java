@@ -32,7 +32,7 @@ public class ViewCourseCommand extends CommandDP {
 
         System.out.println("Monica ==> " + queryResult);
 
-        JSONObject result = new JSONObject(queryResult.toJson().toString());
+        JSONObject result = new JSONObject(queryResult.toJson());
         return result;
     }
 }

@@ -16,6 +16,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.UUID;
@@ -26,27 +27,33 @@ import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 
-public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
+public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
+    volatile String responseBody;
     private HttpRequest request;
     private  int counter = 0;
     private String requestBody;
     private String httpRoute;
     private HttpHeaders headers;
-    volatile String responseBody;
+
+    private static void send100Continue(ChannelHandlerContext ctx) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+                CONTINUE);
+        ctx.writeAndFlush(response);
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         //HTTP HANDLER
         if (msg instanceof HttpRequest) {
-            requestBody="";
-            httpRoute="";
+            requestBody = "";
+            httpRoute = "";
             headers = ((HttpRequest) msg).headers();
             HttpRequest request = this.request = (HttpRequest) msg;
             if (HttpUtil.is100ContinueExpected(request)) {
                 send100Continue(ctx);
             }
-            httpRoute=request.uri();
+            httpRoute = request.uri();
         }
         if (msg instanceof HttpContent) {
             HttpContent httpContent = (HttpContent) msg;
@@ -60,35 +67,36 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         }
     }
 
-    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception{
+    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception {
         JSONObject requestJson = new JSONObject(getRequestBody());
-        requestJson.put("httpRoute",httpRoute);
+        requestJson.put("httpRoute", httpRoute);
         String queue = requestJson.getString("queue");
         String requestQueue = queue + "Req";
         String responseQueue = queue + "Res";
 
         JSONObject authPayload = authenticate(getToken(headers));
 
-        if(validateQueueName(queue)) {
+        if (validateQueueName(queue)) {
 
             requestJson.put("user", authPayload);
 
             final String corrId = UUID.randomUUID().toString();
-            System.out.println("Netty Http Server Handler "+requestJson.toString());
-            MessageQueue.send(requestJson.toString(), requestQueue,corrId);
-            System.out.println("Request Body : " + requestJson.toString());
+            System.out.println("Netty Http Server Handler " + requestJson);
+            MessageQueue.send(requestJson.toString(), requestQueue, corrId);
+            System.out.println("Request Body : " + requestJson);
 
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 
-            if(MessageQueue.channel==null)
+            if (MessageQueue.channel == null) {
                 MessageQueue.instantiateChannel();
+            }
             MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
 
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
                     MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                    response.offer(new String(delivery.getBody(), "UTF-8"));
+                    response.offer(new String(delivery.getBody(), StandardCharsets.UTF_8));
                     MessageQueue.channel.basicCancel(consumerTag);
-                }else{
+                } else {
                     MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
                 }
             }, consumerTag -> {
@@ -106,10 +114,9 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
 
-        }
-        else {
+        } else {
             JSONObject result_error = new JSONObject();
-            result_error.put("Message","Invalid Queue Name");
+            result_error.put("Message", "Invalid Queue Name");
             ByteBuf b = Unpooled.copiedBuffer(result_error.toString(), CharsetUtil.UTF_8);
             FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
             response1.headers().set("CONTENT_TYPE", "application/json");
@@ -118,7 +125,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         }
     }
 
-    public boolean validateQueueName(String queue){
+    public boolean validateQueueName(String queue) {
         Dotenv dotenv = Dotenv.load();
         String strlist = dotenv.get("queues");
         return Arrays.asList(strlist.split(",")).contains(queue);
@@ -132,25 +139,19 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
         return responseBody;
     }
 
-
-    private static void send100Continue(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                CONTINUE);
-        ctx.writeAndFlush(response);
-    }
-
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         ctx.close();
     }
+
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
 
     public JSONObject authenticate(String token) {
-        if(token == null)
+        if (token == null)
             return null;
 
         Dotenv dotenv = Dotenv.load();
@@ -167,7 +168,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
             JSONObject res = new JSONObject(payload);
             return res;
-        } catch (JWTVerificationException exception){
+        } catch (JWTVerificationException exception) {
             System.out.println("auth error");
             return null;
         }
@@ -175,7 +176,7 @@ public class NettyServerHandler  extends SimpleChannelInboundHandler<Object> {
 
     public String getToken(HttpHeaders headers) {
         String auth = headers.get("Authorization");
-        if(auth != null && auth.split(" ").length == 2 && auth.split(" ")[0].equals("Bearer"))
+        if (auth != null && auth.split(" ").length == 2 && auth.split(" ")[0].equals("Bearer"))
             return auth.split(" ")[1];
         else
             return null;
