@@ -25,9 +25,9 @@ public class ConsumerMQ {
     public static void run(String microservice, int port) throws Exception {
         Dotenv dotenv = Dotenv.load();
         CommandsMap cmdMap = new CommandsMap();
-        CommandsMap.instantiate();
-        System.out.println("Command Map Size: " + CommandsMap.cmdMap.size());
-        CommandsMap.getAllClasses();
+        cmdMap.instantiate();
+        System.out.println("Command Map Size: " + cmdMap.cmdMap.size());
+        cmdMap.getAllClasses();
         Consumer consumer;
         if (MessageQueue.channel == null)
             MessageQueue.instantiateChannel();
@@ -66,7 +66,7 @@ public class ConsumerMQ {
                         String queue = requestJson.getString("queue");
 
                         System.out.println("Method to be found: "+ queue + "/" + function);
-                        CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
+                        CommandDP command = (CommandDP) cmdMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
                         Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class,jedis.class);
                         setData.invoke(command, requestJson, finalMongoClient,finalJedis);
