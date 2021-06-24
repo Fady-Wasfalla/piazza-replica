@@ -1,5 +1,8 @@
-package Services;
-
+package core.commands.QuestionCommands;
+import Services.Collections;
+import Services.mongoDB;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.model.Sorts;
 import core.CommandDP;
 import org.bson.Document;

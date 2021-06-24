@@ -1,62 +1,79 @@
-package core.commands.QuestionCommands;
+package core.commands.UserCommands;
 
 import NettyHTTP.NettyHTTPServer;
 import NettyHTTP.NettyServerHandler;
-import Notifications.Notifications;
 import RabbitMQ.MessageQueue;
 import Services.Collections;
 import Services.mongoDB;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.UpdateResult;
 import core.CommandDP;
-import org.bson.BsonValue;
+import org.bson.BsonDocument;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
+import static com.mongodb.client.model.Updates.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class CreateQuestionCommand extends CommandDP {
+import static Services.mongoDB.getCollection;
 
-
+public class BanStudentCommand extends CommandDP {
     @Override
     public JSONObject execute() {
-        JSONObject result = new JSONObject();
-
-        String[] schema = {
+        JSONObject result= new JSONObject();
+        String [] schema= {
                 "courseId",
-                "userName",
-                "title",
-                "description",
-                "anonymous",
-                "private",
-                "media",
-                "likes",
-                "answers"
+                "userName" ,
+                "banExpiryDate" ,
+                "bannerUserName"
         };
-
-        if (!validateJSON(schema, data)) {
+        if(!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
+        String[] updateKeys = {
+                "bannerUserName",
+                "banExpiryDate"
+        };
+        BsonDocument updateOperation = new BsonDocument();
 
-        this.data.put("createdAt", new Date().getTime() + "");
+//        String pollId= data.getString("pollId");
 
-        String description = this.data.getString("description").toLowerCase(Locale.ROOT);
-        this.data.put("description", description);
+        String set = "{ $set: {";
+        set+= "\"banned\":" + true +",";
+        for (String key:updateKeys) {
 
-        Document questionDocument = Document.parse(data.toString());
+            if(this.data.has(key)){
+                set+= "\""+key+"\": \"" + this.data.getString(key)+"\",";
+            }
 
-        BsonValue questionId = mongoDB.create(Collections.question, questionDocument, "_id")
-                .getInsertedId();
 
-        result.put("questionId", questionId.asObjectId().getValue().toString());
+        }
+        set = set.substring(0,set.length()-1);
+        set +=  "      } }" ;
+        System.out.println(set);
+        String courseId = this.data.getString("courseId");
+        String userName = this.data.getString("userName");
+
+        Document filterDocument = new Document("role", "student").append("courseId",courseId).append("userName",userName);
+
+        Document resultDocument = mongoDB.update(Collections.register,filterDocument
+                , BsonDocument.parse(set), new FindOneAndUpdateOptions(),"courseId");
+
+
+        if (resultDocument != null)
+        {
+            result.put("Status", "200 OK: Student banned successfully");
+        }
+        else {
+            result.put("Status", "400 Error");
+        }
 
 
         String correlationId = UUID.randomUUID().toString();
@@ -65,18 +82,17 @@ public class CreateQuestionCommand extends CommandDP {
 
         JSONObject notificationRequest = new JSONObject();
         notificationRequest.put("queue", "notification");
-        notificationRequest.put("function", "NotifyAllStudentsCommand");
+        notificationRequest.put("function", "NotifyStudentCommand");
 
         JSONObject body = new JSONObject();
-        body.put("userName", this.data.getString("userName"));
-
-        body.put("courseId", this.data.getString("courseId"));
-        body.put("description","A student asked a new question");
-        body.put("model",  questionId.asObjectId().getValue().toString());
-        body.put("onModel", "Question");
+        body.put("userName", userName);
+        body.put("description","Your are banned");
+        body.put("model",  courseId);
+        body.put("onModel", "Course");
         body.put("sort", "_id");
         body.put("skip", 0);
         body.put("limit", 0);
+
 
         notificationRequest.put("body", body);
         notificationRequest.put("user", this.user);
@@ -106,8 +122,6 @@ public class CreateQuestionCommand extends CommandDP {
             e.printStackTrace();
         }
 
-
         return result;
     }
-
 }
