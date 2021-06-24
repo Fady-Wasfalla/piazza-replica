@@ -38,7 +38,7 @@ public class ConsumerMQ {
         try {
             mongoDB.initMongo();
             jedis = new jedis(dotenv.get("redis_host", "localhost"), 6379, "");
-            PostgreSQL.initPostgres();
+            PostgreSQL.initPostgres(-1);
         } catch (Exception error) {
             System.out.println("ERROR CREATING MONGODB/REDIS/POSTGRES CONNECTION :" + error);
 
@@ -68,7 +68,7 @@ public class ConsumerMQ {
                         System.out.println("Method to be found: " + queue + "/" + function);
                         CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
-                        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class, jedis.class);
+                        Method setData = service.getMethod("setData", JSONObject.class, jedis.class);
                         setData.invoke(command, requestJson, finalJedis);
                         JSONObject result = command.execute();
                         MessageQueue.send(result.toString(), properties.getReplyTo(), properties.getCorrelationId());

@@ -16,8 +16,9 @@ public class PostgreSQL {
 
     public static final String dbName = "piazza";
     private static PoolingDataSource<PoolableConnection> postgresPool;
+    private static PoolingDriver dbDriver;
 
-    public static void initPostgres() throws SQLException {
+    public static void initPostgres(int maxConnection) throws SQLException {
 
         try {
             Class.forName("org.postgresql.Driver");
@@ -26,12 +27,16 @@ public class PostgreSQL {
             ex.printStackTrace();
         }
 
+        if(maxConnection == -1){
+            maxConnection = 29;
+        }
+
         Dotenv dotenv = Dotenv.load();
         String url = dotenv.get("POSTGRES_URL");
         String user = dotenv.get("POSTGRES_USER");
         String password = dotenv.get("POSTGRES_PASSWORD");
         String initPool = dotenv.get("POSTGRES_POOL_INIT_CONNECTIONS");
-        String maxPool = dotenv.get("POSTGRES_POOL_MAX_CONNECTIONS");
+        String maxPool = maxConnection+"";
 
 
         Properties props = new Properties();
@@ -53,7 +58,7 @@ public class PostgreSQL {
         poolableConnectionFactory.setPool(connectionPool);
 
 
-        PoolingDriver dbDriver = (PoolingDriver) DriverManager.getDriver("jdbc:apache:commons:dbcp:");
+        dbDriver = (PoolingDriver) DriverManager.getDriver("jdbc:apache:commons:dbcp:");
 
         dbDriver.registerPool(dbName, connectionPool);
 
@@ -71,6 +76,10 @@ public class PostgreSQL {
         }
 
         sr.runScript(reader);
+    }
+
+    public static void closeDBPool()throws SQLException{
+        dbDriver.closePool(dbName);
     }
 
     public static int registerUser(JSONObject user) throws SQLException {
@@ -167,7 +176,7 @@ public class PostgreSQL {
 
 
     public static void main(String[] args) throws SQLException {
-        initPostgres();
+        initPostgres(-1);
 
 //        JSONObject obj = new JSONObject();
 //        obj.put("userName", UUID.randomUUID().toString().substring(0, 20));

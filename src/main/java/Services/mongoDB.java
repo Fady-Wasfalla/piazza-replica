@@ -22,7 +22,7 @@ import java.util.Set;
 public class mongoDB {
 
     private final static String databaseName = "piazza";
-    private final static int maxConnections = 10;
+    private final static int maxConnections = 50;
     private static MongoClient mongoClient;
 
 //    public static MongoClient createMongoClient(String connectionString) {
