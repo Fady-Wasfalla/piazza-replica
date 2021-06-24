@@ -34,7 +34,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
         }
 
         ArrayList<Document> queryResults = mongoDB.readAll(Collections.question,
-                new Document("courseId", courseId), Sorts.ascending(sort), skip, limit, jedis);
+                new Document("courseId", courseId), Sorts.ascending(sort), skip, limit);
 
         if (queryResults.isEmpty()) {
             result.put("[]", "No questions to show for this course");

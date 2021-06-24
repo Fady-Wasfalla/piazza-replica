@@ -31,7 +31,7 @@ public class ViewUserCoursesCommand extends CommandDP {
         }
 
         ArrayList<Document> queryResults = mongoDB.readAll(Collections.register,
-                new Document("userName", userName), Sorts.ascending(sort), skip, limit, jedis);
+                new Document("userName", userName), Sorts.ascending(sort), skip, limit);
 
         if (queryResults.isEmpty()) {
             result.put("[]", "User not registered in any courses");

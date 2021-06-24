@@ -34,7 +34,7 @@ public class RegisterUserCommand extends CommandDP {
 
         Document registrationDocument = Document.parse(data.toString());
 
-        InsertOneResult insertOneResult = mongoDB.create(Collections.register, registrationDocument, jedis, "_id");
+        InsertOneResult insertOneResult = mongoDB.create(Collections.register, registrationDocument, "_id");
 
         BsonValue registeredId = insertOneResult.getInsertedId();
 

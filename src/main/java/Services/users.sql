@@ -34,7 +34,7 @@ DROP FUNCTION IF EXISTS register_user;
 CREATE OR REPLACE FUNCTION register_user( inputUserName CHAR(20), inputFirstName CHAR(20), inputLastName CHAR(20), inputEmail CHAR(100), inputPassword TEXT, inputRole CHAR(20)) RETURNS REFCURSOR AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN INSERT INTO users(userName, firstName, lastName, email, password, role) VALUES($1, $2, $3, $4, crypt($5, gen_salt('bf')), $6); OPEN cursor FOR SELECT users.userId FROM users WHERE users.userName = $1; RETURN cursor; END; $$ LANGUAGE PLPGSQL;
 
 DROP FUNCTION IF EXISTS login_user;
-CREATE OR REPLACE FUNCTION login_user( inputEmail CHAR(100), inputPassword CHAR(20)) RETURNS REFCURSOR AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN OPEN cursor FOR SELECT * FROM users WHERE email = $1 AND password = crypt($2, password); RETURN cursor; END; $$ LANGUAGE PLPGSQL;
+CREATE OR REPLACE FUNCTION login_user( inputEmail CHAR(100), inputPassword CHAR(20)) RETURNS REFCURSOR AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN OPEN cursor FOR SELECT users.userName, users.role FROM users WHERE email = $1 AND password = crypt($2, password); RETURN cursor; END; $$ LANGUAGE PLPGSQL;
 
 DROP FUNCTION IF EXISTS delete_user;
 CREATE OR REPLACE FUNCTION delete_user(inputUserName CHAR(20)) RETURNS VOID AS $$ BEGIN DELETE FROM users WHERE users.userName = $1; END; $$ LANGUAGE PLPGSQL;

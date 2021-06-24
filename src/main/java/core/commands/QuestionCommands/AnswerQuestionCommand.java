@@ -40,7 +40,7 @@ public class AnswerQuestionCommand extends CommandDP {
         }
 
         ArrayList<Document> myQuestions = mongoDB.readAll(Collections.question,
-                new Document("_id", new ObjectId(questionId)), Sorts.ascending(sort), skip, limit, jedis);
+                new Document("_id", new ObjectId(questionId)), Sorts.ascending(sort), skip, limit);
 
         Document myQuestion;
         if (!(myQuestions.size() == 0)) {

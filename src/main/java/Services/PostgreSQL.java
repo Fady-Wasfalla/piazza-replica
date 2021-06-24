@@ -27,7 +27,7 @@ public class PostgreSQL {
             ex.printStackTrace();
         }
 
-        if(maxConnection == -1){
+        if (maxConnection == -1) {
             maxConnection = 29;
         }
 
@@ -36,7 +36,7 @@ public class PostgreSQL {
         String user = dotenv.get("POSTGRES_USER");
         String password = dotenv.get("POSTGRES_PASSWORD");
         String initPool = dotenv.get("POSTGRES_POOL_INIT_CONNECTIONS");
-        String maxPool = maxConnection+"";
+        String maxPool = maxConnection + "";
 
 
         Properties props = new Properties();
@@ -78,7 +78,7 @@ public class PostgreSQL {
         sr.runScript(reader);
     }
 
-    public static void closeDBPool()throws SQLException{
+    public static void closeDBPool() throws SQLException {
         dbDriver.closePool(dbName);
     }
 
@@ -114,7 +114,7 @@ public class PostgreSQL {
         }
     }
 
-    public static boolean isUser(String email, String password) throws SQLException {
+    public static JSONObject getUser(String email, String password) throws SQLException {
         Connection connection = postgresPool.getConnection();
 
         connection.setAutoCommit(false);
@@ -129,13 +129,16 @@ public class PostgreSQL {
 
         ResultSet set = (ResultSet) st.getObject(1);
         if (set.next()) {
+            JSONObject user = new JSONObject();
+            user.put("userName", set.getString("userName"));
+            user.put("role", set.getString("role"));
             set.close();
             st.close();
-            return true;
+            return user;
         } else {
             set.close();
             st.close();
-            return false;
+            throw new SQLException();
         }
     }
 

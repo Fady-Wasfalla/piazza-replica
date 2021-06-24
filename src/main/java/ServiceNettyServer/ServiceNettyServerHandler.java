@@ -1,6 +1,6 @@
 package ServiceNettyServer;
 
-import Services.jedis;
+import Services.Redis;
 import core.CommandDP;
 import core.CommandsMap;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -74,8 +74,8 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
         
         CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
         Class service = command.getClass();
-        Method setData = service.getMethod("setData", JSONObject.class,jedis.class);
-        setData.invoke(command, requestJson, null);
+        Method setData = service.getMethod("setData", JSONObject.class);
+        setData.invoke(command, requestJson);
         if(function == "command" || serviceName == "command"){
             Method setCmd = service.getMethod("setCmd", CommandsMap.class);
             setCmd.invoke(command, cmdMap);

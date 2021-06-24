@@ -67,7 +67,7 @@ public class SearchQuestionsCommand extends CommandDP {
         Document queryDocument = new Document("description", regex);
 
         ArrayList<Document> queryResults = mongoDB.readAll(Collections.question,
-                queryDocument, Sorts.ascending(sort), skip, limit, jedis);
+                queryDocument, Sorts.ascending(sort), skip, limit);
 
         if (queryResults.isEmpty()) {
             result.put("[]", "No questions to show for this course");

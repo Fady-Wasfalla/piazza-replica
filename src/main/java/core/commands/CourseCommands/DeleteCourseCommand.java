@@ -25,8 +25,7 @@ public class DeleteCourseCommand extends CommandDP {
         }
 
         String courseId = data.getString("courseId");
-        Document deletedCourse = mongoDB.deleteOne(Collections.course,
-                new Document("_id", new ObjectId(courseId)), jedis, "_id");
+        Document deletedCourse = mongoDB.deleteOne(Collections.course, new Document("_id", new ObjectId(courseId)), "_id");
 
         JSONObject pollDeleteRequest = new JSONObject();
         pollDeleteRequest.put("function", "DeleteCoursePollsCommand");

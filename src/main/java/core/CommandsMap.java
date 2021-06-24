@@ -18,6 +18,7 @@ import core.commands.QuestionCommands.CreateQuestionCommand;
 import core.commands.QuestionCommands.DeleteCourseQuestionsCommand;
 import core.commands.QuestionCommands.SearchQuestionsCommand;
 import core.commands.UserCommands.DeleteCourseRegistersCommand;
+import core.commands.UserCommands.LogInCommand;
 import core.commands.UserCommands.RegisterUserCommand;
 import core.commands.UserCommands.SignUpCommand;
 
@@ -42,6 +43,7 @@ public class CommandsMap implements Serializable {
         cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
         cmdMap.put("user/ViewUserCoursesCommand", ViewUserCoursesCommand.class);
         cmdMap.put("user/SignUpCommand", SignUpCommand.class);
+        cmdMap.put("user/LogInCommand", LogInCommand.class);
 
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
         cmdMap.put("question/DeleteCourseQuestionsCommand", DeleteCourseQuestionsCommand.class);
