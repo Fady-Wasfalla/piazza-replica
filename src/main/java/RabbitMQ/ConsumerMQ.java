@@ -2,10 +2,8 @@ package RabbitMQ;
 
 import ServiceNettyServer.ServiceNettyHTTPServer;
 import Services.PostgreSQL;
-import Services.jedis;
+import Services.Redis;
 import Services.mongoDB;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
@@ -37,16 +35,13 @@ public class ConsumerMQ {
         if (MessageQueue.channel == null)
             MessageQueue.instantiateChannel();
 
-        jedis jedis = null;
         try {
+            Redis.initRedis();
             mongoDB.initMongo();
-            jedis = new jedis(dotenv.get("redis_host", "localhost"), 6379, "");
             PostgreSQL.initPostgres(-1);
         } catch (Exception error) {
             System.out.println("ERROR CREATING MONGODB/REDIS/POSTGRES CONNECTION :" + error);
-
         }
-        jedis finalJedis = jedis;
 
         //Response Queue Declare
         String RES_QUEUE_NAME = microservice + "Res";
@@ -71,8 +66,8 @@ public class ConsumerMQ {
                         System.out.println("Method to be found: " + queue + "/" + function);
                         CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
-                        Method setData = service.getMethod("setData", JSONObject.class, jedis.class);
-                        setData.invoke(command, requestJson, finalJedis);
+                        Method setData = service.getMethod("setData", JSONObject.class);
+                        setData.invoke(command, requestJson);
                         JSONObject result = command.execute();
                         MessageQueue.send(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
                         MessageQueue.channel.basicAck(envelope.getDeliveryTag(), false);

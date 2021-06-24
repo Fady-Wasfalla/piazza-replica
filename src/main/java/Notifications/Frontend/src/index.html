@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Piazza Notifications</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<h1>Piazza Notifications</h1>
+
+
+<form>
+  <label for="userName">UserName:</label><br>
+  <input type="text" id="userName" name="userName"><br>
+</form>
+
+<button id="button" type="button" onclick=
+        'document.getElementById("notify").innerHTML
+                ="Welcome to GeeksforGeeks"'>
+  Login
+</button>
+
+<h2 id="notify"></h2>
+
+<div id="app"></div>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase.js"></script>
+
+
+<script src="main.js"></script>
+
+</body>
+</html>

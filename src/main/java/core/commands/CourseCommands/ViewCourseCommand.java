@@ -22,8 +22,7 @@ public class ViewCourseCommand extends CommandDP {
 
         String courseId = this.data.getString("courseId");
 
-        Document queryResult = mongoDB.readOne(Collections.course,
-                new Document("_id", new ObjectId(courseId)), jedis, "_id");
+        Document queryResult = mongoDB.readOne(Collections.course, new Document("_id", new ObjectId(courseId)), "_id");
 
         if (queryResult.isEmpty()) {
             result.put("[]", "Invalid Course ID");

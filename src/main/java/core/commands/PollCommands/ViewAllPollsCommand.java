@@ -32,7 +32,7 @@ public class ViewAllPollsCommand extends CommandDP {
         }
 
         ArrayList<Document> queryResults = mongoDB.readAll(Collections.poll,
-                new Document("courseId", courseId), Sorts.ascending(sort), skip, limit, jedis);
+                new Document("courseId", courseId), Sorts.ascending(sort), skip, limit);
 
         if (queryResults.isEmpty()) {
             result.put("[]", "No polls to show for this course");

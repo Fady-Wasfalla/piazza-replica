@@ -37,7 +37,7 @@ public class CreateCourseCommand extends CommandDP {
 
         Document courseDocument = Document.parse(data.toString());
 
-        BsonValue courseId = mongoDB.create(Collections.course, courseDocument, jedis, "_id")
+        BsonValue courseId = mongoDB.create(Collections.course, courseDocument, "_id")
                 .getInsertedId();
 
         result.put("courseId", courseId.asObjectId().getValue().toString());
