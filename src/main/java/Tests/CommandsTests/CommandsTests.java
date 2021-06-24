@@ -1,6 +1,7 @@
 package Tests.CommandsTests;
 
 import Services.Redis;
+import Services.mongoDB;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import core.commands.CourseCommands.CreateCourseCommand;
@@ -25,9 +26,14 @@ class CommandsTests {
 
     Dotenv dotenv = Dotenv.load();
     String connectionString = dotenv.get("CONNECTION_STRING") + "100" ; // no. of DP connections
+            public CommandsTests(){
+                mongoDB.initMongo();
+                Redis.initRedis();
+            }
     @Test
     @Order(1)
     public void CreateCourseCommand() {
+
         CreateCourseCommand test = new CreateCourseCommand();
         JSONObject body = new JSONObject();
 
@@ -250,6 +256,7 @@ class CommandsTests {
         data.put("user",new JSONObject());
         test.setData(data);
         JSONObject result =  test.execute();
+        System.out.println(result);
         Assert.assertEquals(1,result.getInt("courseDeletedCount"));
     }
 }
