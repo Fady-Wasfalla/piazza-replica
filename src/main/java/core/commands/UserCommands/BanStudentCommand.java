@@ -9,6 +9,7 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import core.CommandDP;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
@@ -31,28 +32,48 @@ public class BanStudentCommand extends CommandDP {
                 "banExpiryDate" ,
                 "bannerUserName"
         };
-
         if(!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
+        String[] updateKeys = {
+                "bannerUserName",
+                "banExpiryDate"
+        };
+        BsonDocument updateOperation = new BsonDocument();
+
+//        String pollId= data.getString("pollId");
+
+        String set = "{ $set: {";
+        set+= "\"banned\":" + true +",";
+        for (String key:updateKeys) {
+
+            if(this.data.has(key)){
+                set+= "\""+key+"\": \"" + this.data.getString(key)+"\",";
+            }
+
+
+        }
+        set = set.substring(0,set.length()-1);
+        set +=  "      } }" ;
+        System.out.println(set);
         String courseId = this.data.getString("courseId");
         String userName = this.data.getString("userName");
-        String banExpiryDate = this.data.getString("banExpiryDate");
-        String bannerUserName = this.data.getString("bannerUserName");
 
         Document filterDocument = new Document("role", "student").append("courseId",courseId).append("userName",userName);
 
-        Document resultDocument = mongoDB.update(mongoClient,Collections.register,
-                filterDocument,set("banned",true), new FindOneAndUpdateOptions(),jedis,"_id");
+        Document resultDocument = mongoDB.update(mongoClient, Collections.register,filterDocument
+                , BsonDocument.parse(set), new FindOneAndUpdateOptions(), jedis ,"courseId");
 
-        resultDocument = mongoDB.update(mongoClient,Collections.register,
-                filterDocument,set("banExpiryDate",banExpiryDate), new FindOneAndUpdateOptions(),jedis,"_id");
 
-        resultDocument = mongoDB.update(mongoClient,Collections.register,
-                filterDocument,set("bannerUserName",bannerUserName), new FindOneAndUpdateOptions(),jedis,"_id");
+        if (resultDocument != null)
+        {
+            result.put("Status", "200 OK: Student banned successfully");
+        }
+        else {
+            result.put("Status", "400 Error");
+        }
 
-        result.put("Modified Ban Count", resultDocument);
 
         String correlationId = UUID.randomUUID().toString();
         String requestQueue = "notificationReq";
@@ -67,8 +88,13 @@ public class BanStudentCommand extends CommandDP {
         body.put("description","Your are banned");
         body.put("model",  courseId);
         body.put("onModel", "Course");
+        body.put("sort", "_id");
+        body.put("skip", 0);
+        body.put("limit", 0);
+
 
         notificationRequest.put("body", body);
+        notificationRequest.put("user", this.user);
 
         try{
             NettyServerHandler.sendMessageToActiveMQ(notificationRequest.toString(),requestQueue,correlationId);

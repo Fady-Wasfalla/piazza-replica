@@ -64,11 +64,11 @@ public class NotifyAllInstructorsCommand extends CommandDP {
 
                 Document notificationDocument = Document.parse(notification.toString());
 
-                BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument,jedis,"id").getInsertedId();
+                BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument,jedis,"_id").getInsertedId();
                 results.add(notificationId.asObjectId().getValue().toString());
 
                 Document tokenFilterDocument = new Document("userName", username);
-                Document token = mongoDB.readOne(mongoClient, Collections.token, tokenFilterDocument,jedis,"_id");
+                Document token = mongoDB.readOne(mongoClient, Collections.token, tokenFilterDocument,jedis,"userName");
                 if (token.size() > 0) {
                     Notifications notify = new Notifications();
                     try {

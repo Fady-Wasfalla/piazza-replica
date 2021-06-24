@@ -169,7 +169,7 @@ class CommandsTests {
         body = new JSONObject();
         body.put("courseId",courseId);
         body.put("skip",0);
-        body.put("limit",0);
+        body.put("limit",2);
         body.put("sort","userName");
         data = new JSONObject();
         data.put("body",body);

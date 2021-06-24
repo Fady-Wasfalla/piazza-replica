@@ -115,8 +115,12 @@ public class AnswerQuestionCommand extends CommandDP {
         body.put("description","Your question have a new answer");
         body.put("model",  this.data.getString("questionId"));
         body.put("onModel", "Question");
+        body.put("sort", "_id");
+        body.put("skip", 0);
+        body.put("limit", 0);
 
         notificationRequest.put("body", body);
+        notificationRequest.put("user", this.user);
 
         try{
             NettyServerHandler.sendMessageToActiveMQ(notificationRequest.toString(),requestQueue,correlationId);

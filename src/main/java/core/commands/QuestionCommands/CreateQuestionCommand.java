@@ -75,8 +75,12 @@ public class CreateQuestionCommand extends CommandDP {
         body.put("description","A student asked a new question");
         body.put("model",  questionId.asObjectId().getValue().toString());
         body.put("onModel", "Question");
+        body.put("sort", "_id");
+        body.put("skip", 0);
+        body.put("limit", 0);
 
         notificationRequest.put("body", body);
+        notificationRequest.put("user", this.user);
 
         try{
             NettyServerHandler.sendMessageToActiveMQ(notificationRequest.toString(),requestQueue,correlationId);

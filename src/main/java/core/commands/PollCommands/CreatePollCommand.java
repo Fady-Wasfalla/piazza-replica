@@ -62,8 +62,12 @@ public class CreatePollCommand extends CommandDP {
         body.put("description","An Instructor created a new poll");
         body.put("model", pollId.asObjectId().getValue().toString());
         body.put("onModel", "Poll");
+        body.put("sort", "_id");
+        body.put("skip", 0);
+        body.put("limit", 0);
 
         notificationRequest.put("body", body);
+        notificationRequest.put("user", this.user);
 
         try{
             NettyServerHandler.sendMessageToActiveMQ(notificationRequest.toString(),requestQueue,correlationId);

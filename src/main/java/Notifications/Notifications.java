@@ -23,7 +23,7 @@ public class Notifications {
 
     public void initialize(){
         try {
-            refreshToken = new FileInputStream("/home/vm/Downloads/client-7c3f9-firebase-adminsdk-ph90q-381bd6624a.json");
+            refreshToken = new FileInputStream("src/main/java/Notifications/client-7c3f9-firebase-adminsdk-ph90q-381bd6624a.json");
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(refreshToken))
                     .build();
