@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import java.sql.SQLException;
 
-public class SetMaxDBConnectionCountCommand extends CommandDP {
+public class SetMaxDBConnectionCountCommand extends CommandDP {                                      
     @Override
     public JSONObject execute() {
 
