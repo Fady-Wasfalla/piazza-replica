@@ -1,5 +1,6 @@
 package ServiceNettyServer;
 
+import Services.jedis;
 import com.mongodb.client.MongoClient;
 import core.CommandDP;
 import core.CommandsMap;
@@ -71,19 +72,22 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
 
         String function = requestJson.getString("function");
         String serviceName = requestJson.getString("service");
+        
         CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
         Class service = command.getClass();
-        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
-        setData.invoke(command, requestJson, mongoClient);
-        Method setCmd = service.getMethod("setCmd", CommandsMap.class);
-        setCmd.invoke(command, cmdMap);
+        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class,jedis.class);
+        setData.invoke(command, requestJson, mongoClient, null);
+        if(function == "command" || serviceName == "command"){
+            Method setCmd = service.getMethod("setCmd", CommandsMap.class);
+            setCmd.invoke(command, cmdMap);
+        }
 //        cmdMap.getAllClasses();
         JSONObject resultCommand = command.execute();
         if (true) {
             if (ServiceNettyHTTPServer.channel == null)
                 ServiceNettyHTTPServer.instantiateChannel();
-            String result = "HELLO";
-            ByteBuf b = Unpooled.copiedBuffer(result, CharsetUtil.UTF_8);
+            
+            ByteBuf b = Unpooled.copiedBuffer(resultCommand.toString(), CharsetUtil.UTF_8);
             FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
             response1.headers().set("CONTENT_TYPE", "application/json");
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
