@@ -48,7 +48,7 @@ public class NotifyAllInstructorsCommand extends CommandDP {
         this.data.put("description",description);
 
         Document filterDocument = new Document("role", "instructor").append("courseId",courseId);
-        ArrayList<Document> instructors = mongoDB.readAll(mongoClient,Collections.register,filterDocument, Sorts.ascending(sort),skip,limit,jedis);
+        ArrayList<Document> instructors = mongoDB.readAll(Collections.register,filterDocument, Sorts.ascending(sort),skip,limit);
 
         ArrayList<String> results = new ArrayList<>();
         for (Document d:instructors) {
@@ -64,11 +64,11 @@ public class NotifyAllInstructorsCommand extends CommandDP {
 
                 Document notificationDocument = Document.parse(notification.toString());
 
-                BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument,jedis,"_id").getInsertedId();
+                BsonValue notificationId = mongoDB.create(Collections.notification, notificationDocument,"_id").getInsertedId();
                 results.add(notificationId.asObjectId().getValue().toString());
 
                 Document tokenFilterDocument = new Document("userName", username);
-                Document token = mongoDB.readOne(mongoClient, Collections.token, tokenFilterDocument,jedis,"userName");
+                Document token = mongoDB.readOne(Collections.token, tokenFilterDocument,"userName");
                 if (token.size() > 0) {
                     Notifications notify = new Notifications();
                     try {

@@ -73,7 +73,7 @@ public class AnswerQuestionCommand extends CommandDP {
 
         Document finalAns = Document.parse(newAnswer.toString());
 
-        MongoCollection<Document> collection = getCollection(mongoClient, Collections.question);
+        MongoCollection<Document> collection = getCollection(Collections.question);
         UpdateResult resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
                 new Document().append("$push", new Document("answers",finalAns)
         ));

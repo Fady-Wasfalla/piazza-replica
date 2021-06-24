@@ -23,10 +23,9 @@ import core.commands.QuestionCommands.SearchQuestionsCommand;
 import core.commands.UserCommands.DeleteCourseRegistersCommand;
 import core.commands.UserCommands.LogInCommand;
 import core.commands.UserCommands.RegisterUserCommand;
-import core.commands.UserCommands.SignupCommand;
+import core.commands.UserCommands.SignUpCommand;
 import core.commands.QuestionCommands.*;
 import core.commands.UserCommands.*;
-import core.commands.UserCommands.SignUpCommand;
 
 import java.io.*;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
 package Tests.CommandsTests;
 
-import Services.jedis;
+import Services.Redis;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import core.commands.CourseCommands.CreateCourseCommand;
@@ -25,8 +25,6 @@ class CommandsTests {
 
     Dotenv dotenv = Dotenv.load();
     String connectionString = dotenv.get("CONNECTION_STRING") + "100" ; // no. of DP connections
-    MongoClient mongoClient = MongoClients.create(connectionString);
-    jedis jedis = new jedis("localhost", 6379, "");
     @Test
     @Order(1)
     public void CreateCourseCommand() {
@@ -40,7 +38,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         courseId = result.getString("courseId");
         Assert.assertEquals(true,result.has("courseId"));
@@ -58,7 +56,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         System.out.println("result =================================== "+result);
         JSONObject expectedId = new JSONObject(result.get("_id").toString())  ;
@@ -77,7 +75,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(true,result.has("registeredId"));
 
@@ -94,7 +92,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(true,result.has("registeredId"));
     }
@@ -115,7 +113,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         questionId = result.getString("questionId");
         Assert.assertEquals(true,result.has("questionId"));
@@ -138,7 +136,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(true,result.has("Modified Questions Count"));
         Assert.assertEquals(1,result.getInt("Modified Questions Count"));
@@ -162,7 +160,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        qtest.setData(data,mongoClient,jedis);
+        qtest.setData(data);
         qtest.execute();
         //viewing all questions
         ViewAllQuestionsCommand test = new ViewAllQuestionsCommand();
@@ -174,7 +172,7 @@ class CommandsTests {
         data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(true,result.has("question"));
         Assert.assertEquals(2,result.getJSONArray("question").length());
@@ -193,7 +191,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(true,result.has("pollId"));
     }
@@ -211,7 +209,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        ptest.setData(data,mongoClient,jedis);
+        ptest.setData(data);
         ptest.execute();
         //deleting all polls
         DeleteCoursePollsCommand test = new DeleteCoursePollsCommand();
@@ -220,7 +218,7 @@ class CommandsTests {
         data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(2,result.getInt("pollDeletedCount"));
     }
@@ -236,7 +234,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(2,result.getInt("questionDeletedCount"));
     }
@@ -250,7 +248,7 @@ class CommandsTests {
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
-        test.setData(data,mongoClient,jedis);
+        test.setData(data);
         JSONObject result =  test.execute();
         Assert.assertEquals(1,result.getInt("courseDeletedCount"));
     }

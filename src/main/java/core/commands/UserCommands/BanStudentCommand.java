@@ -63,8 +63,8 @@ public class BanStudentCommand extends CommandDP {
 
         Document filterDocument = new Document("role", "student").append("courseId",courseId).append("userName",userName);
 
-        Document resultDocument = mongoDB.update(mongoClient, Collections.register,filterDocument
-                , BsonDocument.parse(set), new FindOneAndUpdateOptions(), jedis ,"courseId");
+        Document resultDocument = mongoDB.update(Collections.register,filterDocument
+                , BsonDocument.parse(set), new FindOneAndUpdateOptions(),"courseId");
 
 
         if (resultDocument != null)

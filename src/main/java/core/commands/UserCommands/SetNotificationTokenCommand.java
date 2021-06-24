@@ -35,17 +35,17 @@ public class SetNotificationTokenCommand extends CommandDP {
         this.data.put("createdAt", new Date().getTime() + "");
 
         Document filterDocument = new Document("token", data.getString("token"));
-        mongoDB.deleteMany(mongoClient, Collections.token, filterDocument,jedis);
+        mongoDB.deleteMany(Collections.token, filterDocument);
         
         filterDocument = new Document("userName", data.getString("userName"));
 
-        Document token = mongoDB.readOne(mongoClient, Collections.token, filterDocument,jedis,"_id");
+        Document token = mongoDB.readOne( Collections.token, filterDocument,"_id");
 
         if(token.size() == 0){
 
             Document tokenDocument = Document.parse(data.toString());
 
-            BsonValue tokenId = mongoDB.create(mongoClient, Collections.token, tokenDocument,jedis,"_id")
+            BsonValue tokenId = mongoDB.create(Collections.token, tokenDocument,"_id")
                     .getInsertedId();
 
             result.put("tokenId", tokenId.asObjectId().getValue().toString());
@@ -54,9 +54,9 @@ public class SetNotificationTokenCommand extends CommandDP {
         else{
 
             Bson updateOperation = set("token", data.getString("token"));
-            mongoDB.update(mongoClient, Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),jedis,"_id");
+            mongoDB.update(Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),"_id");
             updateOperation = set("createdAt", new Date().getTime() + "");
-            mongoDB.update(mongoClient, Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),jedis,"_id");
+            mongoDB.update( Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),"_id");
             result.put("tokenId", token.get("_id").toString());
             System.out.println("second");
         }
