@@ -19,7 +19,7 @@ public class ChatServer {
     private final EventLoopGroup group = new NioEventLoopGroup();
     private Channel channel;
 
-    public ChatServer(int port){
+    public ChatServer(int port) {
         ChannelFuture future = start(new InetSocketAddress(port));
         System.err.println("Server is listening on http://127.0.0.1:" + port + '/');
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -31,6 +31,10 @@ public class ChatServer {
         future.channel().closeFuture().syncUninterruptibly();
     }
 
+    public static void main(String[] args) throws Exception {
+        new ChatServer(4000);
+    }
+
     public ChannelFuture start(InetSocketAddress address) {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(group).channel(NioServerSocketChannel.class).childHandler(createInitializer(channelGroup));
@@ -39,7 +43,6 @@ public class ChatServer {
         channel = future.channel();
         return future;
     }
-
 
     protected ChannelInitializer<Channel> createInitializer(ChannelGroup group) {
         return new ChatServerInitializer(group);
@@ -51,9 +54,5 @@ public class ChatServer {
         }
         channelGroup.close();
         group.shutdownGracefully();
-    }
-
-    public static void main(String[] args) throws Exception {
-        new ChatServer(4000);
     }
 }

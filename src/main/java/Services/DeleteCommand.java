@@ -32,14 +32,14 @@ public class DeleteCommand extends CommandDP {
         try {
             String fullPath = filePath + "/" + parentPackage + "/" + className;
             Files.deleteIfExists(Paths.get(fullPath));
-            Files.deleteIfExists(Paths.get(String.valueOf(fullPath).replace("src/main/java", "target/classes").replace(".java", ".class")));
+            Files.deleteIfExists(Paths.get(fullPath.replace("src/main/java", "target/classes").replace(".java", ".class")));
             String key = queue + "/" + className.split("\\.java")[0];
-            cmdMap.cmdMap.remove(key);
+            CommandsMap.cmdMap.remove(key);
             System.out.println("DELETE");
-            cmdMap.getAllClasses();
+            CommandsMap.getAllClasses();
 
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e);
         }
         return null;
     }
