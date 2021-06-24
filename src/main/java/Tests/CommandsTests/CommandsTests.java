@@ -8,7 +8,7 @@ import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.CourseCommands.DeleteCourseCommand;
 import core.commands.CourseCommands.ViewCourseCommand;
 import core.commands.PollCommands.CreatePollCommand;
-import core.commands.PollCommands.DeleteCoursePollsCommand;
+import core.commands.PollCommands.DeletePollCommand;
 import core.commands.QuestionCommands.*;
 import core.commands.UserCommands.RegisterUserCommand;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -21,6 +21,8 @@ import java.util.ArrayList;
 class CommandsTests {
     static String courseId = null;
     static String questionId = null;
+    static String pollId = null;
+
     String instructorUsername = "Abdo";
     String studentUsername = "Moaz";
 
@@ -199,34 +201,22 @@ class CommandsTests {
         data.put("user",new JSONObject());
         test.setData(data);
         JSONObject result =  test.execute();
+        pollId = result.getString("pollId");
         Assert.assertEquals(true,result.has("pollId"));
     }
     @Test
     @Order(4)
     void DeleteCoursePollsCommand() {
-        //creating another poll for the last course
-        CreatePollCommand ptest = new CreatePollCommand();
+
+        DeletePollCommand test = new DeletePollCommand();
         JSONObject body = new JSONObject();
-        body.put("courseId",courseId);
-        body.put("userName",instructorUsername);
-        body.put("title","title2");
-        body.put("expiryDate","2/1/2021");
-        body.put("options", new ArrayList<>());
+        body.put("pollId",pollId);
         JSONObject data = new JSONObject();
-        data.put("body",body);
-        data.put("user",new JSONObject());
-        ptest.setData(data);
-        ptest.execute();
-        //deleting all polls
-        DeleteCoursePollsCommand test = new DeleteCoursePollsCommand();
-        body = new JSONObject();
-        body.put("courseId",courseId);
-        data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
         test.setData(data);
         JSONObject result =  test.execute();
-        Assert.assertEquals(2,result.getInt("pollDeletedCount"));
+        Assert.assertEquals("poll with id : " + pollId + " deleted successfully",result.getString("Status"));
     }
 
     @Test
