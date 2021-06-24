@@ -7,19 +7,15 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 public class ViewCourseCommand extends CommandDP {
     JSONObject result = new JSONObject();
-    
+
     @Override
     public JSONObject execute() {
 
         String[] schema = {"courseId"};
-        System.out.println(data);
-        System.out.println("=============================");
-        System.out.println(schema);
-        if(!validateJSON(schema, data)) {
+
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
@@ -29,7 +25,7 @@ public class ViewCourseCommand extends CommandDP {
         Document queryResult = mongoDB.readOne(this.mongoClient, Collections.course,
                 new Document("_id", new ObjectId(courseId)), jedis, "_id");
 
-        if(queryResult.isEmpty()) {
+        if (queryResult.isEmpty()) {
             result.put("[]", "Invalid Course ID");
             return result;
         }

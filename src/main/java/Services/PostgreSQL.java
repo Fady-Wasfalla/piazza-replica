@@ -1,5 +1,7 @@
 package Services;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.sql.*;
 
 public class PostgreSQL {
@@ -9,7 +11,7 @@ public class PostgreSQL {
     CallableStatement login_user = null;
     CallableStatement update_user = null;
 
-    public  PostgreSQL(String url, String user, String password){
+    public PostgreSQL(String url, String user, String password) {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url, user, password);
@@ -17,9 +19,10 @@ public class PostgreSQL {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-       db_connection = conn;
+        db_connection = conn;
     }
-    public void create_user_table() throws SQLException{
+
+    public void create_user_table() throws SQLException {
         Statement stmt = db_connection.createStatement();
         String userTable =
                 "CREATE TABLE IF NOT EXISTS users(" +
@@ -132,7 +135,7 @@ public class PostgreSQL {
         stmt.executeUpdate(testProcedure);
         stmt.close();
         System.out.println("User Table created");
-        delete_user =db_connection.prepareCall("call delete_user(?, ?)");
+        delete_user = db_connection.prepareCall("call delete_user(?, ?)");
         System.out.println("Delete user procedure created");
         register_user = db_connection.prepareCall("call register(?, ?, ?, ?, ?, ?, ?)");
         System.out.println("Register user procedure created");
@@ -141,8 +144,10 @@ public class PostgreSQL {
         update_user = db_connection.prepareCall("call update_user(?, ?, ?, ?, ?, ?, ?)");
         System.out.println("Update user procedure created");
     }
+
     public static void main(String[] args) throws SQLException {
-        String url = "jdbc:postgresql://localhost/postgres";
+        Dotenv dotenv = Dotenv.load();
+        String url = "jdbc:postgresql://"+dotenv.get("postgres_host","localhost")+"/postgres";
         String user = "postgres";
         String password = "";
         PostgreSQL postgres = new PostgreSQL(url, user, password);
@@ -161,14 +166,16 @@ public class PostgreSQL {
         System.out.println(result);
 //        Deleting a User
         postgres.delete_user.setString(1, "Mina");
-        postgres.delete_user.setString(2, "");;
+        postgres.delete_user.setString(2, "");
+        ;
         postgres.delete_user.registerOutParameter(2, Types.CHAR);
         postgres.delete_user.execute();
         System.out.println(postgres.delete_user.getString(2));
 //        Login
-        postgres.login_user.setString(1,"Mina");
-        postgres.login_user.setString(2,"Mina");
-        postgres.login_user.setString(3, "");;
+        postgres.login_user.setString(1, "Mina");
+        postgres.login_user.setString(2, "Mina");
+        postgres.login_user.setString(3, "");
+        ;
         postgres.login_user.registerOutParameter(3, Types.CHAR);
         postgres.login_user.execute();
         System.out.println(postgres.login_user.getString(3));

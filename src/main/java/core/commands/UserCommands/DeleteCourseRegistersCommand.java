@@ -14,12 +14,12 @@ public class DeleteCourseRegistersCommand extends CommandDP {
 
         String[] schema = {"courseId"};
 
-        if(!validateJSON(schema, data)) {
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
 
-        String courseId= data.getString("courseId");
+        String courseId = data.getString("courseId");
         DeleteResult deletedRegisters = mongoDB.deleteMany(mongoClient, Collections.register,
                 new Document("courseId", courseId), jedis);
 

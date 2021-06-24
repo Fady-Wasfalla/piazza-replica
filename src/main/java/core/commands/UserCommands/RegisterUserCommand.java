@@ -4,10 +4,8 @@ import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.result.InsertOneResult;
 import core.CommandDP;
-import org.bson.BsonArray;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -24,19 +22,19 @@ public class RegisterUserCommand extends CommandDP {
                 "role",
         };
 
-        if(!validateJSON(schema, data)) {
+        if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
 
         data.put("banned", false);
-        data.put("banExpiryDate",JSONObject.NULL);
-        data.put("bannerUserName",JSONObject.NULL);
-        data.put("createdAt", new Date().getTime()+"");
+        data.put("banExpiryDate", JSONObject.NULL);
+        data.put("bannerUserName", JSONObject.NULL);
+        data.put("createdAt", new Date().getTime() + "");
 
         Document registrationDocument = Document.parse(data.toString());
 
-        InsertOneResult insertOneResult = mongoDB.create(this.mongoClient, Collections.register,registrationDocument, jedis, "_id");
+        InsertOneResult insertOneResult = mongoDB.create(this.mongoClient, Collections.register, registrationDocument, jedis, "_id");
 
         BsonValue registeredId = insertOneResult.getInsertedId();
 
