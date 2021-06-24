@@ -19,7 +19,7 @@ public class DeletePollCommand extends CommandDP{
 
         String pollId= data.getString("pollId");
 
-        Document deletedPoll = mongoDB.deleteOne(mongoClient, Collections.poll, new Document("_id", new ObjectId(pollId)), jedis,"_id");
+        Document deletedPoll = mongoDB.deleteOne( Collections.poll, new Document("_id", new ObjectId(pollId)),"_id");
         if (deletedPoll != null)
         {
             result.put("Status", "poll with id : " + pollId + " deleted successfully");

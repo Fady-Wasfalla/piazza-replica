@@ -52,9 +52,9 @@ public class UpdatePollCommand extends CommandDP {
         }
         set = set.substring(0,set.length()-1);
         set +=  "      } }" ;
-        Document updatedPoll = mongoDB.update(mongoClient, Collections.poll,new Document("_id", new ObjectId(pollId))
+        Document updatedPoll = mongoDB.update( Collections.poll,new Document("_id", new ObjectId(pollId))
                         , BsonDocument.parse(set),
-                        new FindOneAndUpdateOptions(), jedis ,"_id");
+                        new FindOneAndUpdateOptions(),"_id");
             if (updatedPoll != null)
             {
                 result.put("Status", "200 OK: Question updated successfully");

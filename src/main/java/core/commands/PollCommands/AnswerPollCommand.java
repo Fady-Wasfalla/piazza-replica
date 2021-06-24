@@ -25,7 +25,7 @@ public class AnswerPollCommand extends CommandDP {
 //        Document temp = mongoDB.readOne(mongoClient,Collections.poll,new Document("_id", new ObjectId(pollId))
 //                ,jedis,"_id");
 
-        Document temp = mongoDB.getCollection(mongoClient, Collections.poll).find(new Document("_id", new ObjectId(pollId))).first();
+        Document temp = mongoDB.getCollection( Collections.poll).find(new Document("_id", new ObjectId(pollId))).first();
         System.out.println(temp);
         JSONObject targetPoll = new JSONObject(temp);
         System.out.println(targetPoll);
@@ -36,9 +36,9 @@ public class AnswerPollCommand extends CommandDP {
         set+= (currentAnswers).toString() ;
         set +=  "      } }" ;
         System.out.println(set);
-        Document updatedPoll = mongoDB.update(mongoClient, Collections.poll,new Document("_id", new ObjectId(pollId))
+        Document updatedPoll = mongoDB.update( Collections.poll,new Document("_id", new ObjectId(pollId))
                 , BsonDocument.parse(set),
-                new FindOneAndUpdateOptions(), jedis ,"_id");
+                new FindOneAndUpdateOptions(),"_id");
         if (updatedPoll != null)
         {
             result.put("Status", "200 OK: Question updated successfully");
