@@ -53,12 +53,12 @@ public class AnswerQuestionCommand extends CommandDP {
             sort = "title";
         }
 
-        ArrayList<Document> myQuestions = mongoDB.readAll(mongoClient, Collections.question,
-                new Document("_id", new ObjectId(questionId)), Sorts.ascending(sort), skip, limit, jedis);
+        ArrayList<Document> myQuestions = mongoDB.readAll(Collections.question,
+                new Document("_id", new ObjectId(questionId)), Sorts.ascending(sort), skip, limit);
 
         Document myQuestion;
         if (!(myQuestions.size() == 0)) {
-            myQuestion = (Document) myQuestions.get(0);
+            myQuestion = myQuestions.get(0);
         } else {
             result.put("error", "no Questions with such ID");
             return result;

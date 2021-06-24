@@ -43,7 +43,7 @@ public class CreatePollCommand extends CommandDP {
 
         Document pollDocument = Document.parse(data.toString());
 
-        BsonValue pollId = mongoDB.create(mongoClient, Collections.poll, pollDocument, jedis, "_id")
+        BsonValue pollId = mongoDB.create(Collections.poll, pollDocument, "_id")
                 .getInsertedId();
 
         result.put("pollId", pollId.asObjectId().getValue().toString());

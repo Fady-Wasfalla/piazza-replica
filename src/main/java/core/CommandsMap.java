@@ -21,10 +21,12 @@ import core.commands.QuestionCommands.CreateQuestionCommand;
 import core.commands.QuestionCommands.DeleteCourseQuestionsCommand;
 import core.commands.QuestionCommands.SearchQuestionsCommand;
 import core.commands.UserCommands.DeleteCourseRegistersCommand;
+import core.commands.UserCommands.LogInCommand;
 import core.commands.UserCommands.RegisterUserCommand;
 import core.commands.UserCommands.SignupCommand;
 import core.commands.QuestionCommands.*;
 import core.commands.UserCommands.*;
+import core.commands.UserCommands.SignUpCommand;
 
 import java.io.*;
 import java.util.HashMap;
@@ -38,16 +40,20 @@ public class CommandsMap implements Serializable {
 
     public static void instantiate() {
         cmdMap = new HashMap<>();
-        cmdMap.put("user/SignupCommand", SignupCommand.class);
+        cmdMap.put("user/SignupCommand", SignUpCommand.class);
         cmdMap.put("command/AddCommand", AddCommand.class);
         cmdMap.put("command/UpdateCommand", UpdateCommand.class);
         cmdMap.put("command/DeleteCommand", DeleteCommand.class);
+
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
         cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
         cmdMap.put("user/ViewUserCoursesCommand", ViewUserCoursesCommand.class);
         cmdMap.put("user/SetNotificationTokenCommand", SetNotificationTokenCommand.class);
         cmdMap.put("user/BanStudentCommand", BanStudentCommand.class);
-
+        cmdMap.put("user/SetNotificationTokenCommand", SetNotificationTokenCommand.class);
+        cmdMap.put("user/BanStudentCommand", BanStudentCommand.class);
+        cmdMap.put("user/SignUpCommand", SignUpCommand.class);
+        cmdMap.put("user/LogInCommand", LogInCommand.class);
 
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);

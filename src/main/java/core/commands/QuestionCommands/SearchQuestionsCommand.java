@@ -66,8 +66,8 @@ public class SearchQuestionsCommand extends CommandDP {
         Document regex = new Document("$regex", expression);
         Document queryDocument = new Document("description", regex);
 
-        ArrayList<Document> queryResults = mongoDB.readAll(mongoClient, Collections.question,
-                queryDocument, Sorts.ascending(sort), skip, limit, jedis);
+        ArrayList<Document> queryResults = mongoDB.readAll(Collections.question,
+                queryDocument, Sorts.ascending(sort), skip, limit);
 
         if (queryResults.isEmpty()) {
             result.put("[]", "No questions to show for this course");
@@ -75,7 +75,7 @@ public class SearchQuestionsCommand extends CommandDP {
         }
 
         for (Document doc : queryResults) {
-            JSONObject instance = new JSONObject(doc.toJson().toString());
+            JSONObject instance = new JSONObject(doc.toJson());
             result.append("question", instance);
         }
 

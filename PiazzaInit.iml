@@ -681,5 +681,7 @@
     <orderEntry type="library" name="Maven: org.testng:testng:7.4.0" level="project" />
     <orderEntry type="library" name="Maven: com.beust:jcommander:1.78" level="project" />
     <orderEntry type="library" name="Maven: org.webjars:jquery:3.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.ibatis:ibatis-core:3.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-dbcp2:2.7.0" level="project" />
   </component>
 </module>
