@@ -17,12 +17,15 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
 public class ConsumerMQ {
-    private static final ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    public static volatile ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    public static volatile boolean isPaused = false;
+    public static volatile ArrayList<Runnable> pendingTasks = new ArrayList<Runnable>();
 
     public static void run(String microservice, int port) throws Exception {
         Dotenv dotenv = Dotenv.load();
@@ -90,7 +93,14 @@ public class ConsumerMQ {
                         }
                     }
                 };
-                threadPool.submit(task);
+
+                if(!isPaused){
+                    threadPool.submit(task);
+                } else {
+                    pendingTasks.add(task);
+                    System.out.println(pendingTasks.size());
+                }
+
             }
         };
         System.out.println("Request queue name (consumer): " + REQ_QUEUE_NAME);
