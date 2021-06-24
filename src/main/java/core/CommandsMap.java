@@ -3,6 +3,9 @@ package core;
 import Services.AddCommand;
 import Services.DeleteCommand;
 import Services.UpdateCommand;
+import core.commands.Controller.ContinueCommand;
+import core.commands.Controller.FreezeCommand;
+import core.commands.Controller.SetMaxThreadCountCommand;
 import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.CourseCommands.DeleteCourseCommand;
 import core.commands.CourseCommands.ViewCourseCommand;
@@ -62,7 +65,10 @@ public class CommandsMap implements Serializable {
         cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
         cmdMap.put("poll/DeleteCoursePollsCommand", DeleteCoursePollsCommand.class);
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
-//        cmdMap.put("poll/DeleteCoursePollsCommand", ViewAllPollsCommand.class);
+
+        cmdMap.put("controller/FreezeCommand", FreezeCommand.class);
+        cmdMap.put("controller/ContinueCommand", ContinueCommand.class);
+        cmdMap.put("controller/SetMaxThreadCount", SetMaxThreadCountCommand.class);
 
         cmdMap.put("notification/NotifyAllStudentsCommand", NotifyAllStudentsCommand.class);
         cmdMap.put("notification/NotifyAllInstructorsCommand", NotifyAllInstructorsCommand.class);
