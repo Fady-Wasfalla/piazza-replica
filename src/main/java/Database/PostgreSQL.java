@@ -7,7 +7,7 @@ import java.sql.*;
 public class PostgreSQL {
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();
-        String url = "jdbc:postgresql://"+dotenv.get("postgres_host","localhost")+":5432/piazza";
+        String url = "jdbc:postgresql://" + dotenv.get("postgres_host", "localhost") + ":5432/piazza";
         url = "jdbc:postgresql://ec2-54-220-35-19.eu-west-1.compute.amazonaws.com:5432/d2spprpmp8ult?user=fbqvcficlrhimr&password=f989e5d9f18291eddb927bfbbbcf76121d597dddc5a3350f136b233e7c4af518";
         String user = "postgres";
         user = "fbqvcficlrhimr";

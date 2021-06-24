@@ -1,7 +1,6 @@
 package ServiceNettyServer;
 
-import Services.jedis;
-import com.mongodb.client.MongoClient;
+import Services.Redis;
 import core.CommandDP;
 import core.CommandsMap;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -23,15 +22,21 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
 
+    volatile String responseBody;
     private HttpRequest request;
-    private int counter = 0;
+    private final int counter = 0;
     private String requestBody;
     private String httpRoute;
-    volatile String responseBody;
-    private CommandsMap cmdMap;
+    private final CommandsMap cmdMap;
 
     public ServiceNettyServerHandler(CommandsMap cmdMap) {
         this.cmdMap = cmdMap;
+    }
+
+    private static void send100Continue(ChannelHandlerContext ctx) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+                CONTINUE);
+        ctx.writeAndFlush(response);
     }
 
     @Override
@@ -63,20 +68,14 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
     private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception {
         JSONObject requestJson = new JSONObject(getRequestBody());
         Dotenv dotenv = Dotenv.load();
-        MongoClient mongoClient = null;
-        try {
-//            mongoClient = MongoClients.create(dotenv.get("CONNECTION_STRING")+10);
-        } catch (Exception error) {
-            System.out.println("error hhhhhhhhhhhhh :" + error);
-        }
-
+        
         String function = requestJson.getString("function");
         String serviceName = requestJson.getString("service");
         
         CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
         Class service = command.getClass();
-        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class,jedis.class);
-        setData.invoke(command, requestJson, mongoClient, null);
+        Method setData = service.getMethod("setData", JSONObject.class);
+        setData.invoke(command, requestJson);
         if(function == "command" || serviceName == "command"){
             Method setCmd = service.getMethod("setCmd", CommandsMap.class);
             setCmd.invoke(command, cmdMap);
@@ -109,12 +108,6 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<Objec
 
     public String getResponseBody() {
         return responseBody;
-    }
-
-    private static void send100Continue(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                CONTINUE);
-        ctx.writeAndFlush(response);
     }
 
     @Override

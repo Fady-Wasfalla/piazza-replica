@@ -41,7 +41,7 @@ public class CreateQuestionCommand extends CommandDP {
 
         Document questionDocument = Document.parse(data.toString());
 
-        BsonValue questionId = mongoDB.create(mongoClient, Collections.question, questionDocument, jedis, "_id")
+        BsonValue questionId = mongoDB.create(Collections.question, questionDocument, "_id")
                 .getInsertedId();
 
         result.put("questionId", questionId.asObjectId().getValue().toString());

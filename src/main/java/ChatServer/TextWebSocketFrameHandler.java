@@ -27,7 +27,7 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        System.out.println(ctx.channel().read().id() +": "+msg.text());
+        System.out.println(ctx.channel().read().id() + ": " + msg.text());
 
         group.writeAndFlush(new TextWebSocketFrame(ctx.channel().read().id() + ": " + msg.text()).retain());
     }
