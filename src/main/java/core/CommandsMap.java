@@ -68,7 +68,7 @@ public class CommandsMap implements Serializable {
         cmdMap.put("notification/NotifyAllInstructorsCommand", NotifyAllInstructorsCommand.class);
         cmdMap.put("notification/NotifyStudentCommand", NotifyStudentCommand.class);
 
-
+    }
 
 
     public static void saveStatus(Serializable object, String path) {

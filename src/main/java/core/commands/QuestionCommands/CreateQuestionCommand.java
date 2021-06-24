@@ -3,6 +3,7 @@ package core.commands.QuestionCommands;
 import NettyHTTP.NettyHTTPServer;
 import NettyHTTP.NettyServerHandler;
 import Notifications.Notifications;
+import RabbitMQ.MessageQueue;
 import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.MongoClient;
@@ -81,16 +82,16 @@ public class CreateQuestionCommand extends CommandDP {
         notificationRequest.put("user", this.user);
 
         try{
-            NettyServerHandler.sendMessageToActiveMQ(notificationRequest.toString(),requestQueue,correlationId);
+            MessageQueue.send(notificationRequest.toString(),requestQueue,correlationId);
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
-            NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
+            MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
 
                 if (delivery.getProperties().getCorrelationId().equals(correlationId)) {
-                    NettyHTTPServer.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     response.offer(new String(delivery.getBody(), "UTF-8"));
-                    NettyHTTPServer.channel.basicCancel(consumerTag);
+                    MessageQueue.channel.basicCancel(consumerTag);
                 }else{
-                    NettyHTTPServer.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
+                    MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
                 }
             }, consumerTag -> {
             });

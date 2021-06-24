@@ -2,6 +2,7 @@ package core.commands.QuestionCommands;
 
 import NettyHTTP.NettyHTTPServer;
 import NettyHTTP.NettyServerHandler;
+import RabbitMQ.MessageQueue;
 import Services.Collections;
 import Services.mongoDB;
 import com.mongodb.client.model.Sorts;
@@ -63,7 +64,6 @@ public class AnswerQuestionCommand extends CommandDP {
             return result;
         }
         System.out.println(myQuestion);
-        JSONObject answers = (JSONObject) myQuestion.get("answers");
 
         JSONObject newAnswer = new JSONObject();
         newAnswer.put("username", data.getString("userName"));
@@ -103,16 +103,16 @@ public class AnswerQuestionCommand extends CommandDP {
         notificationRequest.put("user", this.user);
 
         try{
-            NettyServerHandler.sendMessageToActiveMQ(notificationRequest.toString(),requestQueue,correlationId);
+            MessageQueue.send(notificationRequest.toString(),requestQueue,correlationId);
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
-            NettyHTTPServer.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
+            MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
 
                 if (delivery.getProperties().getCorrelationId().equals(correlationId)) {
-                    NettyHTTPServer.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     response.offer(new String(delivery.getBody(), "UTF-8"));
-                    NettyHTTPServer.channel.basicCancel(consumerTag);
+                    MessageQueue.channel.basicCancel(consumerTag);
                 }else{
-                    NettyHTTPServer.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
+                    MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
                 }
             }, consumerTag -> {
             });
