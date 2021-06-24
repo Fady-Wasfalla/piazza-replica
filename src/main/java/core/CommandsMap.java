@@ -7,10 +7,7 @@ import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.CourseCommands.DeleteCourseCommand;
 import core.commands.CourseCommands.ViewCourseCommand;
 import core.commands.CourseCommands.ViewUserCoursesCommand;
-import core.commands.PollCommands.CreatePollCommand;
-import core.commands.PollCommands.DeletePollCommand;
-import core.commands.PollCommands.UpdatePollCommand;
-import core.commands.PollCommands.ViewAllPollsCommand;
+import core.commands.PollCommands.*;
 import core.commands.QuestionCommands.AnswerQuestionCommand;
 import core.commands.QuestionCommands.CreateQuestionCommand;
 import core.commands.QuestionCommands.DeleteCourseQuestionsCommand;
@@ -53,6 +50,7 @@ public class CommandsMap implements Serializable {
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
         cmdMap.put("poll/DeletePollCommand", DeletePollCommand.class);
         cmdMap.put("poll/UpdatePollCommand", UpdatePollCommand.class);
+        cmdMap.put("poll/AnswerPollCommand", AnswerPollCommand.class);
 
     }
 

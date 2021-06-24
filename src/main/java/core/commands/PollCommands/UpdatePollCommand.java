@@ -21,8 +21,6 @@ public class UpdatePollCommand extends CommandDP {
     public JSONObject execute() {
 
         JSONObject result = new JSONObject();
-
-        
         String[] schema  = {"pollId"};
         if(!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
@@ -33,9 +31,8 @@ public class UpdatePollCommand extends CommandDP {
                 "expiryDate",
                 "title"
         };
-        BsonDocument updateOperation = new BsonDocument();
-                String pollId= data.getString("pollId");
-                String set = "{ $set: {";
+        String pollId= data.getString("pollId");
+        String set = "{ $set: {";
         for (String key:updateKeys) {
             if (key.equals("pollId")) {
                   continue;

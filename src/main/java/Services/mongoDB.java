@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class mongoDB {
 
-    final static String databaseName = "piazza";
+    final static String databaseName = "Piazza";
 
     public static MongoClient createMongoClient(String connectionString) {
         try (MongoClient mongoClient = MongoClients.create(connectionString)) {
