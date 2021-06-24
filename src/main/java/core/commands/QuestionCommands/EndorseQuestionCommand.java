@@ -5,82 +5,91 @@ import NettyHTTP.NettyServerHandler;
 import RabbitMQ.MessageQueue;
 import Services.Collections;
 import Services.mongoDB;
-import com.mongodb.client.model.Sorts;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
-import com.rabbitmq.client.Command;
 import core.CommandDP;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import static Services.mongoDB.getCollection;
+import static com.mongodb.client.model.Updates.*;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static Services.mongoDB.getCollection;
-import static com.mongodb.client.model.Updates.set;
-
-public class AnswerQuestionCommand extends CommandDP {
-
+public class EndorseQuestionCommand extends CommandDP {
     @Override
     public JSONObject execute() {
         JSONObject result = new JSONObject();
+
         String[] schema = {
                 "questionId",
                 "userName",
-                "description",
-                "endorsed",
-                "media",
-                "sort",
-                "skip",
-                "limit"
+                "description" ,
+                "media"
         };
 
         if (!validateJSON(schema, data)) {
             result.put("error", "invalid request parameters");
             return result;
         }
-        String questionId = this.data.getString("questionId");
-        int skip = this.data.getInt("skip");
-        int limit = this.data.getInt("limit");
-        String sort = this.data.getString("sort");
 
-        if (sort == null) {
-            sort = "title";
-        }
+        String questionId= this.data.getString("questionId");
+        Document myQuestion = mongoDB.readOne(Collections.question, new Document("_id", new ObjectId(questionId)),"_id");
 
-        ArrayList<Document> myQuestions = mongoDB.readAll(Collections.question,
-                new Document("_id", new ObjectId(questionId)), Sorts.ascending(sort), skip, limit);
-
-        Document myQuestion;
-        if (!(myQuestions.size() == 0)) {
-            myQuestion = myQuestions.get(0);
-        } else {
-            result.put("error", "no Questions with such ID");
-            return result;
-        }
-        System.out.println(myQuestion);
-
-        JSONObject newAnswer = new JSONObject();
-        newAnswer.put("username", data.getString("userName"));
-        newAnswer.put("description", data.getString("description"));
-        newAnswer.put("endorsed", data.get("endorsed"));
-        newAnswer.put("media", data.get("media"));
-
-        Document finalAns = Document.parse(newAnswer.toString());
 
         MongoCollection<Document> collection = getCollection(Collections.question);
+
+//        JSONObject x1 = new JSONObject();
+//        x1.put("questionId",questionId);
+//        JSONObject x2 = new JSONObject();
+//        x2.put("userName",this.data.getString("userName"));
+//        x2.put("description",this.data.getString("description"));
+//        x1.put("answers",x2);
+//
+//        Document x3 = Document.parse(x1.toString());
+//        Document projection = new Document("_id",new ObjectId(questionId))
+//                .append("$elemMatch", new Document("answers",
+//                new Document("userName", this.data.getString("userName"))
+//                        .append("description",this.data.getString("description"))) )
+//                ;
+//
+//        ArrayList<Document> x =  mongoDB.read(this.mongoClient, Collections.question,
+//                projection);
+//        System.out.println(projection);
+//        System.out.println(x);
+
+        JSONObject newAnswer= new JSONObject();
+        newAnswer.put("username", data.getString("userName"));
+        newAnswer.put("description", data.getString("description"));
+        newAnswer.put("media", data.getJSONArray("media"));
+
+        Document finalAns = Document.parse(newAnswer.toString());
+//        UpdateResult resultDocument = mongoDB.update(mongoClient, Collections.question,
+//                new Document("_id", new ObjectId(questionId)) ,set("answers", true), new UpdateOptions());
+
+
         UpdateResult resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
+                new Document().append("$pull", new Document("answers",finalAns)
+                ));
+        if(resultDocument.getModifiedCount() == 0){
+            result.put("error","no such answer to this question");
+            return result;
+        }
+
+        newAnswer.put("endorsed", true);
+        finalAns = Document.parse(newAnswer.toString());
+        resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
                 new Document().append("$push", new Document("answers",finalAns)
-        ));
+                ));
 
-        long modifiedQuestionsCount= resultDocument.getModifiedCount();
+        long modifiedQuestionsCount = resultDocument.getModifiedCount();
         result.put("Modified Questions Count", modifiedQuestionsCount);
-
 
         String correlationId = UUID.randomUUID().toString();
         String requestQueue = "notificationReq";
@@ -92,7 +101,7 @@ public class AnswerQuestionCommand extends CommandDP {
 
         JSONObject body = new JSONObject();
         body.put("userName", myQuestion.getString("userName"));
-        body.put("description","Your question have a new answer");
+        body.put("description","Your answer was endorsed");
         body.put("model",  this.data.getString("questionId"));
         body.put("onModel", "Question");
         body.put("sort", "_id");
@@ -127,10 +136,7 @@ public class AnswerQuestionCommand extends CommandDP {
             e.printStackTrace();
         }
 
-
-
-
-
         return result;
+
     }
 }

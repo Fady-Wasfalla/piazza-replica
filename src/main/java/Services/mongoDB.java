@@ -67,8 +67,8 @@ public class mongoDB {
     public static ArrayList<Document> readAll(Collections collectionName, Document filterDocument, Bson sort, int skip, int limit) {
 
         String cached_documents_string = (Redis.getLayeredCache(collectionName.name() + filterDocument.toString(), "" + skip + limit));
-        JSONObject cached_documents_json = new JSONObject(cached_documents_string);
         if(cached_documents_string != null) {
+            JSONObject cached_documents_json = new JSONObject(cached_documents_string);
             ArrayList<Document> cached_documents = new ArrayList<>();
             for (int i = 0; i < cached_documents_json.keySet().size(); i++) {
                 cached_documents.add(Document.parse(cached_documents_json.getJSONObject("" + i).toString()));
