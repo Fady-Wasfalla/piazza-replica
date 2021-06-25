@@ -87,6 +87,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 
+            //TODO To be removed
             if (MessageQueue.channel == null) {
                 MessageQueue.instantiateChannel();
             }

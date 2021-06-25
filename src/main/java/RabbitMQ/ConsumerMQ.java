@@ -29,6 +29,7 @@ public class ConsumerMQ {
         System.out.println("Command Map Size: " + CommandsMap.cmdMap.size());
         CommandsMap.getAllClasses();
         Consumer consumer;
+        //TODO to be removed
         if (MessageQueue.channel == null)
             MessageQueue.instantiateChannel();
 

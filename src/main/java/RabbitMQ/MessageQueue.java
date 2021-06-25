@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 
+import static java.lang.Thread.*;
+
 public class MessageQueue {
     public static ConnectionFactory factory;
     public static Connection connection;
@@ -17,16 +19,31 @@ public class MessageQueue {
     public static void instantiateChannel() {
         Dotenv dotenv = Dotenv.load();
         System.out.println("Instantiate Channel MessageQueue");
-        try {
-            factory = new ConnectionFactory();
-            factory.setHost(dotenv.get("rabbitmq_host", "localhost"));
-            connection = factory.newConnection();
-            channel = connection.createChannel();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
+        if(channel!=null){
+            System.out.println("Connection Already Instantiated");
         }
+        for(int i=0;i<6;i++) {
+            System.out.println("Attempting to connect to RabbitMQ trial: "+i);
+            try {
+                factory = new ConnectionFactory();
+                factory.setHost(dotenv.get("rabbitmq_host", "localhost"));
+                connection = factory.newConnection();
+                channel = connection.createChannel();
+                System.out.println("Connected to RabbitMQ successfully");
+                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+            try {
+                sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Error Connecting to RabbitMQ program exiting");
+        System.exit(0);
     }
 
     public static void declareQueue(String microservice) throws IOException {
@@ -49,8 +66,9 @@ public class MessageQueue {
                 .replyTo(responseQueue)
                 .build();
         System.out.println("Message===>" + message);
+        //TODO to be removed
         if (MessageQueue.channel == null) {
-            MessageQueue.instantiateChannel();
+               MessageQueue.instantiateChannel();
         }
         MessageQueue.channel.basicPublish("", queue, props, message.getBytes(StandardCharsets.UTF_8));
         //TODO clean resources When closing the project (channel and connection)

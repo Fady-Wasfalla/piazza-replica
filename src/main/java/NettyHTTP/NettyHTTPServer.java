@@ -1,5 +1,6 @@
 package NettyHTTP;
 
+import RabbitMQ.MessageQueue;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -21,11 +22,10 @@ public class NettyHTTPServer {
                     .childHandler(new HTTPServerInitializer());
 //            b.option(ChannelOption.SO_KEEPALIVE, true);
             Channel ch = b.bind(port).sync().channel();
-
             System.out.println("Server is listening on http://127.0.0.1:" + port + '/');
-
             ch.closeFuture().sync();
-
+            //Initialize RabbitMq Connections
+            MessageQueue.instantiateChannel();
         } catch (InterruptedException e) {
             e.printStackTrace();
 
