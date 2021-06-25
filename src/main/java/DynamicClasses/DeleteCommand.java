@@ -32,7 +32,7 @@ public class DeleteCommand extends CommandClassDP {
         cmdMap.remove(key);
         System.out.println("Class Deleted Successfully");
         if( status ) {
-            result.append("Message","New class added successfully");
+            result.append("Message","Class Deleted Successfully");
         }
         return result;
     }
