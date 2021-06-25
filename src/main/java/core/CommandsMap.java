@@ -1,8 +1,8 @@
 package core;
 
-import Services.AddCommand;
-import Services.DeleteCommand;
-import Services.UpdateCommand;
+import DynamicClasses.AddCommand;
+import DynamicClasses.DeleteCommand;
+import DynamicClasses.UpdateCommand;
 import core.commands.CourseCommands.CreateCourseCommand;
 import core.commands.CourseCommands.DeleteCourseCommand;
 import core.commands.CourseCommands.ViewCourseCommand;
@@ -31,9 +31,6 @@ public class CommandsMap implements Serializable {
     public static void instantiate() {
         cmdMap = new HashMap<>();
         cmdMap.put("user/SignupCommand", SignupCommand.class);
-        cmdMap.put("command/AddCommand", AddCommand.class);
-        cmdMap.put("command/UpdateCommand", UpdateCommand.class);
-        cmdMap.put("command/DeleteCommand", DeleteCommand.class);
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
         cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
         cmdMap.put("user/ViewUserCoursesCommand", ViewUserCoursesCommand.class);
@@ -50,6 +47,11 @@ public class CommandsMap implements Serializable {
         cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
         cmdMap.put("poll/DeleteCoursePollsCommand", DeleteCoursePollsCommand.class);
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
+
+        cmdMap.put("DynamicClasses/AddCommand", AddCommand.class);
+        cmdMap.put("DynamicClasses/UpdateCommand", UpdateCommand.class);
+        cmdMap.put("DynamicClasses/DeleteCommand", DeleteCommand.class);
+
     }
 
     public static void saveStatus(Serializable object, String path) {
@@ -97,6 +99,11 @@ public class CommandsMap implements Serializable {
         System.out.println("replaced");
     }
 
+    public static void remove(String key) {
+        cmdMap.remove(key);
+        System.out.println("removed");
+    }
+
     public static void getAllClasses() {
         System.out.println("---------Command Map Classes---------");
 //        cmdMap = loadStatus("src/main/java/Services/cmdMap.ser");
@@ -107,14 +114,5 @@ public class CommandsMap implements Serializable {
 
     public static void main(String[] args) {
         CommandsMap.instantiate();
-//        HashMap x = new HashMap<>();
-//        x = loadStatus("src/main/java/Services/cmdMap.ser");
-//        System.out.println(x.keySet());
-//        CommandsMap cmd = new CommandsMap();
-//        cmd.instantiate();
-//        saveStatus(cmd,"src/main/java/Services/cmdMap.ser");
-//        Object back = loadStatus("src/main/java/Services/cmdMap.dat");
-//        System.out.println(back);
-//        back.getAllClasses();
     }
 }

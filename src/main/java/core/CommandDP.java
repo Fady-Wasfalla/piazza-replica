@@ -7,7 +7,6 @@ import org.json.JSONObject;
 public abstract class CommandDP {
     public JSONObject data;
     public JSONObject user;
-    public Object dal;
     public MongoClient mongoClient;
     public jedis jedis;
 

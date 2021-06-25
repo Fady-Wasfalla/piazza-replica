@@ -2,6 +2,7 @@ package ServiceNettyServer;
 
 import com.mongodb.client.MongoClient;
 import core.CommandDP;
+import DynamicClasses.CommandClassDP;
 import core.CommandsMap;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.netty.buffer.ByteBuf;
@@ -10,6 +11,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.multipart.*;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.util.CharsetUtil;
 import org.json.JSONObject;
@@ -35,6 +37,9 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
     private String httpRoute;
     volatile String responseBody;
     private CommandsMap cmdMap;
+    private String url;
+    private ByteBuffer cntJava;
+    private ByteBuffer cntClass;
 
     public ServiceNettyServerHandler(CommandsMap cmdMap) {
         this.cmdMap = cmdMap;
@@ -52,103 +57,130 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
             }
             httpRoute = request.uri();
         }
-
+        cntClass = null;
+        cntJava  = null;
         if (msg instanceof HttpContent) {
-            System.out.println("hello 1");
             HttpContent httpContent = (HttpContent) msg;
+            url = String.valueOf(msg.getUri());
             ByteBuf content = httpContent.content();
-            ByteBuffer content2 = content.nioBuffer();
-
-            QueryStringDecoder decoder = new QueryStringDecoder(String.valueOf(msg.getUri()));
-            String serviceName = decoder.parameters().get("service").get(0);
-            String className = decoder.parameters().get("className").get(0);
-            String service = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1).toLowerCase() + "Commands";
+            QueryStringDecoder decoder = new QueryStringDecoder(url);
             String type = decoder.parameters().get("type").get(0);
-            if(type.equals("class")){
 
-
-                String filePath = "target/classes";
-                File root = new File(filePath);
-                File sourceFile = new File(root, "core/commands/" + service + "/" + className + ".class");
-                FileChannel wChannel = new FileOutputStream(sourceFile, false).getChannel();
-                wChannel.write(content2);
-                wChannel.close();
-
-                System.out.println(className);
-                Class<?> newClass = Class.forName("core.commands."+service+"."+className);
-                String key = serviceName+"/"+className.split("\\.java")[0];
-                cmdMap.replace(key,newClass);
-                System.out.println("ADD");
-                cmdMap.getAllClasses();
-
-            }  else if(type.equals("java")){
-
-
-                String filePath = "src/main/java";
-                File root = new File(filePath);
-                File sourceFile = new File(root, "core/commands/" + service + "/" + className + ".java");
-                Files.write(sourceFile.toPath(), StandardCharsets.UTF_8.decode(content2).toString().getBytes(StandardCharsets.UTF_8));
+            if((type.toLowerCase()).equals("dynamicclasses")) {
+                HttpPostRequestDecoder postDecoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(false), request);
+                InterfaceHttpData data = postDecoder.getBodyHttpData("javaKey");
+                if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
+                    FileUpload attribute = (FileUpload) data;
+                    String value = attribute.getFilename();
+                    cntJava = ((FileUpload) data).getByteBuf().nioBuffer();
+                    System.out.println("fromField1 :" + value);
+                }
+                InterfaceHttpData data1 = postDecoder.getBodyHttpData("classKey");
+                if (data1.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
+                    FileUpload attribute = (FileUpload) data1;
+                    String value = attribute.getFilename();
+                    cntClass = ((FileUpload) data1).getByteBuf().nioBuffer();
+                    System.out.println("fromField1 :" + cntClass);
+                }
             }
-
-
+//            QueryStringDecoder decoder = new QueryStringDecoder(String.valueOf(msg.getUri()));
+//            String serviceName = decoder.parameters().get("service").get(0);
+//            String className = decoder.parameters().get("className").get(0);
+//            String service = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1).toLowerCase() + "Commands";
+//            String type1 = decoder.parameters().get("type1").get(0);
+//
+//            if(type1.equals("add")){
+//                System.out.println("ENTER ADD");
+//                //java file
+//                String filePath1 = "src/main/java";
+//                File root1 = new File(filePath1);
+//                File sourceFile1 = new File(root1, "core/commands/" + service + "/" + className + ".java");
+//                Files.write(sourceFile1.toPath(), StandardCharsets.UTF_8.decode(cntJava).toString().getBytes(StandardCharsets.UTF_8));
+//                System.out.println("ADD NEW JAVA FILE");
+//
+//                String filePath = "target/classes";
+//                File root = new File(filePath);
+//                File sourceFile = new File(root, "core/commands/" + service + "/" + className + ".class");
+//                FileChannel wChannel = new FileOutputStream(sourceFile, false).getChannel();
+//                wChannel.write(cntClass);
+//                wChannel.close();
+//
+//                Class<?> newClass = Class.forName("core.commands."+service+"."+className);
+//                String key = serviceName+"/"+className.split("\\.java")[0];
+//                cmdMap.replace(key,newClass);
+//                cmdMap.getAllClasses();
+//                System.out.println("ADD NEW CLASS FILE");
+//            }
             ctx.fireChannelRead(content.copy());
         }
         if (msg instanceof LastHttpContent) {
             System.out.println("hello 2");
             LastHttpContent trailer = (LastHttpContent) msg;
-            if (trailer instanceof BinaryWebSocketFrame) {
-                System.out.println("AA&AAAAAA");
-                ByteBuf content2 = ((BinaryWebSocketFrame)msg).content();
-                File file = new File("test.class");
-
-                FileChannel wChannel = new FileOutputStream(file, true).getChannel();
-                System.out.println("HELLLLLLLLLLLLLLLLLLLLLLLL"+content2);
-//            wChannel.write(content2);
-                wChannel.close();
-            }
             System.out.println(getRequestBody());
-//            writeResponse(trailer, ctx);
+            writeResponse(trailer, ctx);
         }
 
     }
 
-    private synchronized void writeResponse(HttpObject currentObj, final ChannelHandlerContext ctx) throws Exception {
-        JSONObject requestJson = new JSONObject(getRequestBody());
-        Dotenv dotenv = Dotenv.load();
-        MongoClient mongoClient = null;
-        try {
-//            mongoClient = MongoClients.create(dotenv.get("CONNECTION_STRING")+10);
-        } catch (Exception error) {
-            System.out.println("error hhhhhhhhhhhhh :" + error);
-        }
+    private synchronized void writeResponse(HttpContent msg, final ChannelHandlerContext ctx) throws Exception {
 
-        String function = requestJson.getString("function");
-        String serviceName = requestJson.getString("service");
-        CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
-        Class service = command.getClass();
-        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
-        setData.invoke(command, requestJson, mongoClient);
-        Method setCmd = service.getMethod("setCmd", CommandsMap.class);
-        setCmd.invoke(command, cmdMap);
-//        cmdMap.getAllClasses();
-        JSONObject resultCommand = command.execute();
-        if (true) {
+        QueryStringDecoder decoder = new QueryStringDecoder(url);
+        String type = decoder.parameters().get("type").get(0);
+
+        if((type.toLowerCase()).equals("dynamicclasses")){ //dynamic classes
+            String dynamicFunction = decoder.parameters().get("dynamicFunction").get(0);
+            CommandClassDP command = (CommandClassDP) cmdMap.queryClass("DynamicClasses/"+dynamicFunction).getDeclaredConstructor().newInstance();
+            Class service1 = command.getClass();
+            Method setData = service1.getMethod("setData", ByteBuffer.class, ByteBuffer.class,String.class);
+            setData.invoke(command, cntJava, cntClass,url);
+            Method setCmd = service1.getMethod("setCmd", CommandsMap.class);
+            setCmd.invoke(command, cmdMap);
+            JSONObject resultCommand = command.execute();
+
             if (ServiceNettyHTTPServer.channel == null)
                 ServiceNettyHTTPServer.instantiateChannel();
-            String result = "HELLO";
-            ByteBuf b = Unpooled.copiedBuffer(result, CharsetUtil.UTF_8);
+            ByteBuf b = Unpooled.copiedBuffer(resultCommand.toString(), CharsetUtil.UTF_8);
             FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
             response1.headers().set("CONTENT_TYPE", "application/json");
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
-        } else {
-            JSONObject result_error = new JSONObject();
-            result_error.put("Message", "");
-            ByteBuf b = Unpooled.copiedBuffer(result_error.toString(), CharsetUtil.UTF_8);
-            FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(b));
-            response1.headers().set("CONTENT_TYPE", "application/json");
-            response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
-            ctx.write(response1);
+        }else {// Controller
+            JSONObject requestJson = new JSONObject(getRequestBody());
+            Dotenv dotenv = Dotenv.load();
+            MongoClient mongoClient = null;
+            try {
+//            mongoClient = MongoClients.create(dotenv.get("CONNECTION_STRING")+10);
+            } catch (Exception error) {
+                System.out.println("error hhhhhhhhhhhhh :" + error);
+            }
+
+            String function = requestJson.getString("function");
+            String serviceName = requestJson.getString("service");
+            CommandDP command = (CommandDP) cmdMap.queryClass(serviceName + "/" + function).getDeclaredConstructor().newInstance();
+            Class service = command.getClass();
+            Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
+            setData.invoke(command, requestJson, mongoClient);
+            Method setCmd = service.getMethod("setCmd", CommandsMap.class);
+            setCmd.invoke(command, cmdMap);
+            JSONObject resultCommand = command.execute();
+            if (true) {
+                if (ServiceNettyHTTPServer.channel == null)
+                    ServiceNettyHTTPServer.instantiateChannel();
+                String result = "HELLO";
+                ByteBuf b = Unpooled.copiedBuffer(result, CharsetUtil.UTF_8);
+                FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
+                response1.headers().set("CONTENT_TYPE", "application/json");
+                response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
+                ctx.write(response1);
+            } else {
+                JSONObject result_error = new JSONObject();
+                result_error.put("Message", "");
+                ByteBuf b = Unpooled.copiedBuffer(result_error.toString(), CharsetUtil.UTF_8);
+                FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.wrappedBuffer(b));
+                response1.headers().set("CONTENT_TYPE", "application/json");
+                response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
+                ctx.write(response1);
+            }
         }
     }
 
