@@ -7,6 +7,9 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static java.lang.Thread.*;
@@ -30,6 +33,11 @@ public class MessageQueue {
                 connection = factory.newConnection();
                 channel = connection.createChannel();
                 System.out.println("Connected to RabbitMQ successfully");
+                String strlist = dotenv.get("queues");
+                List<String> arr= Arrays.asList(strlist.split(","));
+                for(String queue: arr){
+                    declareQueue(queue);
+                }
                 return;
             } catch (IOException e) {
                 e.printStackTrace();
