@@ -1,5 +1,6 @@
 package ServiceNettyServer;
 
+import Services.Redis;
 import com.mongodb.client.MongoClient;
 import core.CommandDP;
 import DynamicClasses.CommandClassDP;
@@ -32,7 +33,7 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
 
 
     private HttpRequest request;
-    private int counter = 0;
+    private final int counter = 0;
     private String requestBody;
     private String httpRoute;
     volatile String responseBody;
@@ -43,6 +44,12 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
 
     public ServiceNettyServerHandler(CommandsMap cmdMap) {
         this.cmdMap = cmdMap;
+    }
+
+    private static void send100Continue(ChannelHandlerContext ctx) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+                CONTINUE);
+        ctx.writeAndFlush(response);
     }
 
     @Override
@@ -83,34 +90,6 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
                     System.out.println("fromField1 :" + cntClass);
                 }
             }
-//            QueryStringDecoder decoder = new QueryStringDecoder(String.valueOf(msg.getUri()));
-//            String serviceName = decoder.parameters().get("service").get(0);
-//            String className = decoder.parameters().get("className").get(0);
-//            String service = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1).toLowerCase() + "Commands";
-//            String type1 = decoder.parameters().get("type1").get(0);
-//
-//            if(type1.equals("add")){
-//                System.out.println("ENTER ADD");
-//                //java file
-//                String filePath1 = "src/main/java";
-//                File root1 = new File(filePath1);
-//                File sourceFile1 = new File(root1, "core/commands/" + service + "/" + className + ".java");
-//                Files.write(sourceFile1.toPath(), StandardCharsets.UTF_8.decode(cntJava).toString().getBytes(StandardCharsets.UTF_8));
-//                System.out.println("ADD NEW JAVA FILE");
-//
-//                String filePath = "target/classes";
-//                File root = new File(filePath);
-//                File sourceFile = new File(root, "core/commands/" + service + "/" + className + ".class");
-//                FileChannel wChannel = new FileOutputStream(sourceFile, false).getChannel();
-//                wChannel.write(cntClass);
-//                wChannel.close();
-//
-//                Class<?> newClass = Class.forName("core.commands."+service+"."+className);
-//                String key = serviceName+"/"+className.split("\\.java")[0];
-//                cmdMap.replace(key,newClass);
-//                cmdMap.getAllClasses();
-//                System.out.println("ADD NEW CLASS FILE");
-//            }
             ctx.fireChannelRead(content.copy());
         }
         if (msg instanceof LastHttpContent) {
@@ -145,6 +124,7 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
             response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
             ctx.write(response1);
         }else {// Controller
+
             JSONObject requestJson = new JSONObject(getRequestBody());
             Dotenv dotenv = Dotenv.load();
             MongoClient mongoClient = null;
@@ -160,14 +140,18 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
             Class service = command.getClass();
             Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class);
             setData.invoke(command, requestJson, mongoClient);
-            Method setCmd = service.getMethod("setCmd", CommandsMap.class);
-            setCmd.invoke(command, cmdMap);
+
+            if(function == "command" || serviceName == "command"){
+                Method setCmd = service.getMethod("setCmd", CommandsMap.class);
+                setCmd.invoke(command, cmdMap);
+            }
+
+        
             JSONObject resultCommand = command.execute();
             if (true) {
                 if (ServiceNettyHTTPServer.channel == null)
                     ServiceNettyHTTPServer.instantiateChannel();
-                String result = "HELLO";
-                ByteBuf b = Unpooled.copiedBuffer(result, CharsetUtil.UTF_8);
+                ByteBuf b = Unpooled.copiedBuffer(resultCommand.toString(), CharsetUtil.UTF_8);
                 FullHttpResponse response1 = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(b));
                 response1.headers().set("CONTENT_TYPE", "application/json");
                 response1.headers().set("CONTENT_LENGTH", response1.content().readableBytes());
@@ -190,12 +174,6 @@ public class ServiceNettyServerHandler extends SimpleChannelInboundHandler<FullH
 
     public String getResponseBody() {
         return responseBody;
-    }
-
-    private static void send100Continue(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                CONTINUE);
-        ctx.writeAndFlush(response);
     }
 
     @Override

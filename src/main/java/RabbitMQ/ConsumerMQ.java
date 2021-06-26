@@ -1,9 +1,9 @@
 package RabbitMQ;
 
 import ServiceNettyServer.ServiceNettyHTTPServer;
-import Services.jedis;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
+import Services.PostgreSQL;
+import Services.Redis;
+import Services.mongoDB;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
@@ -15,12 +15,15 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
 public class ConsumerMQ {
-    private static final ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    public static volatile ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    public static volatile boolean isPaused = false;
+    public static volatile ArrayList<Runnable> pendingTasks = new ArrayList<Runnable>();
 
     public static void run(String microservice, int port) throws Exception {
         Dotenv dotenv = Dotenv.load();
@@ -32,18 +35,13 @@ public class ConsumerMQ {
         if (MessageQueue.channel == null)
             MessageQueue.instantiateChannel();
 
-        String connectionString = dotenv.get("CONNECTION_STRING") + "10"; // no. of DP connections
-        MongoClient mongoClient = null;
-        jedis jedis = null;
         try {
-            mongoClient = MongoClients.create(connectionString);
-            jedis = new jedis(dotenv.get("redis_host","localhost"), 6379, "");
+            Redis.initRedis();
+            mongoDB.initMongo();
+            PostgreSQL.initPostgres(-1);
         } catch (Exception error) {
-            System.out.println("ERROR CREATING MONGODB/Redis CONNECTION :" + error);
-
+            System.out.println("ERROR CREATING MONGODB/REDIS/POSTGRES CONNECTION :" + error);
         }
-        MongoClient finalMongoClient = mongoClient;
-        jedis finalJedis = jedis;
 
         //Response Queue Declare
         String RES_QUEUE_NAME = microservice + "Res";
@@ -65,11 +63,11 @@ public class ConsumerMQ {
                         String function = requestJson.getString("function");
                         String queue = requestJson.getString("queue");
 
-                        System.out.println("Method to be found: "+ queue + "/" + function);
-                        CommandDP command = (CommandDP) cmdMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
+                        System.out.println("Method to be found: " + queue + "/" + function);
+                        CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
-                        Method setData = service.getMethod("setData", JSONObject.class, MongoClient.class,jedis.class);
-                        setData.invoke(command, requestJson, finalMongoClient,finalJedis);
+                        Method setData = service.getMethod("setData", JSONObject.class);
+                        setData.invoke(command, requestJson);
                         JSONObject result = command.execute();
                         MessageQueue.send(result.toString(), properties.getReplyTo(), properties.getCorrelationId());
                         MessageQueue.channel.basicAck(envelope.getDeliveryTag(), false);
@@ -90,7 +88,14 @@ public class ConsumerMQ {
                         }
                     }
                 };
-                threadPool.submit(task);
+
+                if(!isPaused){
+                    threadPool.submit(task);
+                } else {
+                    pendingTasks.add(task);
+                    System.out.println(pendingTasks.size());
+                }
+
             }
         };
         System.out.println("Request queue name (consumer): " + REQ_QUEUE_NAME);

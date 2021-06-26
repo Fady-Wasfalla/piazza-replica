@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -24,8 +25,7 @@ public class DeleteCourseCommand extends CommandDP {
         }
 
         String courseId = data.getString("courseId");
-        Document deletedCourse = mongoDB.deleteOne(this.mongoClient, Collections.course,
-                new Document("_id", new ObjectId(courseId)), jedis, "_id");
+        Document deletedCourse = mongoDB.deleteOne(Collections.course, new Document("_id", new ObjectId(courseId)), "_id");
 
         JSONObject pollDeleteRequest = new JSONObject();
         pollDeleteRequest.put("function", "DeleteCoursePollsCommand");
@@ -67,7 +67,7 @@ public class DeleteCourseCommand extends CommandDP {
                 MessageQueue.channel.basicConsume("pollRes", false, (consumerTag, delivery) -> {
                     if (delivery.getProperties().getCorrelationId().equals(pollCorrelationId)) {
                         MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                        pollResponse.offer(new String(delivery.getBody(), "UTF-8"));
+                        pollResponse.offer(new String(delivery.getBody(), StandardCharsets.UTF_8));
                         MessageQueue.channel.basicCancel(consumerTag);
                     } else {
                         MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
@@ -78,7 +78,7 @@ public class DeleteCourseCommand extends CommandDP {
                 MessageQueue.channel.basicConsume("questionRes", false, (consumerTag, delivery) -> {
                     if (delivery.getProperties().getCorrelationId().equals(questionCorrelationId)) {
                         MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                        questionResponse.offer(new String(delivery.getBody(), "UTF-8"));
+                        questionResponse.offer(new String(delivery.getBody(), StandardCharsets.UTF_8));
                         MessageQueue.channel.basicCancel(consumerTag);
                     } else {
                         MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
@@ -89,7 +89,7 @@ public class DeleteCourseCommand extends CommandDP {
                 MessageQueue.channel.basicConsume("userRes", false, (consumerTag, delivery) -> {
                     if (delivery.getProperties().getCorrelationId().equals(registerCorrelationId)) {
                         MessageQueue.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                        registerResponse.offer(new String(delivery.getBody(), "UTF-8"));
+                        registerResponse.offer(new String(delivery.getBody(), StandardCharsets.UTF_8));
                         MessageQueue.channel.basicCancel(consumerTag);
                     } else {
                         MessageQueue.channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
@@ -112,7 +112,7 @@ public class DeleteCourseCommand extends CommandDP {
         } else {
             result.put("error", "Error deleting course");
         }
-
+        System.out.println("======================"+result);
         return result;
     }
 }
