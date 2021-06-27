@@ -25,6 +25,10 @@ public class DeleteCourseRegistersCommand extends CommandDP {
         long registerDeletedCount = deletedRegisters.getDeletedCount();
         result.put("registerDeletedCount", registerDeletedCount);
 
+        schema = null;
+        courseId = null;
+        deletedRegisters = null;
+
         return result;
     }
 }

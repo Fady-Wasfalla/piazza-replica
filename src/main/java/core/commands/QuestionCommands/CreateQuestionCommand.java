@@ -100,12 +100,18 @@ public class CreateQuestionCommand extends CommandDP {
             JSONObject notificationObject = new JSONObject(notificationResponse);
             System.out.println(notificationObject);
 
-
-
         } catch (Exception e){
             e.printStackTrace();
         }
 
+        schema = null;
+        description = null;
+        questionDocument = null;
+        questionId = null;
+        requestQueue = null;
+        responseQueue = null;
+        notificationRequest = null;
+        body = null;
 
         return result;
     }

@@ -49,7 +49,7 @@ public class SetNotificationTokenCommand extends CommandDP {
                     .getInsertedId();
 
             result.put("tokenId", tokenId.asObjectId().getValue().toString());
-            System.out.println("first");
+            tokenDocument = null;
         }
         else{
 
@@ -58,10 +58,11 @@ public class SetNotificationTokenCommand extends CommandDP {
             updateOperation = set("createdAt", new Date().getTime() + "");
             mongoDB.update( Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),"_id");
             result.put("tokenId", token.get("_id").toString());
-            System.out.println("second");
+            updateOperation = null;
         }
-
-
+        schema = null;
+        filterDocument = null;
+        token = null;
         return result;
     }
 }

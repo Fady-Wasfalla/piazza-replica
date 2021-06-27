@@ -44,6 +44,10 @@ public class ViewAllPollsCommand extends CommandDP {
             result.append("poll", instance);
         }
 
+        schema = null;
+        courseId = null;
+        sort = null;
+        queryResults = null;
 
         return result;
     }

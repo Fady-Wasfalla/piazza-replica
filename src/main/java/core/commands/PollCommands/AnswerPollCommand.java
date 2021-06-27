@@ -26,16 +26,11 @@ public class AnswerPollCommand extends CommandDP {
 //                ,jedis,"_id");
 
         Document temp = mongoDB.getCollection( Collections.poll).find(new Document("_id", new ObjectId(pollId))).first();
-        System.out.println(temp);
         JSONObject targetPoll = new JSONObject(temp);
-        System.out.println(targetPoll);
         JSONArray prevAnswers =  targetPoll.getJSONArray("answers") ;
-        System.out.println(prevAnswers);
         JSONArray currentAnswers =  prevAnswers.put(answer);
-        System.out.println(currentAnswers);
         set+= (currentAnswers).toString() ;
         set +=  "      } }" ;
-        System.out.println(set);
         Document updatedPoll = mongoDB.update( Collections.poll,new Document("_id", new ObjectId(pollId))
                 , BsonDocument.parse(set),
                 new FindOneAndUpdateOptions(),"_id");
@@ -46,6 +41,15 @@ public class AnswerPollCommand extends CommandDP {
         else {
             result.put("Status", "400 Error");
         }
+        schema = null;
+        pollId = null;
+        answer = null;
+        set = null;
+        temp = null;
+        targetPoll = null;
+        prevAnswers = null;
+        currentAnswers = null;
+        updatedPoll = null;
         return result ;
 
     }

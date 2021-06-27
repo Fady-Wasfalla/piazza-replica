@@ -28,9 +28,9 @@ public class ConsumerMQ {
     public static void run(String microservice, int port) throws Exception {
         Dotenv dotenv = Dotenv.load();
         CommandsMap cmdMap = new CommandsMap();
-        CommandsMap.instantiate();
-        System.out.println("Command Map Size: " + CommandsMap.cmdMap.size());
-        CommandsMap.getAllClasses();
+        cmdMap.instantiate();
+        System.out.println("Command Map Size: " + cmdMap.cmdMap.size());
+        cmdMap.getAllClasses();
         Consumer consumer;
         if (MessageQueue.channel == null)
             MessageQueue.instantiateChannel();
