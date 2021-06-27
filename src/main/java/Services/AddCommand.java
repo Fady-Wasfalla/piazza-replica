@@ -44,7 +44,7 @@ public class AddCommand extends CommandDP {
             Files.write(sourceFile.toPath(), sourceCode.getBytes(StandardCharsets.UTF_8));
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
             int rr = compiler.run(System.in, System.out, System.err, sourceFile.getPath());
-            System.out.println(rr + " XX: " + String.valueOf(sourceFile));
+            System.out.println(rr + " XX: " + sourceFile);
 
             try {
                 Path temp = Files.move(Paths.get(String.valueOf(sourceFile).replace(".java", ".class")),
@@ -55,7 +55,7 @@ public class AddCommand extends CommandDP {
                     System.out.println("Failed to move the file");
                 }
             } catch (Exception e) {
-                System.out.println(e.toString());
+                System.out.println(e);
             }
             String clsN = className.split("\\.java")[0];
             System.out.println((clsN));
@@ -69,11 +69,11 @@ public class AddCommand extends CommandDP {
 
             Class<?> newClass = Class.forName("Services.ViewAllQuestionsCommand", true, classLoader);
             String key = queue + "/" + className.split("\\.java")[0];
-            cmdMap.replace(key, newClass);
+            CommandsMap.replace(key, newClass);
             System.out.println("ADD");
-            cmdMap.getAllClasses();
+            CommandsMap.getAllClasses();
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e);
         }
 
         return null;

@@ -1,23 +1,20 @@
 package core;
 
-import Services.jedis;
-import com.mongodb.client.MongoClient;
+import Services.Redis;
 import org.json.JSONObject;
 
 public abstract class CommandDP {
     public JSONObject data;
     public JSONObject user;
     public Object dal;
-    public MongoClient mongoClient;
-    public jedis jedis;
+    public Redis jedis;
 
     public abstract JSONObject execute();
 
-    public void setData(JSONObject data, MongoClient mongoClient, jedis jedis) {
+    public void setData(JSONObject data) {
         this.data = data.getJSONObject("body");
-        this.user = data.getJSONObject("user");
-        this.mongoClient = mongoClient;
-        this.jedis = jedis;
+        if(data.has("user"))
+            this.user = data.getJSONObject("user");
     }
 
     public boolean validateJSON(String[] schema, JSONObject jsonData) {

@@ -1,5 +1,8 @@
-package Services;
-
+package core.commands.QuestionCommands;
+import Services.Collections;
+import Services.mongoDB;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.model.Sorts;
 import core.CommandDP;
 import org.bson.Document;
@@ -33,8 +36,8 @@ public class ViewAllQuestionsCommand extends CommandDP {
             sort = "title";
         }
 
-        ArrayList<Document> queryResults = mongoDB.readAll(this.mongoClient, Collections.question,
-                new Document("courseId", courseId), Sorts.ascending(sort), skip, limit, jedis);
+        ArrayList<Document> queryResults = mongoDB.readAll(Collections.question,
+                new Document("courseId", courseId), Sorts.ascending(sort), skip, limit);
 
         if (queryResults.isEmpty()) {
             result.put("[]", "No questions to show for this course");
@@ -42,7 +45,7 @@ public class ViewAllQuestionsCommand extends CommandDP {
         }
 
         for (Document doc : queryResults) {
-            JSONObject instance = new JSONObject(doc.toJson().toString());
+            JSONObject instance = new JSONObject(doc.toJson());
             result.append("question", instance);
         }
 

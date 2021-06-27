@@ -31,7 +31,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
     volatile String responseBody;
     private HttpRequest request;
-    private  int counter = 0;
+    private final int counter = 0;
     private String requestBody;
     private String httpRoute;
     private HttpHeaders headers;
@@ -78,7 +78,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
         if (validateQueueName(queue)) {
 
-            requestJson.put("user", authPayload);
+            if(authPayload != null)
+                requestJson.put("user", authPayload);
 
             final String corrId = UUID.randomUUID().toString();
             System.out.println("Netty Http Server Handler " + requestJson);

@@ -31,6 +31,24 @@ public class ServiceNettyHTTPServer {
         this.cmdMap = cmdMap;
     }
 
+    public static void instantiateChannel() {
+        try {
+            factory = new ConnectionFactory();
+            //TODO check host
+            factory.setHost("localhost");
+            connection = factory.newConnection();
+            channel = connection.createChannel();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+//        ServiceNettyServerHandler x = new ServiceNettyServerHandler();
+    }
+
     public void start() {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -54,24 +72,6 @@ public class ServiceNettyHTTPServer {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
-    }
-
-    public static void instantiateChannel() {
-        try {
-            factory = new ConnectionFactory();
-            //TODO check host
-            factory.setHost("localhost");
-            connection = factory.newConnection();
-            channel = connection.createChannel();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) throws Exception {
-//        ServiceNettyServerHandler x = new ServiceNettyServerHandler();
     }
 
 }
