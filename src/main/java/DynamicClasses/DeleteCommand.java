@@ -30,7 +30,6 @@ public class DeleteCommand extends CommandClassDP {
         String className = decoder.parameters().get("className").get(0);
         String key = serviceName+"/"+className.split("\\.java")[0];
         cmdMap.remove(key);
-        System.out.println("Class Deleted Successfully");
         if( status ) {
             result.append("Message","Class Deleted Successfully");
         }

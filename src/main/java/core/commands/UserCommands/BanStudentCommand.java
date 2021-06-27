@@ -110,7 +110,6 @@ public class BanStudentCommand extends CommandDP {
 
             String notificationResponse = response.take();
             JSONObject notificationObject = new JSONObject(notificationResponse);
-            System.out.println(notificationObject);
 
         } catch (Exception e){
             e.printStackTrace();

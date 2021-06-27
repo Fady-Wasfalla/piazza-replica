@@ -30,7 +30,6 @@ public class UpdateCommand extends CommandClassDP {
         String className = decoder.parameters().get("className").get(0);
         String service = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1).toLowerCase() + "Commands";
 
-        System.out.println("ENTER ADD");
         //java file
         String filePath1 = "src/main/java";
         File root1 = new File(filePath1);
@@ -42,7 +41,6 @@ public class UpdateCommand extends CommandClassDP {
             result.append("Error",e.toString());
             e.printStackTrace();
         }
-        System.out.println("ADD NEW JAVA FILE");
 
         String filePath = "target/classes";
         File root = new File(filePath);
@@ -73,7 +71,6 @@ public class UpdateCommand extends CommandClassDP {
         String key = serviceName+"/"+className.split("\\.java")[0];
         cmdMap.replace(key,newClass);
         cmdMap.getAllClasses();
-        System.out.println("CLASS FILE");
         if( status ) {
             result.append("Message","Class added successfully");
         }
