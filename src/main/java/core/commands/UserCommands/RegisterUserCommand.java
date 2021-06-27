@@ -39,6 +39,10 @@ public class RegisterUserCommand extends CommandDP {
         BsonValue registeredId = insertOneResult.getInsertedId();
 
         result.put("registeredId", registeredId.asObjectId().getValue().toString());
+        schema = null;
+        registrationDocument = null;
+        insertOneResult = null;
+        registeredId = null;
         return result;
     }
 }

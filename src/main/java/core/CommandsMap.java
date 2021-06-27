@@ -42,7 +42,6 @@ public class CommandsMap implements Serializable {
     public static void instantiate() {
         cmdMap = new HashMap<>();
         cmdMap.put("user/SignupCommand", SignUpCommand.class);
-
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
         cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
         cmdMap.put("user/ViewUserCoursesCommand", ViewUserCoursesCommand.class);
@@ -68,14 +67,9 @@ public class CommandsMap implements Serializable {
 
         cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
-
-        cmdMap.put("DynamicClasses/AddCommand", AddCommand.class);
-        cmdMap.put("DynamicClasses/UpdateCommand", UpdateCommand.class);
-        cmdMap.put("DynamicClasses/DeleteCommand", DeleteCommand.class);
         cmdMap.put("poll/DeletePollCommand", DeletePollCommand.class);
         cmdMap.put("poll/UpdatePollCommand", UpdatePollCommand.class);
         cmdMap.put("poll/AnswerPollCommand", AnswerPollCommand.class);
-
 
         cmdMap.put("controller/FreezeCommand", FreezeCommand.class);
         cmdMap.put("controller/ContinueCommand", ContinueCommand.class);
@@ -86,6 +80,9 @@ public class CommandsMap implements Serializable {
         cmdMap.put("notification/NotifyAllInstructorsCommand", NotifyAllInstructorsCommand.class);
         cmdMap.put("notification/NotifyStudentCommand", NotifyStudentCommand.class);
 
+        cmdMap.put("DynamicClasses/AddCommand", AddCommand.class);
+        cmdMap.put("DynamicClasses/UpdateCommand", UpdateCommand.class);
+        cmdMap.put("DynamicClasses/DeleteCommand", DeleteCommand.class);
     }
 
 
@@ -97,7 +94,6 @@ public class CommandsMap implements Serializable {
             out.writeObject(object);
             out.close();
             fileOut.close();
-            System.out.printf("Serialized data is saved in " + path);
         } catch (IOException i) {
             i.printStackTrace();
         }
@@ -131,19 +127,15 @@ public class CommandsMap implements Serializable {
 //        cmdMap = loadStatus("src/main/java/Services/cmdMap.ser");
         cmdMap.put(key, cls);
 //        saveStatus(cmdMap,"src/main/java/Services/cmdMap.ser");
-        System.out.println("replaced");
     }
 
     public static void remove(String key) {
         cmdMap.remove(key);
-        System.out.println("removed");
     }
 
     public static void getAllClasses() {
-        System.out.println("---------Command Map Classes---------");
 //        cmdMap = loadStatus("src/main/java/Services/cmdMap.ser");
         cmdMap.forEach((k, v) -> System.out.println(k + " ==> " + v));
-        System.out.println("-------------------------------------");
     }
 
 

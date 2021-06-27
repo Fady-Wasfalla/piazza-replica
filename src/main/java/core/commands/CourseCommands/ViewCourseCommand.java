@@ -28,10 +28,10 @@ public class ViewCourseCommand extends CommandDP {
             result.put("[]", "Invalid Course ID");
             return result;
         }
-
-        System.out.println("Monica ==> " + queryResult);
-
         JSONObject result = new JSONObject(queryResult.toJson());
+        schema = null;
+        courseId = null;
+        queryResult = null;
         return result;
     }
 }

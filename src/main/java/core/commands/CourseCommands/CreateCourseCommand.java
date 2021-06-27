@@ -21,8 +21,6 @@ public class CreateCourseCommand extends CommandDP {
     @Override
     public JSONObject execute() {
 
-        System.out.println("from create course" + this.user);
-
         String[] schema = {
                 "name",
                 "userName",
@@ -59,7 +57,6 @@ public class CreateCourseCommand extends CommandDP {
         registerRequest.put("user", user);
 
         try {
-            System.out.println("Create Course Command: " + registerRequest);
             MessageQueue.send(registerRequest.toString(), requestQueue, correlationId);
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
             MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
@@ -78,12 +75,20 @@ public class CreateCourseCommand extends CommandDP {
 
             // to be changed
             ObjectId id = new ObjectId(registerObject.get("registeredId").toString());
-
             result.put("registeredId", id.toString());
+            id = null;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        schema = null;
+        courseDocument = null;
+        courseId = null;
+        requestQueue = null;
+        responseQueue = null;
+        registerRequest = null;
+        body = null;
 
         return result;
     }

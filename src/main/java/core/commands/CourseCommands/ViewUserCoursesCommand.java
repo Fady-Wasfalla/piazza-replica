@@ -41,8 +41,12 @@ public class ViewUserCoursesCommand extends CommandDP {
         for (Document doc : queryResults) {
             JSONObject instance = new JSONObject(doc.toJson());
             result.append("course", instance);
+            instance = null;
         }
-
+        schema = null;
+        userName = null;
+        sort = null;
+        queryResults = null;
         return result;
     }
 }

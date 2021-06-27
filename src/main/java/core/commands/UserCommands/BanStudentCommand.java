@@ -41,9 +41,6 @@ public class BanStudentCommand extends CommandDP {
                 "bannerUserName",
                 "banExpiryDate"
         };
-        BsonDocument updateOperation = new BsonDocument();
-
-//        String pollId= data.getString("pollId");
 
         String set = "{ $set: {";
         set+= "\"banned\":" + true +",";
@@ -57,7 +54,6 @@ public class BanStudentCommand extends CommandDP {
         }
         set = set.substring(0,set.length()-1);
         set +=  "      } }" ;
-        System.out.println(set);
         String courseId = this.data.getString("courseId");
         String userName = this.data.getString("userName");
 
@@ -116,11 +112,20 @@ public class BanStudentCommand extends CommandDP {
             JSONObject notificationObject = new JSONObject(notificationResponse);
             System.out.println(notificationObject);
 
-
-
         } catch (Exception e){
             e.printStackTrace();
         }
+
+        schema = null;
+        set = null;
+        courseId = null;
+        userName = null;
+        filterDocument = null;
+        resultDocument = null;
+        requestQueue = null;
+        responseQueue = null;
+        notificationRequest = null;
+        body = null;
 
         return result;
     }

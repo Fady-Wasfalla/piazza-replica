@@ -45,25 +45,6 @@ public class EndorseQuestionCommand extends CommandDP {
 
         MongoCollection<Document> collection = getCollection(Collections.question);
 
-//        JSONObject x1 = new JSONObject();
-//        x1.put("questionId",questionId);
-//        JSONObject x2 = new JSONObject();
-//        x2.put("userName",this.data.getString("userName"));
-//        x2.put("description",this.data.getString("description"));
-//        x1.put("answers",x2);
-//
-//        Document x3 = Document.parse(x1.toString());
-//        Document projection = new Document("_id",new ObjectId(questionId))
-//                .append("$elemMatch", new Document("answers",
-//                new Document("userName", this.data.getString("userName"))
-//                        .append("description",this.data.getString("description"))) )
-//                ;
-//
-//        ArrayList<Document> x =  mongoDB.read(this.mongoClient, Collections.question,
-//                projection);
-//        System.out.println(projection);
-//        System.out.println(x);
-
         JSONObject newAnswer= new JSONObject();
         newAnswer.put("username", data.getString("userName"));
         newAnswer.put("description", data.getString("description"));
@@ -130,11 +111,21 @@ public class EndorseQuestionCommand extends CommandDP {
             JSONObject notificationObject = new JSONObject(notificationResponse);
             System.out.println(notificationObject);
 
-
-
         } catch (Exception e){
             e.printStackTrace();
         }
+
+        schema = null;
+        questionId = null;
+        myQuestion = null;
+        collection = null;
+        newAnswer = null;
+        finalAns = null;
+        resultDocument = null;
+        requestQueue = null;
+        responseQueue = null;
+        notificationRequest = null;
+        body = null;
 
         return result;
 

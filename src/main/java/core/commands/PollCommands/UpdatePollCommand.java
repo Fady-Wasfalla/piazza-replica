@@ -62,7 +62,11 @@ public class UpdatePollCommand extends CommandDP {
             else {
                 result.put("Status", "400 Error");
             }
-
+        schema = null;
+        updateKeys = null;
+        pollId = null;
+        set = null;
+        updatedPoll = null;
         return result;
     }
 }

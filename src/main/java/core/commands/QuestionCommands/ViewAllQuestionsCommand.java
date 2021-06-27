@@ -49,6 +49,10 @@ public class ViewAllQuestionsCommand extends CommandDP {
             result.append("question", instance);
         }
 
+        schema = null;
+        courseId = null;
+        sort = null;
+        queryResults = null;
 
         return result;
     }
