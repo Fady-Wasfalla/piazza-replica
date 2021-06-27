@@ -1,0 +1,44 @@
+version: "3.3"
+services:
+  netty:
+    build:
+      context: .
+      dockerfile: ./docker/netty/Netty.Dockerfile
+    image: localhost:5000/netty:latest
+    ports: ["80:8080"]
+  userconsumer:
+    build:
+      context: .
+      dockerfile: ./docker/consumers/UserConsumer.Dockerfile
+    image: localhost:5000/userconsumer:latest
+    ports: ["8081:8081"]
+  questionconsumer:
+    build:
+      context: .
+      dockerfile: ./docker/consumers/QuestionConsumer.Dockerfile
+    image: localhost:5000/questionconsumer:latest
+    ports: ["8082:8082"]
+  pollconsumer:
+    build:
+      context: .
+      dockerfile: ./docker/consumers/PollConsumer.Dockerfile
+    image: localhost:5000/pollconsumer:latest
+    ports: ["8083:8083"]
+  notificationconsumer:
+    build:
+      context: .
+      dockerfile: ./docker/consumers/NotificationConsumer.Dockerfile
+    image: localhost:5000/notificationconsumer:latest
+    ports: ["8084:8084"]
+  mediaconsumer:
+    build:
+      context: .
+      dockerfile: ./docker/consumers/MediaConsumer.Dockerfile
+    image: localhost:5000/mediaconsumer:latest
+    ports: ["8085:8085"]
+  courseconsumer:
+    build:
+      context: .
+      dockerfile: ./docker/consumers/CourseConsumer.Dockerfile
+    image: localhost:5000/courseconsumer:latest
+    ports: ["8086:8086"]

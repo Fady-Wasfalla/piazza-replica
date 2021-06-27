@@ -32,7 +32,7 @@ public class PostgreSQL {
         }
 
         Dotenv dotenv = Dotenv.load();
-        String url = dotenv.get("POSTGRES_URL");
+        String url = "jdbc:postgresql://" + dotenv.get("POSTGRES_HOST") + "/" + dotenv.get("POSTGRES_DB");
         String user = dotenv.get("POSTGRES_USER");
         String password = dotenv.get("POSTGRES_PASSWORD");
         String initPool = dotenv.get("POSTGRES_POOL_INIT_CONNECTIONS");
