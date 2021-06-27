@@ -1,6 +1,3 @@
-FROM maven:3-openjdk-16-slim
-ADD ./ /usr/src/maven
-WORKDIR /usr/src/maven
+FROM benoamgad/basepiazzaproject:latest
 RUN mvn install
-RUN mvn exec:java -Dexec.mainClass=CompileTest
-CMD mvn exec:java -Dexec.mainClass="RabbitMQ.PollConsumer" 
+CMD mvn exec:java -Dexec.mainClass="RabbitMQ.PollConsumer"
