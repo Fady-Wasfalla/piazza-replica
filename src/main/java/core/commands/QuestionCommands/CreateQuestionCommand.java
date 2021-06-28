@@ -39,7 +39,8 @@ public class CreateQuestionCommand extends CommandDP {
                 "media",
                 "likes",
                 "answers",
-                "endorsed"
+                "endorsed",
+                "mentions"
         };
 
         if (!validateJSON(schema, data)) {
