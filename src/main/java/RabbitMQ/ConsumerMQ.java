@@ -10,7 +10,6 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import core.CommandDP;
 import core.CommandsMap;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
@@ -81,7 +80,7 @@ public class ConsumerMQ {
                     }
                 };
 
-                if(!isPaused){
+                if (!isPaused) {
                     threadPool.submit(task);
                 } else {
                     pendingTasks.add(task);

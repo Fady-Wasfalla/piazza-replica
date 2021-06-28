@@ -7,12 +7,11 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import static java.lang.Thread.*;
+import static java.lang.Thread.sleep;
 
 public class MessageQueue {
     public static ConnectionFactory factory;
@@ -21,21 +20,21 @@ public class MessageQueue {
 
     public static void instantiateChannel() {
         Dotenv dotenv = Dotenv.load();
-        if(channel!=null){
+        if (channel != null) {
             System.out.println("Connection Already Instantiated");
             return;
         }
-        for(int i=0;i<6;i++) {
+        for (int i = 0; i < 6; i++) {
             try {
                 factory = new ConnectionFactory();
                 factory.setHost(dotenv.get("RABBITMQ_HOST", "localhost"));
                 connection = factory.newConnection();
                 channel = connection.createChannel();
-                
+
                 //Instantiate queues for all microservices
                 String strlist = dotenv.get("QUEUES");
-                List<String> arr= Arrays.asList(strlist.split(","));
-                for(String queue: arr){
+                List<String> arr = Arrays.asList(strlist.split(","));
+                for (String queue : arr) {
                     declareQueue(queue);
                 }
                 return;
@@ -75,7 +74,7 @@ public class MessageQueue {
                 .build();
 //        System.out.println("Message===>" + message);
         if (MessageQueue.channel == null) {
-               MessageQueue.instantiateChannel();
+            MessageQueue.instantiateChannel();
         }
         MessageQueue.channel.basicPublish("", queue, props, message.getBytes(StandardCharsets.UTF_8));
         //TODO clean resources When closing the project (channel and connection)

@@ -2,7 +2,7 @@ cd ~/Desktop/piazzainit/
 docker-compose build
 docker image tag redis:alpine localhost:5000/redis:alpine
 docker image tag rabbitmq:management-alpine localhost:5000/rabbitmq:management-alpine
-docker image tag postgres:alpine localhost:5000/postgres:alpine
+docker image tag postgres:alpinbae localhost:5000/postgres:alpine
 
 docker push -a localhost:5000/redis
 docker push -a localhost:5000/rabbitmq
