@@ -7,7 +7,11 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
+
+import static java.lang.Thread.sleep;
 
 public class MessageQueue {
     public static ConnectionFactory factory;
@@ -16,16 +20,48 @@ public class MessageQueue {
 
     public static void instantiateChannel() {
         Dotenv dotenv = Dotenv.load();
-        try {
-            factory = new ConnectionFactory();
-            factory.setHost(dotenv.get("rabbitmq_host", "localhost"));
-            connection = factory.newConnection();
-            channel = connection.createChannel();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
+        if (channel != null) {
+            System.out.println("Connection Already Instantiated");
+            return;
         }
+        for (int i = 0; i < 6; i++) {
+            try {
+                factory = new ConnectionFactory();
+                factory.setHost(dotenv.get("RABBITMQ_HOST", "localhost"));
+                connection = factory.newConnection();
+                channel = connection.createChannel();
+
+                //Instantiate queues for all microservices
+                String strlist = dotenv.get("QUEUES");
+                List<String> arr = Arrays.asList(strlist.split(","));
+                for (String queue : arr) {
+                    declareQueue(queue);
+                }
+                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+            try {
+                sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Error Connecting to RabbitMQ program exiting");
+        System.exit(0);
+    }
+
+    public static void declareQueue(String microservice) throws IOException {
+        //Response Queue Declare
+        String RES_QUEUE_NAME = microservice + "Res";
+        MessageQueue.channel.queueDeclare(RES_QUEUE_NAME, false, false, false, null);
+
+        //Request Queue Declare
+        String REQ_QUEUE_NAME = microservice + "Req";
+        MessageQueue.channel.queueDeclare(REQ_QUEUE_NAME, false, false, false, null);
+
     }
 
     public static void send(String message, String queue, String corrId) throws IOException, TimeoutException {
