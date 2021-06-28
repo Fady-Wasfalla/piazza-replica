@@ -10,7 +10,6 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import core.CommandDP;
 import core.CommandsMap;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
@@ -26,12 +25,11 @@ public class ConsumerMQ {
     public static volatile ArrayList<Runnable> pendingTasks = new ArrayList<Runnable>();
 
     public static void run(String microservice, int port) throws Exception {
-        Dotenv dotenv = Dotenv.load();
         CommandsMap cmdMap = new CommandsMap();
         cmdMap.instantiate();
         System.out.println("Command Map Size: " + cmdMap.cmdMap.size());
-        cmdMap.getAllClasses();
         Consumer consumer;
+        //TODO to be removed
         if (MessageQueue.channel == null)
             MessageQueue.instantiateChannel();
 
@@ -43,14 +41,8 @@ public class ConsumerMQ {
             System.out.println("ERROR CREATING MONGODB/REDIS/POSTGRES CONNECTION :" + error);
         }
 
-        //Response Queue Declare
-        String RES_QUEUE_NAME = microservice + "Res";
-        MessageQueue.channel.queueDeclare(RES_QUEUE_NAME, false, false, false, null);
-
-        //Request Queue Declare
+        MessageQueue.declareQueue(microservice);
         String REQ_QUEUE_NAME = microservice + "Req";
-        MessageQueue.channel.queueDeclare(REQ_QUEUE_NAME, false, false, false, null);
-
         System.out.println("[*REQ] " + REQ_QUEUE_NAME + " [*] Waiting for messages. To exit press CTRL+C");
 
         consumer = new DefaultConsumer(MessageQueue.channel) {
@@ -63,7 +55,6 @@ public class ConsumerMQ {
                         String function = requestJson.getString("function");
                         String queue = requestJson.getString("queue");
 
-                        System.out.println("Method to be found: " + queue + "/" + function);
                         CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
                         Method setData = service.getMethod("setData", JSONObject.class);
@@ -89,7 +80,7 @@ public class ConsumerMQ {
                     }
                 };
 
-                if(!isPaused){
+                if (!isPaused) {
                     threadPool.submit(task);
                 } else {
                     pendingTasks.add(task);

@@ -14,7 +14,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONObject;
-import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +22,7 @@ import java.util.Set;
 
 public class mongoDB {
 
-    private final static String databaseName = "Piazza";
+    private final static String databaseName = "piazza";
     private final static int maxConnections = 10;
     private static MongoClient mongoClient;
 
@@ -35,7 +34,10 @@ public class mongoDB {
 
     public static void initMongo() {
         Dotenv dotenv = Dotenv.load();
-        String url = dotenv.get("CONNECTION_STRING") + maxConnections;
+        String url = "mongodb" + dotenv.get("MONGO_DRIVER") + "://" + dotenv.get("MONGO_INITDB_ROOT_USERNAME") + ":"
+                + dotenv.get("MONGO_INITDB_ROOT_PASSWORD") + "@" + dotenv.get("MONGO_HOST") + "/"
+                + dotenv.get("MONGO_INITDB_DATABASE") + "?retryWrites=true&w=majority&maxPoolSize=" + maxConnections
+                + dotenv.get("MONGO_AUTH");
         mongoClient = MongoClients.create(url);
         MongoCollection<Document> chat_collection = getCollection(Collections.chat);
         MongoCollection<Document> course_collection = getCollection(Collections.course);
@@ -79,21 +81,21 @@ public class mongoDB {
     public static ArrayList<Document> readAll(Collections collectionName, Document filterDocument, Bson sort, int skip, int limit) {
 
         String cached_documents_string = (Redis.getLayeredCache(collectionName.name() + filterDocument.toString(), "" + skip + limit));
-        if(cached_documents_string != null) {
+        if (cached_documents_string != null) {
             JSONObject cached_documents_json = new JSONObject(cached_documents_string);
             ArrayList<Document> cached_documents = new ArrayList<>();
             for (int i = 0; i < cached_documents_json.keySet().size(); i++) {
                 cached_documents.add(Document.parse(cached_documents_json.getJSONObject("" + i).toString()));
             }
-            return  cached_documents;
+            return cached_documents;
         }
         MongoCollection<Document> collection = getCollection(collectionName);
         ArrayList<Document> documents = collection.find(filterDocument).sort(sort)
                 .skip(skip).limit(limit).into(new ArrayList<>());
         JSONObject cachedJsonDocuments = new JSONObject();
-        for(int i = 0 ; i < documents.size() ; i++)
-            cachedJsonDocuments.put(i + "" , documents.get(i));
-        Redis.setLayeredCache(collectionName.name() + filterDocument.toString(), "" + skip + limit ,
+        for (int i = 0; i < documents.size(); i++)
+            cachedJsonDocuments.put(i + "", documents.get(i));
+        Redis.setLayeredCache(collectionName.name() + filterDocument.toString(), "" + skip + limit,
                 cachedJsonDocuments.toString());
         return documents;
     }
@@ -165,15 +167,15 @@ public class mongoDB {
 //        Redis Redis = new Redis(dotenv.get("redis_host", "localhost"), 6379, "");
 //        //check whether server is running or not
 //        try (MongoClient mongo_client = MongoClients.create(connectionString)) {
-            System.out.println("Connection to server sucessfully");
-            // Random rand = new Random();
-            // Document student = new Document("_id", new ObjectId());
-            // student.append("student_id", 10002d)
-            //         .append("class_id", 1d)
-            //         .append("scores", Arrays.asList(new Document("type", "exam").append("score", rand.nextDouble() * 100),
-            //                 new Document("type", "quiz").append("score", 89d),
-            //                 new Document("type", "homework").append("score", rand.nextDouble() * 100),
-            //                 new Document("type", "homework").append("score", rand.nextDouble() * 100)));
+        System.out.println("Connection to server sucessfully");
+        // Random rand = new Random();
+        // Document student = new Document("_id", new ObjectId());
+        // student.append("student_id", 10002d)
+        //         .append("class_id", 1d)
+        //         .append("scores", Arrays.asList(new Document("type", "exam").append("score", rand.nextDouble() * 100),
+        //                 new Document("type", "quiz").append("score", 89d),
+        //                 new Document("type", "homework").append("score", rand.nextDouble() * 100),
+        //                 new Document("type", "homework").append("score", rand.nextDouble() * 100)));
 //        }
         // creates an instance of this json format
         //{ _id: ObjectId("6084b687d5433f16094a680b"),

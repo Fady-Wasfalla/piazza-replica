@@ -88,8 +88,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
             final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 
-            if (MessageQueue.channel == null)
+            //TODO To be removed
+            if (MessageQueue.channel == null) {
                 MessageQueue.instantiateChannel();
+            }
             MessageQueue.channel.basicConsume(responseQueue, false, (consumerTag, delivery) -> {
 
                 if (delivery.getProperties().getCorrelationId().equals(corrId)) {
@@ -127,7 +129,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
     public boolean validateQueueName(String queue) {
         Dotenv dotenv = Dotenv.load();
-        String strlist = dotenv.get("queues");
+        String strlist = dotenv.get("QUEUES");
         return Arrays.asList(strlist.split(",")).contains(queue);
     }
 
