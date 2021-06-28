@@ -55,6 +55,7 @@ public class CommandsMap implements Serializable {
         cmdMap.put("user/BanStudentCommand", BanStudentCommand.class);
         cmdMap.put("user/SignUpCommand", SignUpCommand.class);
         cmdMap.put("user/LogInCommand", LogInCommand.class);
+        cmdMap.put("user/GetUserByEmailCommand", GetUserByEmailCommand.class);
 
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
