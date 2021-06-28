@@ -3,13 +3,15 @@ package core;
 import Services.Redis;
 import org.json.JSONObject;
 
+import java.sql.SQLException;
+
 public abstract class CommandDP {
     public JSONObject data;
     public JSONObject user;
     public Object dal;
     public Redis jedis;
 
-    public abstract JSONObject execute();
+    public abstract JSONObject execute() throws SQLException;
 
     public void setData(JSONObject data) {
         this.data = data.getJSONObject("body");
