@@ -1,45 +1,31 @@
 package core.commands.QuestionCommands;
 
-import NettyHTTP.NettyHTTPServer;
-import NettyHTTP.NettyServerHandler;
-import Notifications.Notifications;
 import RabbitMQ.MessageQueue;
 import Services.Collections;
 import Services.mongoDB;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.UpdateResult;
 import core.CommandDP;
-import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class CreateQuestionCommand extends CommandDP {
+import static Services.mongoDB.getCollection;
 
-
+public class EndorseAnswerCommand extends CommandDP {
     @Override
     public JSONObject execute() {
         JSONObject result = new JSONObject();
 
         String[] schema = {
-                "courseId",
+                "questionId",
                 "userName",
-                "title",
-                "description",
-                "anonymous",
-                "private",
-                "media",
-                "likes",
-                "answers",
-                "endorsed"
+                "description" ,
+                "media"
         };
 
         if (!validateJSON(schema, data)) {
@@ -47,18 +33,38 @@ public class CreateQuestionCommand extends CommandDP {
             return result;
         }
 
-        this.data.put("createdAt", new Date().getTime() + "");
+        String questionId= this.data.getString("questionId");
+        Document myQuestion = mongoDB.readOne(Collections.question, new Document("_id", new ObjectId(questionId)),"_id");
 
-        String description = this.data.getString("description").toLowerCase(Locale.ROOT);
-        this.data.put("description", description);
 
-        Document questionDocument = Document.parse(data.toString());
+        MongoCollection<Document> collection = getCollection(Collections.question);
 
-        BsonValue questionId = mongoDB.create(Collections.question, questionDocument, "_id")
-                .getInsertedId();
+        JSONObject newAnswer= new JSONObject();
+        newAnswer.put("username", data.getString("userName"));
+        newAnswer.put("description", data.getString("description"));
+        newAnswer.put("media", data.getJSONArray("media"));
 
-        result.put("questionId", questionId.asObjectId().getValue().toString());
+        Document finalAns = Document.parse(newAnswer.toString());
+//        UpdateResult resultDocument = mongoDB.update(mongoClient, Collections.question,
+//                new Document("_id", new ObjectId(questionId)) ,set("answers", true), new UpdateOptions());
 
+
+        UpdateResult resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
+                new Document().append("$pull", new Document("answers",finalAns)
+                ));
+        if(resultDocument.getModifiedCount() == 0){
+            result.put("error","no such answer to this question");
+            return result;
+        }
+
+        newAnswer.put("endorsed", true);
+        finalAns = Document.parse(newAnswer.toString());
+        resultDocument = collection.updateOne(new Document("_id", new ObjectId(questionId)),
+                new Document().append("$push", new Document("answers",finalAns)
+                ));
+
+        long modifiedQuestionsCount = resultDocument.getModifiedCount();
+        result.put("Modified Questions Count", modifiedQuestionsCount);
 
         String correlationId = UUID.randomUUID().toString();
         String requestQueue = "notificationReq";
@@ -66,18 +72,16 @@ public class CreateQuestionCommand extends CommandDP {
 
         JSONObject notificationRequest = new JSONObject();
         notificationRequest.put("queue", "notification");
-        notificationRequest.put("function", "NotifyAllStudentsCommand");
+        notificationRequest.put("function", "NotifyStudentCommand");
 
         JSONObject body = new JSONObject();
-        body.put("userName", this.data.getString("userName"));
-
-        body.put("courseId", this.data.getString("courseId"));
-        body.put("description","A student asked a new question");
-        body.put("model",  questionId.asObjectId().getValue().toString());
+        body.put("userName", myQuestion.getString("userName"));
+        body.put("description","Your answer was endorsed");
+        body.put("model",  this.data.getString("questionId"));
         body.put("onModel", "Question");
-        body.put("sort", "role");
+        body.put("sort", "_id");
         body.put("skip", 0);
-        body.put("limit", 100);
+        body.put("limit", 0);
 
         notificationRequest.put("body", body);
         notificationRequest.put("user", this.user);
@@ -106,15 +110,18 @@ public class CreateQuestionCommand extends CommandDP {
         }
 
         schema = null;
-        description = null;
-        questionDocument = null;
         questionId = null;
+        myQuestion = null;
+        collection = null;
+        newAnswer = null;
+        finalAns = null;
+        resultDocument = null;
         requestQueue = null;
         responseQueue = null;
         notificationRequest = null;
         body = null;
 
         return result;
-    }
 
+    }
 }

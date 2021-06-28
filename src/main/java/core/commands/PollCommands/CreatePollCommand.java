@@ -41,7 +41,7 @@ public class CreatePollCommand extends CommandDP {
 
         Document pollDocument = Document.parse(data.toString());
 
-        BsonValue pollId = mongoDB.create(Collections.poll, pollDocument, "_id")
+        BsonValue pollId = mongoDB.create(Collections.poll, pollDocument, "courseId")
                 .getInsertedId();
 
         result.put("pollId", pollId.asObjectId().getValue().toString());
@@ -64,7 +64,7 @@ public class CreatePollCommand extends CommandDP {
         body.put("onModel", "Poll");
         body.put("sort", "_id");
         body.put("skip", 0);
-        body.put("limit", 0);
+        body.put("limit", 100);
 
         notificationRequest.put("body", body);
         notificationRequest.put("user", this.user);
