@@ -6,6 +6,7 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.ibatis.jdbc.ScriptRunner;
+import org.bson.Document;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -133,6 +134,7 @@ public class PostgreSQL {
             JSONObject user = new JSONObject();
             user.put("userName", set.getString("userName"));
             user.put("role", set.getString("role"));
+
             set.close();
             st.close();
             return user;
@@ -143,39 +145,86 @@ public class PostgreSQL {
         }
     }
 
-    public static void deleteUser(String username) throws SQLException {
+
+    public static JSONObject getUserByEmail(String email) throws SQLException {
+        Connection connection = postgresPool.getConnection();
+        String cached = Redis.getLayeredCache("users" + email, email);
+        if(cached != null)
+            return new JSONObject(cached);
+        connection.setAutoCommit(false);
+        CallableStatement st = connection.prepareCall("{ ? = call get_user(?) }");
+        st.setPoolable(true);
+
+        st.setString(2, email);
+
+        st.registerOutParameter(1, Types.OTHER);
+        st.execute();
+
+        ResultSet set = (ResultSet) st.getObject(1);
+        if (set.next()) {
+            JSONObject user = new JSONObject();
+            user.put("userId", set.getString("userId"));
+            user.put("userName", set.getString("userName"));
+            user.put("firstName", set.getString("firstName"));
+            user.put("lastName", set.getString("lastName"));
+            user.put("email", set.getString("email"));
+            user.put("role", set.getString("role"));
+            Redis.setLayeredCache("users" + email, email, user.toString());
+            set.close();
+
+            return user;
+        } else {
+            set.close();
+            st.close();
+            throw new SQLException();
+        }
+    }
+
+    public static void deleteUser(String email) throws SQLException {
         Connection connection = postgresPool.getConnection();
 
         connection.setAutoCommit(true);
         CallableStatement st = connection.prepareCall("{ call delete_user(?) }");
         st.setPoolable(true);
 
-        st.setString(1, username);
-
+        st.setString(1, email);
         st.execute();
         st.close();
+
+        Redis.deleteCache("users" + email);
+
     }
 
     public static void updateUser(JSONObject user, String username) throws SQLException {
         Connection connection = postgresPool.getConnection();
 
         connection.setAutoCommit(true);
-        CallableStatement st = connection.prepareCall("{ call update_user(?, ?, ?, ?) }");
+        CallableStatement st = connection.prepareCall("{ ? = call update_user(?, ?, ?, ?) }");
         st.setPoolable(true);
 
         if (user.has("firstName")) st.setString(1, user.getString("firstName"));
-        else st.setString(1, null);
-
-        if (user.has("lastName")) st.setString(2, user.getString("lastName"));
         else st.setString(2, null);
 
-        if (user.has("password")) st.setString(3, user.getString("password"));
+        if (user.has("lastName")) st.setString(2, user.getString("lastName"));
         else st.setString(3, null);
 
-        st.setString(4, username);
+        if (user.has("password")) st.setString(3, user.getString("password"));
+        else st.setString(4, null);
+
+        st.setString(5, username);
+        st.registerOutParameter(1, Types.OTHER);
 
         st.execute();
         st.close();
+        String email = null;
+        ResultSet set = (ResultSet) st.getObject(1);
+        if (set.next()) {
+            email = st.getString("email");
+        }
+        if(email != null)
+            Redis.deleteCache("users" + email);
+        email = null;
+
     }
 
 
