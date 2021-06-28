@@ -1,8 +1,8 @@
 package core;
 
-import Services.AddCommand;
-import Services.DeleteCommand;
-import Services.UpdateCommand;
+import DynamicClasses.AddCommand;
+import DynamicClasses.DeleteCommand;
+import DynamicClasses.UpdateCommand;
 import core.commands.Controller.ContinueCommand;
 import core.commands.Controller.FreezeCommand;
 import core.commands.Controller.SetMaxDBConnectionCountCommand;
@@ -42,10 +42,6 @@ public class CommandsMap implements Serializable {
     public static void instantiate() {
         cmdMap = new HashMap<>();
         cmdMap.put("user/SignupCommand", SignUpCommand.class);
-        cmdMap.put("command/AddCommand", AddCommand.class);
-        cmdMap.put("command/UpdateCommand", UpdateCommand.class);
-        cmdMap.put("command/DeleteCommand", DeleteCommand.class);
-
         cmdMap.put("user/RegisterUserCommand", RegisterUserCommand.class);
         cmdMap.put("user/DeleteCourseRegistersCommand", DeleteCourseRegistersCommand.class);
         cmdMap.put("user/ViewUserCoursesCommand", ViewUserCoursesCommand.class);
@@ -57,6 +53,10 @@ public class CommandsMap implements Serializable {
         cmdMap.put("user/LogInCommand", LogInCommand.class);
         cmdMap.put("user/GetUserByEmailCommand", GetUserByEmailCommand.class);
 
+        cmdMap.put("user/DeleteCourseRegistersCommand",DeleteCourseRegistersCommand.class);
+        cmdMap.put("user/RerportUserCommand",RerportUserCommand.class);
+        cmdMap.put("user/DeleteUserCommand",DeleteUserCommand.class);
+        
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
         cmdMap.put("question/DeleteCourseQuestionsCommand", DeleteCourseQuestionsCommand.class);
@@ -64,18 +64,20 @@ public class CommandsMap implements Serializable {
         cmdMap.put("question/AnswerQuestionCommand", AnswerQuestionCommand.class);
         cmdMap.put("question/EndorseQuestionCommand", EndorseQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
-
-
+        cmdMap.put("question/EndorseAnswerCommand", EndorseAnswerCommand.class);
+        cmdMap.put("question/SuggestQuestionsCommand",SuggestQuestionsCommand.class);
+        cmdMap.put("question/DeleteAnswerCommand",DeleteAnswerCommand.class);
+        
         cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("course/ViewCourseCommand", ViewCourseCommand.class);
         cmdMap.put("course/DeleteCourseCommand", DeleteCourseCommand.class);
+        cmdMap.put("course/ViewUserCoursesCommand",ViewUserCoursesCommand.class);
 
         cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);
         cmdMap.put("poll/DeletePollCommand", DeletePollCommand.class);
         cmdMap.put("poll/UpdatePollCommand", UpdatePollCommand.class);
         cmdMap.put("poll/AnswerPollCommand", AnswerPollCommand.class);
-
 
         cmdMap.put("controller/FreezeCommand", FreezeCommand.class);
         cmdMap.put("controller/ContinueCommand", ContinueCommand.class);
@@ -86,6 +88,9 @@ public class CommandsMap implements Serializable {
         cmdMap.put("notification/NotifyAllInstructorsCommand", NotifyAllInstructorsCommand.class);
         cmdMap.put("notification/NotifyStudentCommand", NotifyStudentCommand.class);
 
+        cmdMap.put("DynamicClasses/AddCommand", AddCommand.class);
+        cmdMap.put("DynamicClasses/UpdateCommand", UpdateCommand.class);
+        cmdMap.put("DynamicClasses/DeleteCommand", DeleteCommand.class);
     }
 
 
@@ -97,7 +102,6 @@ public class CommandsMap implements Serializable {
             out.writeObject(object);
             out.close();
             fileOut.close();
-            System.out.printf("Serialized data is saved in " + path);
         } catch (IOException i) {
             i.printStackTrace();
         }
@@ -131,27 +135,19 @@ public class CommandsMap implements Serializable {
 //        cmdMap = loadStatus("src/main/java/Services/cmdMap.ser");
         cmdMap.put(key, cls);
 //        saveStatus(cmdMap,"src/main/java/Services/cmdMap.ser");
-        System.out.println("replaced");
+    }
+
+    public static void remove(String key) {
+        cmdMap.remove(key);
     }
 
     public static void getAllClasses() {
-        System.out.println("---------Command Map Classes---------");
 //        cmdMap = loadStatus("src/main/java/Services/cmdMap.ser");
         cmdMap.forEach((k, v) -> System.out.println(k + " ==> " + v));
-        System.out.println("-------------------------------------");
     }
 
 
     public static void main(String[] args) {
         CommandsMap.instantiate();
-//        HashMap x = new HashMap<>();
-//        x = loadStatus("src/main/java/Services/cmdMap.ser");
-//        System.out.println(x.keySet());
-//        CommandsMap cmd = new CommandsMap();
-//        cmd.instantiate();
-//        saveStatus(cmd,"src/main/java/Services/cmdMap.ser");
-//        Object back = loadStatus("src/main/java/Services/cmdMap.dat");
-//        System.out.println(back);
-//        back.getAllClasses();
     }
 }

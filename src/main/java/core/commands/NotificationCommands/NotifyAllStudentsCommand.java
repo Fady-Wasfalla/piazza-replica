@@ -65,7 +65,7 @@ public class NotifyAllStudentsCommand extends CommandDP {
 
                 Document notificationDocument = Document.parse(notification.toString());
 
-                BsonValue notificationId = mongoDB.create( Collections.notification, notificationDocument,"_id").getInsertedId();
+                BsonValue notificationId = mongoDB.create( Collections.notification, notificationDocument,"userName").getInsertedId();
                 results.add(notificationId.asObjectId().getValue().toString());
 
                 Document tokenFilterDocument = new Document("userName", username);
@@ -79,12 +79,26 @@ public class NotifyAllStudentsCommand extends CommandDP {
                     } catch (Exception e) {
 
                     }
+                    notify = null;
                 }
+                notification = null;
+                notificationDocument = null;
+                notificationId = null;
+                tokenFilterDocument = null;
+                token = null;
             }
-
-
+            username = null;
         }
         result.put("notificationsId", results.toString());
+
+        schema = null;
+        courseId = null;
+        model = null;
+        onModel = null;
+        description = null;
+        sort = null;
+        filterDocument = null;
+        students = null;
         return result;
     }
 

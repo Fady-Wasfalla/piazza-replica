@@ -39,29 +39,30 @@ public class SetNotificationTokenCommand extends CommandDP {
         
         filterDocument = new Document("userName", data.getString("userName"));
 
-        Document token = mongoDB.readOne( Collections.token, filterDocument,"_id");
+        Document token = mongoDB.readOne( Collections.token, filterDocument,"userName");
 
         if(token.size() == 0){
 
             Document tokenDocument = Document.parse(data.toString());
 
-            BsonValue tokenId = mongoDB.create(Collections.token, tokenDocument,"_id")
+            BsonValue tokenId = mongoDB.create(Collections.token, tokenDocument,"userName")
                     .getInsertedId();
 
             result.put("tokenId", tokenId.asObjectId().getValue().toString());
-            System.out.println("first");
+            tokenDocument = null;
         }
         else{
 
             Bson updateOperation = set("token", data.getString("token"));
-            mongoDB.update(Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),"_id");
+            mongoDB.update(Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),"userName");
             updateOperation = set("createdAt", new Date().getTime() + "");
-            mongoDB.update( Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),"_id");
+            mongoDB.update( Collections.token, filterDocument, updateOperation, new FindOneAndUpdateOptions(),"userName");
             result.put("tokenId", token.get("_id").toString());
-            System.out.println("second");
+            updateOperation = null;
         }
-
-
+        schema = null;
+        filterDocument = null;
+        token = null;
         return result;
     }
 }

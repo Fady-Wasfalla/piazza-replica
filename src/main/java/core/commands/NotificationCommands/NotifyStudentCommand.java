@@ -39,9 +39,6 @@ public class NotifyStudentCommand extends CommandDP {
         String model = this.data.getString("model");
         String onModel = this.data.getString("onModel");
         String description = this.data.getString("description").toLowerCase(Locale.ROOT);;
-        String sort = this.data.getString("sort");
-        int skip = this.data.getInt("skip");
-        int limit = this.data.getInt("limit");
         this.data.put("description",description);
 
 
@@ -56,7 +53,7 @@ public class NotifyStudentCommand extends CommandDP {
 
         Document notificationDocument = Document.parse(notification.toString());
 
-        BsonValue notificationId = mongoDB.create(Collections.notification, notificationDocument,"_id").getInsertedId();
+        BsonValue notificationId = mongoDB.create(Collections.notification, notificationDocument,"userName").getInsertedId();
 
         Document tokenFilterDocument = new Document("userName", username);
         Document token = mongoDB.readOne( Collections.token, tokenFilterDocument,"userName");
@@ -69,12 +66,19 @@ public class NotifyStudentCommand extends CommandDP {
             } catch (Exception e) {
 
             }
+            notify = null;
         }
-
-
-
-
         result.put("notificationsId", notificationId.asObjectId().getValue().toString());
+        schema = null;
+        model = null;
+        onModel = null;
+        description = null;
+        username = null;
+        notification = null;
+        notificationDocument = null;
+        notificationId = null;
+        tokenFilterDocument = null;
+        token = null;
         return result;
     }
 

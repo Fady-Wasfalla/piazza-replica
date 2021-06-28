@@ -42,16 +42,6 @@ public class SearchQuestionsCommand extends CommandDP {
         query = query.toLowerCase(Locale.ROOT);
         String[] keywords = query.split(" ");
 
-//        Document[] parameters = new Document[keywords.length];
-//
-//        for(int i=0; i<parameters.length; i++){
-//            parameters[i] = new Document("description",
-//                    new Document("$regex", ".*Ramy.*"));
-//
-////            System.out.println(parameters[i]);
-//        }
-
-//        Document queries = new Document("$or", parameters);
         String expression = "";
         for (int i = 0; i < keywords.length; i++) {
             expression += ".*";
@@ -60,7 +50,6 @@ public class SearchQuestionsCommand extends CommandDP {
             if (!(i == keywords.length - 1)) {
                 expression += "|";
             }
-            System.out.println(expression);
 
         }
         Document regex = new Document("$regex", expression);
@@ -78,6 +67,13 @@ public class SearchQuestionsCommand extends CommandDP {
             JSONObject instance = new JSONObject(doc.toJson());
             result.append("question", instance);
         }
+        schema = null;
+        query = null;
+        sort = null;
+        query = null;
+        keywords = null;
+        regex = null;
+        queryDocument = null;
 
         return result;
     }

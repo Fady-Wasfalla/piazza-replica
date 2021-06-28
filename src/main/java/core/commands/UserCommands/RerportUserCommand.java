@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
-public class RegisterUserCommand extends CommandDP {
+public class RerportUserCommand extends CommandDP {
     JSONObject result = new JSONObject();
 
     @Override
@@ -18,8 +18,10 @@ public class RegisterUserCommand extends CommandDP {
 
         String[] schema = {
                 "courseId",
-                "userName",
-                "role",
+                "reporterUserName",
+                "reason",
+                "reportedUserName"
+                
         };
 
         if (!validateJSON(schema, data)) {
@@ -27,22 +29,19 @@ public class RegisterUserCommand extends CommandDP {
             return result;
         }
 
-        data.put("banned", false);
-        data.put("banExpiryDate", JSONObject.NULL);
-        data.put("bannerUserName", JSONObject.NULL);
         data.put("createdAt", new Date().getTime() + "");
 
-        Document registrationDocument = Document.parse(data.toString());
+        Document reportDocument = Document.parse(data.toString());
 
-        InsertOneResult insertOneResult = mongoDB.create(Collections.register, registrationDocument, "_id");
+        InsertOneResult insertOneResult = mongoDB.create(Collections.report, reportDocument, "_id");
 
-        BsonValue registeredId = insertOneResult.getInsertedId();
+        BsonValue reportdId = insertOneResult.getInsertedId();
 
-        result.put("registeredId", registeredId.asObjectId().getValue().toString());
+        result.put("reportId", reportdId.asObjectId().getValue().toString());
         schema = null;
-        registrationDocument = null;
+        reportDocument = null;
         insertOneResult = null;
-        registeredId = null;
+        reportdId = null;
         return result;
     }
 }

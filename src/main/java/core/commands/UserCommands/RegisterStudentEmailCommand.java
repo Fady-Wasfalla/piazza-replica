@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
-public class RegisterUserCommand extends CommandDP {
+public class RegisterStudentEmailCommand extends CommandDP {
     JSONObject result = new JSONObject();
 
     @Override
@@ -18,8 +18,7 @@ public class RegisterUserCommand extends CommandDP {
 
         String[] schema = {
                 "courseId",
-                "userName",
-                "role",
+                "email"
         };
 
         if (!validateJSON(schema, data)) {
@@ -31,6 +30,10 @@ public class RegisterUserCommand extends CommandDP {
         data.put("banExpiryDate", JSONObject.NULL);
         data.put("bannerUserName", JSONObject.NULL);
         data.put("createdAt", new Date().getTime() + "");
+
+        String userName = "";
+        data.put("userName",userName);
+        data.remove("email");
 
         Document registrationDocument = Document.parse(data.toString());
 

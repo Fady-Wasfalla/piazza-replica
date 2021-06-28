@@ -23,7 +23,6 @@ public class CreatePollCommand extends CommandDP {
     @Override
     public JSONObject execute() {
         JSONObject result = new JSONObject();
-        System.out.println("Execute Poll Create");
         String[] schema = {
                 "courseId",
                 "userName",
@@ -33,7 +32,6 @@ public class CreatePollCommand extends CommandDP {
         };
 
         if (!validateJSON(schema, data)) {
-            System.out.println("Invalid Json");
             result.put("error", "invalid request parameters");
             return result;
         }
@@ -43,7 +41,7 @@ public class CreatePollCommand extends CommandDP {
 
         Document pollDocument = Document.parse(data.toString());
 
-        BsonValue pollId = mongoDB.create(Collections.poll, pollDocument, "_id")
+        BsonValue pollId = mongoDB.create(Collections.poll, pollDocument, "courseId")
                 .getInsertedId();
 
         result.put("pollId", pollId.asObjectId().getValue().toString());
@@ -66,7 +64,7 @@ public class CreatePollCommand extends CommandDP {
         body.put("onModel", "Poll");
         body.put("sort", "_id");
         body.put("skip", 0);
-        body.put("limit", 0);
+        body.put("limit", 100);
 
         notificationRequest.put("body", body);
         notificationRequest.put("user", this.user);
@@ -90,51 +88,18 @@ public class CreatePollCommand extends CommandDP {
             JSONObject notificationObject = new JSONObject(notificationResponse);
             System.out.println(notificationObject);
 
-
-
         } catch (Exception e){
             e.printStackTrace();
         }
 
-
+        schema = null;
+        pollDocument = null;
+        pollId = null;
+        requestQueue = null;
+        responseQueue = null;
+        notificationRequest = null;
+        body = null;
         return result;
     }
-
-//    private void sendNotification(BsonValue pollId, String courseId) {
-//
-//        Document filterDocument = new Document("role", "student").append("courseId",courseId).append("banned",false);
-//        ArrayList<Document> students = mongoDB.read(mongoClient,Collections.register,filterDocument);
-//
-//        for (Document d:students) {
-//
-//            String username = d.getString("userName");
-//            JSONObject notification = new JSONObject();
-//            notification.put("userName",username);
-//            notification.put("description","An instructor posted a new poll");
-//            notification.put("model",pollId.asObjectId().getValue().toString());
-//            notification.put("onModel","Poll");
-//            notification.put("createdAt", new Date().getTime() + "");
-//
-//            Document notificationDocument = Document.parse(notification.toString());
-//
-//            BsonValue notificationId = mongoDB.create(mongoClient, Collections.notification, notificationDocument).getInsertedId();
-//
-//            Document tokenFilterDocument = new Document("userName", username);
-//            ArrayList<Document> token = mongoDB.read(mongoClient, Collections.token, tokenFilterDocument);
-//            if(token.size()>0){
-//                Notifications notify = new Notifications();
-//                try {
-//                    notify.notify(token.get(0).getString("token"),"An instructor posted a new poll");
-////                    notify.notify("d3-GpfzqP5WOaJBfZB05yP:APA91bFOtEuWyXTvYcSZQI0eWhTu48IuncorBWpLyHXVdUoUMFt8d7lR5OudjOH2RiUjch47obFj_G4tDGTRTBmfCZhNzkNCLce_KhWJnhDD-5wglEJdThCS4Ps53KCpA_qGRjbwn0SP","A student asked a new question");
-//
-//                } catch (Exception e) {
-//
-//                }
-//            }
-//        }
-//
-//
-//    }
-
 
 }

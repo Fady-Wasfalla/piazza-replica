@@ -105,6 +105,10 @@ public class DeleteCourseCommand extends CommandDP {
                 result.put("questionDeletedCount", questionObject.get("questionDeletedCount"));
                 result.put("registerDeletedCount", registerObject.get("registerDeletedCount"));
 
+                registerObject = null;
+                questionObject = null;
+                pollObject = null;
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -112,7 +116,17 @@ public class DeleteCourseCommand extends CommandDP {
         } else {
             result.put("error", "Error deleting course");
         }
-        System.out.println("======================"+result);
+
+        schema = null;
+        courseId = null;
+        deletedCourse = null;
+        pollDeleteRequest = null;
+        pollBody = null;
+        questionDeleteRequest = null;
+        questionBody = null;
+        registerDeleteRequest = null;
+        registerBody = null;
+
         return result;
     }
 }

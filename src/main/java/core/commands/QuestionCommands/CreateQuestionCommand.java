@@ -38,7 +38,9 @@ public class CreateQuestionCommand extends CommandDP {
                 "private",
                 "media",
                 "likes",
-                "answers"
+                "answers",
+                "endorsed",
+                "mentions"
         };
 
         if (!validateJSON(schema, data)) {
@@ -74,9 +76,9 @@ public class CreateQuestionCommand extends CommandDP {
         body.put("description","A student asked a new question");
         body.put("model",  questionId.asObjectId().getValue().toString());
         body.put("onModel", "Question");
-        body.put("sort", "_id");
+        body.put("sort", "role");
         body.put("skip", 0);
-        body.put("limit", 0);
+        body.put("limit", 100);
 
         notificationRequest.put("body", body);
         notificationRequest.put("user", this.user);
@@ -100,12 +102,18 @@ public class CreateQuestionCommand extends CommandDP {
             JSONObject notificationObject = new JSONObject(notificationResponse);
             System.out.println(notificationObject);
 
-
-
         } catch (Exception e){
             e.printStackTrace();
         }
 
+        schema = null;
+        description = null;
+        questionDocument = null;
+        questionId = null;
+        requestQueue = null;
+        responseQueue = null;
+        notificationRequest = null;
+        body = null;
 
         return result;
     }

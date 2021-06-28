@@ -16,7 +16,6 @@ public class MessageQueue {
 
     public static void instantiateChannel() {
         Dotenv dotenv = Dotenv.load();
-        System.out.println("Instantiate Channel MessageQueue");
         try {
             factory = new ConnectionFactory();
             factory.setHost(dotenv.get("rabbitmq_host", "localhost"));
@@ -31,13 +30,13 @@ public class MessageQueue {
 
     public static void send(String message, String queue, String corrId) throws IOException, TimeoutException {
         String responseQueue = queue.split("Req", 0)[0] + "Res";
-        System.out.println("Send Message (MessageQueue.class):" + queue + " =====> " + message);
+//        System.out.println("Send Message (MessageQueue.class):" + queue + " =====> " + message);
         AMQP.BasicProperties props = new AMQP.BasicProperties
                 .Builder()
                 .correlationId(corrId)
                 .replyTo(responseQueue)
                 .build();
-        System.out.println("Message===>" + message);
+//        System.out.println("Message===>" + message);
         if (MessageQueue.channel == null) {
             MessageQueue.instantiateChannel();
         }
