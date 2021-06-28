@@ -118,6 +118,7 @@ class CommandsTests {
         body.put("media", new ArrayList<>());
         body.put("likes",new ArrayList<>());
         body.put("answers",new ArrayList<>());
+        body.put("mentions",new ArrayList<>());
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
@@ -165,6 +166,7 @@ class CommandsTests {
         body.put("media", new ArrayList<>());
         body.put("likes",new ArrayList<>());
         body.put("answers",new ArrayList<>());
+        body.put("mentions",new ArrayList<>());
         JSONObject data = new JSONObject();
         data.put("body",body);
         data.put("user",new JSONObject());
