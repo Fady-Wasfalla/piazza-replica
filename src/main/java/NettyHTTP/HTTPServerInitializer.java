@@ -15,8 +15,8 @@ public class HTTPServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel arg0) {
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
-                .allowedRequestHeaders("X-Requested-With", "Content-Type","Content-Length")
-                .allowedRequestMethods(HttpMethod.GET,HttpMethod.POST,HttpMethod.PUT,HttpMethod.DELETE,HttpMethod.OPTIONS)
+                .allowedRequestHeaders("X-Requested-With", "Content-Type", "Content-Length")
+                .allowedRequestMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.OPTIONS)
                 .build();
         ChannelPipeline p = arg0.pipeline();
         p.addLast("decoder", new HttpRequestDecoder());
