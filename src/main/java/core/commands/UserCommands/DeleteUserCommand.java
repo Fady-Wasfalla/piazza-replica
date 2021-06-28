@@ -18,7 +18,7 @@ public class DeleteUserCommand extends CommandDP {
     public JSONObject execute() {
 
         String[] schema = {
-                "userName"
+                "email"
         };
 
         if (!validateJSON(schema, data)) {
@@ -27,7 +27,7 @@ public class DeleteUserCommand extends CommandDP {
         }
 
         try {
-            PostgreSQL.deleteUser(data.getString("userName"));
+            PostgreSQL.deleteUser(data.getString("email"));
 
 
             result.put("Status", "User Deleted Successfully");
@@ -37,7 +37,7 @@ public class DeleteUserCommand extends CommandDP {
             return result;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-            result.put("error", "Wrong usernam");
+            result.put("error", "Wrong email");
             return result;
         }
     }
