@@ -51,6 +51,7 @@ public class CommandsMap implements Serializable {
         cmdMap.put("user/BanStudentCommand", BanStudentCommand.class);
         cmdMap.put("user/SignUpCommand", SignUpCommand.class);
         cmdMap.put("user/LogInCommand", LogInCommand.class);
+        cmdMap.put("user/DeleteCourseRegistersCommand",DeleteCourseRegistersCommand.class);
 
         cmdMap.put("question/CreateQuestionCommand", CreateQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
@@ -59,11 +60,13 @@ public class CommandsMap implements Serializable {
         cmdMap.put("question/AnswerQuestionCommand", AnswerQuestionCommand.class);
         cmdMap.put("question/EndorseQuestionCommand", EndorseQuestionCommand.class);
         cmdMap.put("question/ViewAllQuestionsCommand", ViewAllQuestionsCommand.class);
+        cmdMap.put("question/EndorseAnswerCommand", EndorseAnswerCommand.class);
 
 
         cmdMap.put("course/CreateCourseCommand", CreateCourseCommand.class);
         cmdMap.put("course/ViewCourseCommand", ViewCourseCommand.class);
         cmdMap.put("course/DeleteCourseCommand", DeleteCourseCommand.class);
+        cmdMap.put("course/ViewUserCoursesCommand",ViewUserCoursesCommand.class);
 
         cmdMap.put("poll/CreatePollCommand", CreatePollCommand.class);
         cmdMap.put("poll/ViewAllPollsCommand", ViewAllPollsCommand.class);

@@ -64,7 +64,7 @@ public class NotifyAllInstructorsCommand extends CommandDP {
 
                 Document notificationDocument = Document.parse(notification.toString());
 
-                BsonValue notificationId = mongoDB.create(Collections.notification, notificationDocument,"_id").getInsertedId();
+                BsonValue notificationId = mongoDB.create(Collections.notification, notificationDocument,"userName").getInsertedId();
                 results.add(notificationId.asObjectId().getValue().toString());
 
                 Document tokenFilterDocument = new Document("userName", username);
