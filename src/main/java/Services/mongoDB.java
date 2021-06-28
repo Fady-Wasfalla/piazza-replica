@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
@@ -22,7 +23,7 @@ import java.util.Set;
 
 public class mongoDB {
 
-    private final static String databaseName = "Piazza";
+    private final static String databaseName = "piazza";
     private final static int maxConnections = 10;
     private static MongoClient mongoClient;
 
@@ -36,6 +37,17 @@ public class mongoDB {
         Dotenv dotenv = Dotenv.load();
         String url = dotenv.get("CONNECTION_STRING") + maxConnections;
         mongoClient = MongoClients.create(url);
+        MongoCollection<Document> chat_collection = getCollection(Collections.chat);
+        MongoCollection<Document> course_collection = getCollection(Collections.course);
+        MongoCollection<Document> notification_collection = getCollection(Collections.notification);
+        MongoCollection<Document> question_collection = getCollection(Collections.question);
+        chat_collection.createIndex(Indexes.ascending("name"));
+        course_collection.createIndex(Indexes.ascending("_id"));
+        notification_collection.createIndex(Indexes.ascending("relatedId", "relatedType"));
+        notification_collection.createIndex(Indexes.ascending("relatedId"));
+        question_collection.createIndex(Indexes.ascending("courseId"));
+        question_collection.createIndex(Indexes.ascending("title"));
+        question_collection.createIndex(Indexes.ascending("description"));
     }
 
     public static MongoCollection<Document> getCollection(Collections collectionName) {
@@ -134,6 +146,18 @@ public class mongoDB {
 
 
 ///////////////////////////////////////////////////
+
+//    MongoCollection<Document> chat_collection = database.getCollection("chat");
+//    MongoCollection<Document> course_collection = database.getCollection("course");
+//    MongoCollection<Document> notification_collection = database.getCollection("notification");
+//    MongoCollection<Document> question_collection = database.getCollection("question");
+//        chat_collection.createIndex(Indexes.ascending("name"));
+//        course_collection.createIndex(Indexes.ascending("_id"));
+//        notification_collection.createIndex(Indexes.ascending("relatedId", "relatedType"));
+//        notification_collection.createIndex(Indexes.ascending("relatedId"));
+//        question_collection.createIndex(Indexes.ascending("courseId"));
+//        question_collection.createIndex(Indexes.ascending("title"));
+//        question_collection.createIndex(Indexes.ascending("description"));
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();

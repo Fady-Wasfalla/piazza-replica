@@ -129,7 +129,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
     public boolean validateQueueName(String queue) {
         Dotenv dotenv = Dotenv.load();
-        String strlist = dotenv.get("queues");
+        String strlist = dotenv.get("QUEUES");
         return Arrays.asList(strlist.split(",")).contains(queue);
     }
 

@@ -26,7 +26,10 @@ public class DeleteCourseQuestionsCommand extends CommandDP {
         long questionDeletedCount = deletedQuestions.getDeletedCount();
         result.put("questionDeletedCount", questionDeletedCount);
 
-        return result;
+        schema = null;
+        courseId = null;
+        deletedQuestions = null;
 
+        return result;
     }
 }

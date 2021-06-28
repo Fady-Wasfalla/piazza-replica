@@ -51,6 +51,10 @@ public class LogInCommand extends CommandDP {
                     .sign(algorithm);
 
             result.put("token", token);
+            schema = null;
+            user = null;
+            calendar = null;
+            payload = null;
             return result;
         } catch (SQLException throwables) {
             throwables.printStackTrace();

@@ -21,19 +21,19 @@ public class MessageQueue {
 
     public static void instantiateChannel() {
         Dotenv dotenv = Dotenv.load();
-        System.out.println("Instantiate Channel MessageQueue");
         if(channel!=null){
             System.out.println("Connection Already Instantiated");
+            return;
         }
         for(int i=0;i<6;i++) {
-            System.out.println("Attempting to connect to RabbitMQ trial: "+i);
             try {
                 factory = new ConnectionFactory();
-                factory.setHost(dotenv.get("rabbitmq_host", "localhost"));
+                factory.setHost(dotenv.get("RABBITMQ_HOST", "localhost"));
                 connection = factory.newConnection();
                 channel = connection.createChannel();
-                System.out.println("Connected to RabbitMQ successfully");
-                String strlist = dotenv.get("queues");
+                
+                //Instantiate queues for all microservices
+                String strlist = dotenv.get("QUEUES");
                 List<String> arr= Arrays.asList(strlist.split(","));
                 for(String queue: arr){
                     declareQueue(queue);
@@ -67,14 +67,13 @@ public class MessageQueue {
 
     public static void send(String message, String queue, String corrId) throws IOException, TimeoutException {
         String responseQueue = queue.split("Req", 0)[0] + "Res";
-        System.out.println("Send Message (MessageQueue.class):" + queue + " =====> " + message);
+//        System.out.println("Send Message (MessageQueue.class):" + queue + " =====> " + message);
         AMQP.BasicProperties props = new AMQP.BasicProperties
                 .Builder()
                 .correlationId(corrId)
                 .replyTo(responseQueue)
                 .build();
-        System.out.println("Message===>" + message);
-        //TODO to be removed
+//        System.out.println("Message===>" + message);
         if (MessageQueue.channel == null) {
                MessageQueue.instantiateChannel();
         }

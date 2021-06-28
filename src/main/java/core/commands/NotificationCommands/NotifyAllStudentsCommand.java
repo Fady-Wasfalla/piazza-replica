@@ -79,12 +79,26 @@ public class NotifyAllStudentsCommand extends CommandDP {
                     } catch (Exception e) {
 
                     }
+                    notify = null;
                 }
+                notification = null;
+                notificationDocument = null;
+                notificationId = null;
+                tokenFilterDocument = null;
+                token = null;
             }
-
-
+            username = null;
         }
         result.put("notificationsId", results.toString());
+
+        schema = null;
+        courseId = null;
+        model = null;
+        onModel = null;
+        description = null;
+        sort = null;
+        filterDocument = null;
+        students = null;
         return result;
     }
 

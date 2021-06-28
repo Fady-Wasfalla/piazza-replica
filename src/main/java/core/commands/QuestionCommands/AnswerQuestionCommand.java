@@ -63,7 +63,6 @@ public class AnswerQuestionCommand extends CommandDP {
             result.put("error", "no Questions with such ID");
             return result;
         }
-        System.out.println(myQuestion);
 
         JSONObject newAnswer = new JSONObject();
         newAnswer.put("username", data.getString("userName"));
@@ -121,15 +120,23 @@ public class AnswerQuestionCommand extends CommandDP {
             JSONObject notificationObject = new JSONObject(notificationResponse);
             System.out.println(notificationObject);
 
-
-
         } catch (Exception e){
             e.printStackTrace();
         }
 
-
-
-
+        schema = null;
+        questionId = null;
+        sort = null;
+        myQuestions = null;
+        myQuestion = null;
+        newAnswer = null;
+        finalAns = null;
+        collection = null;
+        resultDocument = null;
+        requestQueue = null;
+        responseQueue = null;
+        notificationRequest = null;
+        body = null;
 
         return result;
     }

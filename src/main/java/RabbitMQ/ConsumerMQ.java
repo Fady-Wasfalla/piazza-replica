@@ -26,11 +26,9 @@ public class ConsumerMQ {
     public static volatile ArrayList<Runnable> pendingTasks = new ArrayList<Runnable>();
 
     public static void run(String microservice, int port) throws Exception {
-        Dotenv dotenv = Dotenv.load();
         CommandsMap cmdMap = new CommandsMap();
-        CommandsMap.instantiate();
-        System.out.println("Command Map Size: " + CommandsMap.cmdMap.size());
-        CommandsMap.getAllClasses();
+        cmdMap.instantiate();
+        System.out.println("Command Map Size: " + cmdMap.cmdMap.size());
         Consumer consumer;
         //TODO to be removed
         if (MessageQueue.channel == null)
@@ -58,7 +56,6 @@ public class ConsumerMQ {
                         String function = requestJson.getString("function");
                         String queue = requestJson.getString("queue");
 
-                        System.out.println("Method to be found: " + queue + "/" + function);
                         CommandDP command = (CommandDP) CommandsMap.queryClass(queue + "/" + function).getDeclaredConstructor().newInstance();
                         Class service = command.getClass();
                         Method setData = service.getMethod("setData", JSONObject.class);

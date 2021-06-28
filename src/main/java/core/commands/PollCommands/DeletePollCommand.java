@@ -28,9 +28,9 @@ public class DeletePollCommand extends CommandDP{
             result.put("Status", "400 Error");
 
         }
-
-
+        schema = null;
+        pollId = null;
+        deletedPoll = null;
         return result;
-
     }
 }

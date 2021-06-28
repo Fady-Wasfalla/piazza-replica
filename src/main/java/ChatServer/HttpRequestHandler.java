@@ -36,8 +36,6 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
     private static void send100Continue(ChannelHandlerContext ctx) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
         ctx.writeAndFlush(response);
-        System.out.println(response);
-
     }
 
     @Override
@@ -74,7 +72,6 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
-        System.out.println(cause);
         ctx.close();
     }
 }
