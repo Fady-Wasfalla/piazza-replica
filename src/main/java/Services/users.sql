@@ -43,4 +43,4 @@ DROP FUNCTION IF EXISTS delete_user;
 CREATE OR REPLACE FUNCTION delete_user(inputUserEmail VARCHAR(20)) RETURNS VOID AS $$ BEGIN DELETE FROM users WHERE users.email = $1; END; $$ LANGUAGE PLPGSQL;
 
 DROP FUNCTION IF EXISTS update_user;
-CREATE OR REPLACE FUNCTION update_user( inputFirstName VARCHAR(20), inputLastName VARCHAR(20), inputPassword TEXT, inputUserName VARCHAR(20)) RETURNS VOID AS $$ BEGIN UPDATE users SET firstName = COALESCE($1, firstName), lastName = COALESCE($2, lastName), password = COALESCE(crypt($3, gen_salt('bf')), password) WHERE userName = $4; END; $$ LANGUAGE PLPGSQL;
+CREATE OR REPLACE FUNCTION update_user( inputFirstName VARCHAR(20), inputLastName VARCHAR(20), inputPassword TEXT, inputUserName VARCHAR(20)) RETURNS REFCURSOR AS $$ DECLARE cursor REFCURSOR := 'cur'; BEGIN UPDATE users SET firstName = COALESCE($1, firstName), lastName = COALESCE($2, lastName), password = COALESCE(crypt($3, gen_salt('bf')), password) WHERE userName = $4; BEGIN OPEN cursor FOR SELECT users.email FROM users WHERE userName = $4  END; $$ LANGUAGE PLPGSQL;
